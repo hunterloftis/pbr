@@ -51,7 +51,7 @@ func (s *Sampler) trace(x, y int) [3]uint64 {
 	}
 
 	if energy.X > 0 {
-		return [3]uint64{0, 0, 255}
+		return [3]uint64{255, 255, 255}
 	}
 	return [3]uint64{0, 0, 0}
 }
