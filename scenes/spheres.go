@@ -5,7 +5,8 @@ import (
 )
 
 func main() {
-	sampler := trace.NewSampler(960, 540)
+	camera := trace.Camera{}
+	sampler := trace.NewSampler(960, 540, camera, 10)
 	renderer := trace.Renderer{Width: 960, Height: 540}
 	for i := 0; i < 10; i++ {
 		sampler.Sample()

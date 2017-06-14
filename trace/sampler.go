@@ -7,14 +7,18 @@ type Sampler struct {
 	Width   int
 	Height  int
 	samples []uint64 // r, g, b, count
+	cam     Camera
+	bounces int
 }
 
 // NewSampler constructs a new Sampler instance
-func NewSampler(width, height int) *Sampler {
+func NewSampler(width, height int, cam Camera, bounces int) *Sampler {
 	return &Sampler{
 		Width:   width,
 		Height:  height,
 		samples: make([]uint64, width*height*4),
+		cam:     Camera{},
+		bounces: bounces,
 	}
 }
 
@@ -31,7 +35,21 @@ func (s *Sampler) Sample() {
 }
 
 func (s *Sampler) trace(x, y int) [3]uint64 {
-	return [3]uint64{0, 255, 0}
+	ray := s.cam.Ray(x, y)
+	signal := &Vector3{1, 1, 1}
+	energy := &Vector3{0, 0, 0}
+
+	for bounce := 0; bounce < s.bounces; bounce++ {
+		if ray.Intersect() {
+			signal = signal.Scale(1)
+			energy = &Vector3{1, 1, 1}
+		}
+	}
+
+	if energy.X > 0 {
+		return [3]uint64{0, 0, 255}
+	}
+	return [3]uint64{0, 0, 0}
 }
 
 func (s *Sampler) offsetPixel(i int) (x, y int) {
