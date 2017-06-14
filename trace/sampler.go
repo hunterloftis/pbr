@@ -1,6 +1,8 @@
 package trace
 
-import "math"
+import (
+	"math"
+)
 
 // Sampler traces samples from light paths in a scene
 type Sampler struct {
@@ -38,14 +40,16 @@ func (s *Sampler) Sample() {
 
 func (s *Sampler) trace(x, y int) [3]uint64 {
 	ray := s.cam.Ray(x, y)
-	signal := &Vector3{1, 1, 1}
-	energy := &Vector3{0, 0, 0}
+	signal := Vector3{1, 1, 1}
+	energy := Vector3{0, 0, 0}
 
+	// if rand.Float64() < 0.01 {
+	// 	fmt.Printf("%+v\n", ray)
+	// }
 	for bounce := 0; bounce < s.bounces; bounce++ {
 		if s.scene.Intersect(ray) {
-			// TODO: implement Vector3 and camera rays to actually test the intersection
 			signal = signal.Scale(1)
-			energy = &Vector3{1, 1, 1}
+			energy = Vector3{1, 1, 1}
 		}
 	}
 
