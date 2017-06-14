@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
+	sampler := trace.Sampler{Width: 960, Height: 540}
 	renderer := trace.Renderer{Width: 960, Height: 540}
-	renderer.Write("test.png")
-
+	renderer.Write(sampler.Samples(), "test.png")
 }
