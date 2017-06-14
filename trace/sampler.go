@@ -18,19 +18,29 @@ func NewSampler(width, height int) *Sampler {
 	}
 }
 
-// Trace traces light paths for the full image
-func (s *Sampler) Trace() {
+// Sample traces light paths for the full image
+func (s *Sampler) Sample() {
 	for i := 0; i < len(s.samples); i += 4 {
-		s.samples[i] += 255
-		s.samples[i+1] += 0
-		s.samples[i+2] += 0
+		x, y := s.offsetPixel(i)
+		rgb := s.trace(x, y)
+		s.samples[i] += rgb[0]
+		s.samples[i+1] += rgb[1]
+		s.samples[i+2] += rgb[2]
 		s.samples[i+3]++
 	}
 }
 
-// Samples gets the average sampled value at each pixel
+func (s *Sampler) trace(x, y int) [3]uint64 {
+	return [3]uint64{0, 255, 0}
+}
+
+func (s *Sampler) offsetPixel(i int) (x, y int) {
+	return i / s.Width, i % s.Width
+}
+
+// Values gets the average sampled value at each pixel
 // in a format compatible with image.RGBA.Pix
-func (s *Sampler) Samples() []uint8 {
+func (s *Sampler) Values() []uint8 {
 	rgba := make([]uint8, s.Width*s.Height*4)
 	for i := 0; i < len(s.samples); i += 4 {
 		count := s.samples[i+3]
