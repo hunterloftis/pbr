@@ -1,1 +1,1 @@
-go install ./scenes && scenes && open test.png
+go build ./scenes/spheres.go && ./spheres && open test.png
