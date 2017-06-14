@@ -58,7 +58,7 @@ func (s *Sampler) trace(x, y int) [3]uint64 {
 
 func (s *Sampler) offsetPixel(i int) (x, y int) {
 	pos := i / 4
-	return pos / s.Width, pos % s.Width
+	return pos % s.Width, pos / s.Width
 }
 
 // Values gets the average sampled value at each pixel

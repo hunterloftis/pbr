@@ -13,15 +13,15 @@ func (a *Vector3) Scale(n float64) Vector3 {
 	return Vector3{a.X * n, a.Y * n, a.Z * n}
 }
 
-// Minus subtracts another vector from this one
-func (a *Vector3) Minus(b Vector3) Vector3 {
-	return Vector3{a.X - b.X, a.Y - b.Y, a.Z - b.Z}
-}
-
 // Dot returns the dot product of two vectors
 // (which is also the cosine of the angle between them)
 func (a *Vector3) Dot(b Vector3) float64 {
 	return a.X*b.X + a.Y*b.Y + a.Z*b.Z
+}
+
+// Minus subtracts another vector from this one
+func (a *Vector3) Minus(b Vector3) Vector3 {
+	return Vector3{a.X - b.X, a.Y - b.Y, a.Z - b.Z}
 }
 
 // Normalize makes the vector of length 1
