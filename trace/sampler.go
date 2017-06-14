@@ -8,16 +8,18 @@ type Sampler struct {
 	Height  int
 	samples []uint64 // r, g, b, count
 	cam     Camera
+	scene   Scene
 	bounces int
 }
 
 // NewSampler constructs a new Sampler instance
-func NewSampler(width, height int, cam Camera, bounces int) *Sampler {
+func NewSampler(width, height int, cam Camera, scene Scene, bounces int) *Sampler {
 	return &Sampler{
 		Width:   width,
 		Height:  height,
 		samples: make([]uint64, width*height*4),
-		cam:     Camera{},
+		cam:     cam,
+		scene:   scene,
 		bounces: bounces,
 	}
 }
@@ -40,7 +42,8 @@ func (s *Sampler) trace(x, y int) [3]uint64 {
 	energy := &Vector3{0, 0, 0}
 
 	for bounce := 0; bounce < s.bounces; bounce++ {
-		if ray.Intersect() {
+		if s.scene.Intersect(ray) {
+			// TODO: implement Vector3 and camera rays to actually test the intersection
 			signal = signal.Scale(1)
 			energy = &Vector3{1, 1, 1}
 		}
