@@ -7,7 +7,7 @@ import (
 func main() {
 	scene := trace.Scene{}
 	camera := trace.Camera{}
-	sampler := trace.NewSampler(960, 540, camera, scene, 10)
+	sampler := trace.NewSampler(960, 540, &camera, &scene, 10)
 	renderer := trace.Renderer{Width: 960, Height: 540}
 
 	scene.Add(trace.Sphere{trace.Vector3{0, 0, -10}, 1})

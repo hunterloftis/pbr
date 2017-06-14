@@ -9,13 +9,13 @@ type Sampler struct {
 	Width   int
 	Height  int
 	samples []uint64 // r, g, b, count
-	cam     Camera
-	scene   Scene
+	cam     *Camera
+	scene   *Scene
 	bounces int
 }
 
 // NewSampler constructs a new Sampler instance
-func NewSampler(width, height int, cam Camera, scene Scene, bounces int) *Sampler {
+func NewSampler(width, height int, cam *Camera, scene *Scene, bounces int) *Sampler {
 	return &Sampler{
 		Width:   width,
 		Height:  height,
@@ -44,7 +44,11 @@ func (s *Sampler) trace(x, y int) [3]uint64 {
 	energy := Vector3{0, 0, 0}
 
 	// if rand.Float64() < 0.01 {
+	// 	fmt.Printf("%v, %v", x, y)
+	// }
+	// if x == 480 && y == 270 {
 	// 	fmt.Printf("%+v\n", ray)
+	// 	fmt.Printf("%v\n", s.scene.Intersect(ray))
 	// }
 	for bounce := 0; bounce < s.bounces; bounce++ {
 		if s.scene.Intersect(ray) {
@@ -60,7 +64,11 @@ func (s *Sampler) trace(x, y int) [3]uint64 {
 }
 
 func (s *Sampler) offsetPixel(i int) (x, y int) {
-	return i / s.Width, i % s.Width
+	pos := i / 4
+	// if rand.Float64() < 0.01 {
+	// 	fmt.Printf("%v - ", (pos % s.Width))
+	// }
+	return pos / s.Width, pos % s.Width
 }
 
 // Values gets the average sampled value at each pixel
