@@ -12,6 +12,11 @@ type Renderer struct {
 	Height int
 }
 
+// NewRenderer sizes a Renderer to match a Camera
+func NewRenderer(cam *Camera) *Renderer {
+	return &Renderer{Width: cam.Width, Height: cam.Height}
+}
+
 func (r *Renderer) Write(samples []uint8, file string) error {
 	f, err := os.Create(file)
 	if err != nil {

@@ -15,11 +15,11 @@ type Sampler struct {
 }
 
 // NewSampler constructs a new Sampler instance
-func NewSampler(width, height int, cam *Camera, scene *Scene, bounces int) *Sampler {
+func NewSampler(cam *Camera, scene *Scene, bounces int) *Sampler {
 	return &Sampler{
-		Width:   width,
-		Height:  height,
-		samples: make([]uint64, width*height*4),
+		Width:   cam.Width,
+		Height:  cam.Height,
+		samples: make([]uint64, cam.Width*cam.Height*4),
 		cam:     cam,
 		scene:   scene,
 		bounces: bounces,
@@ -43,13 +43,6 @@ func (s *Sampler) trace(x, y int) [3]uint64 {
 	signal := Vector3{1, 1, 1}
 	energy := Vector3{0, 0, 0}
 
-	// if rand.Float64() < 0.01 {
-	// 	fmt.Printf("%v, %v", x, y)
-	// }
-	// if x == 480 && y == 270 {
-	// 	fmt.Printf("%+v\n", ray)
-	// 	fmt.Printf("%v\n", s.scene.Intersect(ray))
-	// }
 	for bounce := 0; bounce < s.bounces; bounce++ {
 		if s.scene.Intersect(ray) {
 			signal = signal.Scale(1)
@@ -65,9 +58,6 @@ func (s *Sampler) trace(x, y int) [3]uint64 {
 
 func (s *Sampler) offsetPixel(i int) (x, y int) {
 	pos := i / 4
-	// if rand.Float64() < 0.01 {
-	// 	fmt.Printf("%v - ", (pos % s.Width))
-	// }
 	return pos / s.Width, pos % s.Width
 }
 
