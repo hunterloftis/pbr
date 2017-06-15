@@ -22,20 +22,24 @@ type Scene struct {
 }
 
 // Intersect tests whether a ray hits any objects in the scene
-func (s *Scene) Intersect(ray Ray3) bool {
-	dist := math.MaxFloat64
+func (s *Scene) Intersect(ray Ray3) (hit bool, normal Vector3, mat Material, dist float64) {
+	var center Vector3
+	dist = math.MaxFloat64
 
 	for _, sphere := range s.Spheres {
 		i, d := sphere.Intersect(ray)
 		if i && d < dist {
-			// nearest = sphere
+			hit = true
 			dist = d
+			mat = sphere.Mat
+			center = sphere.Center
 		}
 	}
-	if dist == math.MaxFloat64 {
-		return false
+	if hit {
+		point := ray.Origin.Add(ray.Dir.Scale(dist))
+		normal = point.Minus(center).Normalize()
 	}
-	return true
+	return
 }
 
 // Env returns the light value from the environment map
