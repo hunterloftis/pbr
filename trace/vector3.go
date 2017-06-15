@@ -25,6 +25,43 @@ func (a Vector3) Add(b Vector3) Vector3 {
 	return Vector3{a.X + b.X, a.Y + b.Y, a.Z + b.Z}
 }
 
+// Refract refracts a vector based on the ratio of coefficients of refraction
+func (a Vector3) Refract(b Vector3, refractA, refractB float64) (bool, Vector3) {
+	ratio := refractA / refractB
+	cos := b.Dot(a)
+	k := 1 - ratio*ratio*(1-cos*cos)
+	if k < 0 {
+		return false, a
+	}
+	offset := b.Scale(ratio*cos + math.Sqrt(k))
+	return true, a.Scale(ratio).Minus(offset).Normalize()
+}
+
+// Ave returns the average of X, Y, and Z
+func (a Vector3) Ave() float64 {
+	return (a.X + a.Y + a.Z) / 3
+}
+
+// Cone returns a random vector within a Cone of the original vector
+// size is 0-1, where 0 is the original vector and 1 is anything within the original hemisphere
+// https://github.com/fogleman/pt/blob/69e74a07b0af72f1601c64120a866d9a5f432e2f/pt/util.go#L24
+func (a Vector3) Cone(size float64) Vector3 {
+	u := rand.Float64()
+	v := rand.Float64()
+	theta := size * 0.5 * math.Pi * (1 - (2 * math.Acos(u) / math.Pi))
+	m1 := math.Sin(theta)
+	m2 := math.Cos(theta)
+	a2 := v * 2 * math.Pi
+	q := NewVectorSphere()
+	s := a.Cross(q)
+	t := a.Cross(s)
+	d := Vector3{}
+	d = d.Add(s.Scale(m1 * math.Cos(a2)))
+	d = d.Add(t.Scale(m1 * math.Sin(a2)))
+	d = d.Add(a.Scale(m2))
+	return d.Normalize()
+}
+
 // Array converts this Vector3 to a fixed Array of length 3
 func (a Vector3) Array() [3]float64 {
 	return [3]float64{a.X, a.Y, a.Z}
@@ -42,7 +79,7 @@ func (a Vector3) RandHemiCos() Vector3 {
 	v := rand.Float64()
 	r := math.Sqrt(u)
 	theta := 2 * math.Pi * v
-	s := a.Cross(VectorRandUnit()).Normalize()
+	s := a.Cross(NewVectorSphere()).Normalize()
 	t := a.Cross(s)
 	d := Vector3{}
 	d = d.Add(s.Scale(r * math.Cos(theta)))
@@ -57,13 +94,13 @@ func (a Vector3) Dot(b Vector3) float64 {
 	return a.X*b.X + a.Y*b.Y + a.Z*b.Z
 }
 
-// VectorRandUnit returns a random unit vector (some point on the edge of a unit sphere)
-func VectorRandUnit() Vector3 {
-	return VectorFromAngles(rand.Float64()*math.Pi*2, math.Asin(rand.Float64()*2-1))
+// NewVectorSphere returns a random unit vector (some point on the edge of a unit sphere)
+func NewVectorSphere() Vector3 {
+	return NewVectorAngles(rand.Float64()*math.Pi*2, math.Asin(rand.Float64()*2-1))
 }
 
-// VectorFromAngles creates a vector based on theta and phi
-func VectorFromAngles(theta, phi float64) Vector3 {
+// NewVectorAngles creates a vector based on theta and phi
+func NewVectorAngles(theta, phi float64) Vector3 {
 	return Vector3{math.Cos(theta) * math.Cos(phi), math.Sin(phi), math.Sin(theta) * math.Cos(phi)}
 }
 
@@ -86,4 +123,16 @@ func (a Vector3) Normalize() Vector3 {
 // Length finds the length of the vector
 func (a Vector3) Length() float64 {
 	return math.Sqrt(a.X*a.X + a.Y*a.Y + a.Z*a.Z)
+}
+
+// Lerp linearly interpolates between two vectors
+func (a Vector3) Lerp(b Vector3, n float64) Vector3 {
+	m := 1 - n
+	return Vector3{a.X*m + b.X*n, a.Y*m + b.Y*n, a.Z*m + b.Z*n}
+}
+
+// Reflect reflects the vector about a normal (b)
+func (a Vector3) Reflect(b Vector3) Vector3 {
+	cos := b.Dot(a)
+	return a.Minus(b.Scale(2 * cos)).Normalize()
 }
