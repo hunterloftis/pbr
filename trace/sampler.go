@@ -40,13 +40,19 @@ func (s *Sampler) trace(x, y int) [3]float64 {
 	energy := Vector3{0, 0, 0}
 
 	for bounce := 0; bounce < s.bounces; bounce++ {
-		hit, normal, mat, _ := s.scene.Intersect(ray)
-		if !hit {
+		intersected, hit := s.scene.Intersect(ray)
+		if !intersected {
 			energy = energy.Add(s.scene.Env(ray).Mult(signal))
 			break
 		}
-		light := mat.Emit(normal, ray.Dir)
+		light := hit.Mat.Emit(hit.Normal, ray.Dir)
 		energy = energy.Add(light.Mult(signal))
+		next, dir, strength := hit.Mat.Bsdf(hit.Normal, ray.Dir, hit.Dist)
+		if !next {
+			break
+		}
+		ray = Ray3{hit.Point, dir}
+		signal = signal.Mult(strength)
 	}
 
 	return energy.Array()

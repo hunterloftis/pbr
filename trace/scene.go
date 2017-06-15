@@ -21,23 +21,31 @@ type Scene struct {
 	image   RGBAE
 }
 
+// Hit describes an intersection
+type Hit struct {
+	Normal Vector3
+	Mat    Material
+	Dist   float64
+	Point  Vector3
+}
+
 // Intersect tests whether a ray hits any objects in the scene
-func (s *Scene) Intersect(ray Ray3) (hit bool, normal Vector3, mat Material, dist float64) {
+func (s *Scene) Intersect(ray Ray3) (intersection bool, hit Hit) {
 	var center Vector3
-	dist = math.MaxFloat64
+	hit.Dist = math.MaxFloat64
 
 	for _, sphere := range s.Spheres {
 		i, d := sphere.Intersect(ray)
-		if i && d < dist {
-			hit = true
-			dist = d
-			mat = sphere.Mat
+		if i && d < hit.Dist {
+			intersection = true
+			hit.Dist = d
+			hit.Mat = sphere.Mat
 			center = sphere.Center
 		}
 	}
-	if hit {
-		point := ray.Origin.Add(ray.Dir.Scale(dist))
-		normal = point.Minus(center).Normalize()
+	if intersection {
+		hit.Point = ray.Origin.Add(ray.Dir.Scale(hit.Dist))
+		hit.Normal = hit.Point.Minus(center).Normalize()
 	}
 	return
 }

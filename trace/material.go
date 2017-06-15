@@ -14,8 +14,8 @@ type Material struct {
 }
 
 // Bsdf returns next rays predicted by the material's bidirectional scattering distribution function
-func (m *Material) Bsdf(normal Vector3, dir Vector3, dist float64) {
-
+func (m *Material) Bsdf(normal Vector3, dir Vector3, dist float64) (bool, Vector3, Vector3) {
+	return false, Vector3{}, Vector3{1, 1, 1}
 }
 
 // Emit returns the amount of light emitted
