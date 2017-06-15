@@ -12,7 +12,8 @@ func main() {
 	light := trace.Material{Light: trace.Vector3{500, 500, 500}}
 
 	scene.SetEnv("images/ennis.hdr", 100)
-	scene.Add(trace.Sphere{trace.Vector3{0, 0, -4}, 1, light})
+	scene.Add(trace.Sphere{trace.Vector3{-1.5, 0, -5}, 1, light})
+	scene.Add(trace.Sphere{trace.Vector3{1.5, 0, -5}, 1, light})
 
 	for i := 0; i < 10; i++ {
 		sampler.Sample()
