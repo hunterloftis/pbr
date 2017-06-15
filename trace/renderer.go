@@ -26,6 +26,9 @@ func (r *Renderer) Write(samples []uint8, file string) error {
 	m := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
 	for i := 0; i < len(samples); i += 4 {
 		m.Pix[i] = samples[i]
+		m.Pix[i+1] = samples[i+1]
+		m.Pix[i+2] = samples[i+2]
+		m.Pix[i+3] = 255
 	}
 	return png.Encode(f, m)
 }
