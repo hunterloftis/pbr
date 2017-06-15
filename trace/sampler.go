@@ -1,9 +1,5 @@
 package trace
 
-import (
-	"math"
-)
-
 // Sampler traces samples from light paths in a scene
 type Sampler struct {
 	Width   int
@@ -60,20 +56,15 @@ func (s *Sampler) offsetPixel(i int) (x, y int) {
 	return pos % s.Width, pos / s.Width
 }
 
-// Values gets the average sampled value at each pixel
-// in a format compatible with image.RGBA.Pix
-func (s *Sampler) Values() []uint8 {
-	rgba := make([]uint8, s.Width*s.Height*4)
+// Values gets the average sampled rgb at each pixel
+func (s *Sampler) Values() []float64 {
+	rgb := make([]float64, s.Width*s.Height*3)
 	for i := 0; i < len(s.samples); i += 4 {
 		count := s.samples[i+3]
-		rgba[i] = average(s.samples[i], count)
-		rgba[i+1] = average(s.samples[i+1], count)
-		rgba[i+2] = average(s.samples[i+2], count)
-		rgba[i+3] = 255
+		i2 := i / 4 * 3
+		rgb[i2] = s.samples[i] / count
+		rgb[i2+1] = s.samples[i+1] / count
+		rgb[i2+2] = s.samples[i+2] / count
 	}
-	return rgba
-}
-
-func average(total, count float64) uint8 {
-	return uint8(math.Floor(total / count))
+	return rgb
 }

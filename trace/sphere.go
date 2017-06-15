@@ -2,7 +2,7 @@ package trace
 
 import "math"
 
-const BIAS = 1e-6
+const bias = 1e-6
 
 // Sphere describes a 3d sphere
 type Sphere struct {
@@ -20,11 +20,11 @@ func (s *Sphere) Intersect(r Ray3) (hit bool, dist float64) {
 	}
 	root := math.Sqrt(det)
 	t1 := b - root
-	if t1 > BIAS {
+	if t1 > bias {
 		return true, t1
 	}
 	t2 := b + root
-	if t2 > BIAS {
+	if t2 > bias {
 		return true, t2
 	}
 	return false, 0
