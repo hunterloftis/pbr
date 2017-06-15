@@ -14,8 +14,24 @@ type Material struct {
 }
 
 // Bsdf returns next rays predicted by the material's bidirectional scattering distribution function
-func (m *Material) Bsdf(normal Vector3, dir Vector3, dist float64) (bool, Vector3, Vector3) {
-	return false, Vector3{}, Vector3{1, 1, 1}
+func (m *Material) Bsdf(normal Vector3, incident Vector3, dist float64) (next bool, dir Vector3, signal Vector3) {
+	entering := incident.Enters(normal)
+	if entering {
+		// reflected
+		// transmitted (entering)
+		// absorbed
+		// diffused
+		next = true
+		dir = normal.RandHemiCos()
+		signal = m.Color.Scale(1 / math.Pi)
+	} else {
+		// transmitted (exiting)
+	}
+	return
+}
+
+func (m *Material) schlick(normal Vector3, dir Vector3) {
+
 }
 
 // Emit returns the amount of light emitted
