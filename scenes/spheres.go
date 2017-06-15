@@ -10,6 +10,7 @@ func main() {
 	sampler := trace.NewSampler(&camera, &scene, 10)
 	renderer := trace.NewRenderer(&camera)
 
+	scene.SetEnv("images/ennis.hdr", 100)
 	scene.Add(trace.Sphere{trace.Vector3{0, 0, -4}, 1})
 
 	for i := 0; i < 10; i++ {

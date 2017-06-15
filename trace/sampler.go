@@ -8,7 +8,7 @@ import (
 type Sampler struct {
 	Width   int
 	Height  int
-	samples []uint64 // r, g, b, count
+	samples []float64 // r, g, b, count
 	cam     *Camera
 	scene   *Scene
 	bounces int
@@ -19,7 +19,7 @@ func NewSampler(cam *Camera, scene *Scene, bounces int) *Sampler {
 	return &Sampler{
 		Width:   cam.Width,
 		Height:  cam.Height,
-		samples: make([]uint64, cam.Width*cam.Height*4),
+		samples: make([]float64, cam.Width*cam.Height*4),
 		cam:     cam,
 		scene:   scene,
 		bounces: bounces,
@@ -38,22 +38,21 @@ func (s *Sampler) Sample() {
 	}
 }
 
-func (s *Sampler) trace(x, y int) [3]uint64 {
+func (s *Sampler) trace(x, y int) [3]float64 {
 	ray := s.cam.Ray(x, y)
 	signal := Vector3{1, 1, 1}
 	energy := Vector3{0, 0, 0}
 
-	for bounce := 0; bounce < s.bounces; bounce++ {
-		if s.scene.Intersect(ray) {
-			signal = signal.Scale(1)
-			energy = Vector3{1, 1, 1}
+	for bounce := 0; bounce < 1; bounce++ { // bounce < s.bounces
+		hit := s.scene.Intersect(ray)
+		if hit {
+			energy = energy.Add(Vector3{255, 255, 255}.Mult(signal))
+		} else {
+			energy = energy.Add(s.scene.Env(ray).Mult(signal))
 		}
 	}
 
-	if energy.X > 0 {
-		return [3]uint64{255, 255, 255}
-	}
-	return [3]uint64{0, 0, 0}
+	return energy.Array()
 }
 
 func (s *Sampler) offsetPixel(i int) (x, y int) {
@@ -75,6 +74,6 @@ func (s *Sampler) Values() []uint8 {
 	return rgba
 }
 
-func average(total, count uint64) uint8 {
-	return uint8(math.Floor(float64(total) / float64(count)))
+func average(total, count float64) uint8 {
+	return uint8(math.Floor(total / count))
 }

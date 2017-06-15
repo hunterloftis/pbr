@@ -12,6 +12,21 @@ func (a Vector3) Scale(n float64) Vector3 {
 	return Vector3{a.X * n, a.Y * n, a.Z * n}
 }
 
+// Mult multiplies by a Vector3
+func (a Vector3) Mult(b Vector3) Vector3 {
+	return Vector3{a.X * b.X, a.Y * b.Y, a.Z * b.Z}
+}
+
+// Add adds Vector3s together
+func (a Vector3) Add(b Vector3) Vector3 {
+	return Vector3{a.X + b.X, a.Y + b.Y, a.Z + b.Z}
+}
+
+// Array converts this Vector3 to a fixed Array of length 3
+func (a Vector3) Array() [3]float64 {
+	return [3]float64{a.X, a.Y, a.Z}
+}
+
 // Dot returns the dot product of two vectors
 // (which is also the cosine of the angle between them)
 func (a Vector3) Dot(b Vector3) float64 {
