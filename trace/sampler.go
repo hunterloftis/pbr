@@ -8,7 +8,6 @@ import (
 )
 
 const adapt = 0.25
-const skip = 5
 const block = 5
 
 // Sampler traces samples from light paths in a scene
@@ -60,18 +59,22 @@ func (s *Sampler) scan(samples int, result chan []float64) {
 }
 
 func (s *Sampler) sample(pixels []float64, p int, rnd *rand.Rand, samples int) {
+	var val Vector3
 	x, y := s.offsetPixel(p)
 	for i := 0; i < samples; i++ {
-		val := value(pixels, p)
+		original := value(pixels, p)
 		sample := s.trace(x, y, rnd)
-		noise := sample.Minus(val).Length() / sample.Length()
+		delta := (sample.Minus(val).Length() + sample.Minus(original).Length()) / 2
+		scale := ((sample.Length() + val.Length() + original.Length()) / 3)
+		noise := delta / scale
+		val = sample
 		rgb := sample.Array()
 		pixels[p] += rgb[0]
 		pixels[p+1] += rgb[1]
 		pixels[p+2] += rgb[2]
 		pixels[p+3]++
-		if i > 0 && noise < adapt {
-			i *= skip
+		if noise < adapt {
+			i *= (1 / adapt)
 		}
 	}
 }
