@@ -1,15 +1,18 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
 	"github.com/hunterloftis/trace/trace"
 )
 
-const samples = 1000
-const out = "test.png"
-
 func main() {
+	out := flag.String("out", "trace.png", "Output png filename.")
+	samples := flag.Int("samples", 16, "Number of samples to take.")
+	heat := flag.String("heat", "", "Heatmap png filename.")
+	flag.Parse()
+
 	scene := trace.Scene{}
 	camera := trace.Camera{Width: 960, Height: 540}
 	sampler := trace.NewSampler(&camera, &scene, 10)
@@ -29,10 +32,13 @@ func main() {
 	scene.Add(trace.Sphere{trace.Vector3{100, -150, -50}, 100, light})
 	scene.Add(trace.Sphere{trace.Vector3{0, 10001, -6}, 10000, whitePlastic})
 
-	for i := 0; i < samples; i++ {
-		fmt.Printf("Sampling %v/%v...\n", i, samples)
+	for i := 0; i < *samples; i++ {
+		fmt.Printf("Sampling %v/%v...\n", i, *samples)
 		sampler.Sample()
 	}
-	renderer.Write(sampler.Values(), out)
-	fmt.Printf("Done: %v\n", out)
+	renderer.Write(sampler.Values(), *out)
+	if len(*heat) > 0 {
+		renderer.Write(sampler.Counts(), *heat)
+	}
+	fmt.Printf("Done: %v\n", *out)
 }

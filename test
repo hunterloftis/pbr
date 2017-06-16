@@ -1,1 +1,1 @@
-go build ./scenes/spheres.go && ./spheres && open test.png
+go build ./scenes/spheres.go && time ./spheres -samples 16 -out trace.png -heat heat.png && open trace.png
