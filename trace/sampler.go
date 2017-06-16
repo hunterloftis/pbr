@@ -37,7 +37,7 @@ func NewSampler(cam *Camera, scene *Scene, bounces int) *Sampler {
 func (s *Sampler) Collect(samples int) {
 	results := make(chan []float64)
 	for i := 0; i < samples; i++ {
-		go s.Sample(samples, results)
+		go s.Scan(samples, results)
 	}
 	for i := 0; i < samples; i++ {
 		result := <-results
@@ -48,8 +48,8 @@ func (s *Sampler) Collect(samples int) {
 	}
 }
 
-// Sample does stuff
-func (s *Sampler) Sample(samples int, result chan []float64) {
+// Scan takes samples of every pixel in the image
+func (s *Sampler) Scan(samples int, result chan []float64) {
 	pixels := make([]float64, s.Width*s.Height*block)
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := 0; i < samples; i++ {
