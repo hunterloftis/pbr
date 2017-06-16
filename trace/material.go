@@ -53,25 +53,25 @@ func NewGlass(r, g, b, opacity float64, gloss float64) Material {
 }
 
 // Bsdf returns next rays predicted by the material's bidirectional scattering distribution function
-func (m *Material) Bsdf(normal Vector3, incident Vector3, dist float64) (next bool, dir Vector3, signal Vector3) {
+func (m *Material) Bsdf(normal Vector3, incident Vector3, dist float64, rnd *rand.Rand) (next bool, dir Vector3, signal Vector3) {
 	if incident.Enters(normal) {
 		// reflected
 		reflect := m.schlick(normal, incident)
-		if rand.Float64() <= reflect.Ave() {
+		if rnd.Float64() <= reflect.Ave() {
 			tint := Vector3{1, 1, 1}.Lerp(m.Fresnel, m.Metal)
-			return true, incident.Reflect(normal).Cone(1 - m.Gloss), tint
+			return true, incident.Reflect(normal).Cone(1-m.Gloss, rnd), tint
 		}
 		// transmitted (entering)
-		if rand.Float64() > m.Opacity {
+		if rnd.Float64() > m.Opacity {
 			refracted, dir := incident.Refract(normal, 1, m.Refract)
-			return refracted, dir.Cone(1 - m.Gloss), Vector3{1, 1, 1}
+			return refracted, dir.Cone(1-m.Gloss, rnd), Vector3{1, 1, 1}
 		}
 		// absorbed
-		if rand.Float64() < m.Metal {
+		if rnd.Float64() < m.Metal {
 			return false, incident, Vector3{0, 0, 0}
 		}
 		// diffused
-		return true, normal.RandHemiCos(), m.Color.Scale(1 / math.Pi)
+		return true, normal.RandHemiCos(rnd), m.Color.Scale(1 / math.Pi)
 	}
 	exited, dir := incident.Refract(normal.Scale(-1), m.Refract, 1)
 	volume := math.Min(m.Opacity*dist*dist, 1)

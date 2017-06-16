@@ -3,6 +3,7 @@ package trace
 import (
 	"math"
 	"math/rand"
+	"time"
 )
 
 const adapt = 0.25
@@ -32,6 +33,7 @@ func NewSampler(cam *Camera, scene *Scene, bounces int) *Sampler {
 
 // Sample traces light paths for the full image
 func (s *Sampler) Sample() {
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	total := float64(s.Width * s.Height)
 	for p := 0; p < len(s.pixels); p += 4 {
 		val := s.value(p)
@@ -39,7 +41,7 @@ func (s *Sampler) Sample() {
 		average := math.Floor(float64(s.count) / total)
 		limit := int(average) + 1
 		for j := 0; j < limit; j++ {
-			sample := s.trace(x, y)
+			sample := s.trace(x, y, rnd)
 			variance := sample.Minus(val).Length() / (val.Length() + 1e-6)
 			rgb := sample.Array()
 			val = sample
@@ -60,8 +62,8 @@ func (s *Sampler) value(i int) Vector3 {
 	return sample.Scale(1 / s.pixels[i+3])
 }
 
-func (s *Sampler) trace(x, y int) Vector3 {
-	ray := s.cam.Ray(x, y)
+func (s *Sampler) trace(x, y int, rnd *rand.Rand) Vector3 {
+	ray := s.cam.Ray(x, y, rnd)
 	signal := Vector3{1, 1, 1}
 	energy := Vector3{0, 0, 0}
 
@@ -73,11 +75,11 @@ func (s *Sampler) trace(x, y int) Vector3 {
 		}
 		light := hit.Mat.Emit(hit.Normal, ray.Dir)
 		energy = energy.Add(light.Mult(signal))
-		if rand.Float64() > signal.Max() {
+		if rnd.Float64() > signal.Max() {
 			break
 		}
 		signal = signal.Scale(1 / signal.Max())
-		next, dir, strength := hit.Mat.Bsdf(hit.Normal, ray.Dir, hit.Dist)
+		next, dir, strength := hit.Mat.Bsdf(hit.Normal, ray.Dir, hit.Dist, rnd)
 		if !next {
 			break
 		}
