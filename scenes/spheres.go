@@ -10,7 +10,7 @@ import (
 func main() {
 	out := flag.String("out", "trace.png", "Output png filename.")
 	frames := flag.Int("frames", 4, "Number of frames to combine.")
-	samples := flag.Int("samples", 1000, "Maximum number of samples to take for any pixel.")
+	samples := flag.Int("samples", 100, "Average per pixel samples to take.")
 	heat := flag.String("heat", "", "Heatmap png filename.")
 	flag.Parse()
 
@@ -37,8 +37,9 @@ func main() {
 	scene.Add(trace.Sphere{trace.Vector3{150, -250, -100}, 150, light})
 	scene.Add(trace.Sphere{trace.Vector3{0, 10001, -6}, 10000, whitePlastic})
 
-	fmt.Printf("Collecting %v frames, sampling each pixel up to %v times...\n", *frames, *samples)
-	sampler.Collect(*frames, *samples)
+	frameSamples := (*samples) * sampler.Width * sampler.Height
+	fmt.Printf("Collecting %v frames, taking %v samples/frame...\n", *frames, frameSamples)
+	sampler.Collect(*frames, frameSamples)
 	renderer.Write(sampler.Values(), *out)
 	if len(*heat) > 0 {
 		renderer.Write(sampler.Counts(), *heat)

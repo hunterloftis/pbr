@@ -53,31 +53,45 @@ func (s *Sampler) Collect(frames int, samples int) {
 func (s *Sampler) scan(samples int, result chan []float64) {
 	pixels := make([]float64, s.Width*s.Height*block)
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	sampled := 0
 	for p := 0; p < len(pixels); p += block {
-		s.sample(pixels, p, rnd, samples)
+		s.sample(pixels, p, rnd, 1)
+		sampled++
+	}
+	delta := 0.0
+	for p := 0; p < len(pixels); p += block {
+		delta += s.sample(pixels, p, rnd, 1)
+		sampled++
+	}
+	for sampled < samples {
+		size := float64(len(pixels) / block)
+		mean := delta / size
+		fmt.Println(sampled, samples, float64(sampled)/float64(samples), delta, size, mean)
+		delta = 0.0
+		for p := 0; sampled < samples && p < len(pixels); p += block {
+			adapted := int(math.Ceil(pixels[p+4] / mean))
+			delta += s.sample(pixels, p, rnd, adapted)
+			sampled += adapted
+		}
 	}
 	result <- pixels
 }
 
-func (s *Sampler) sample(pixels []float64, p int, rnd *rand.Rand, samples int) {
-	var val Vector3
+func (s *Sampler) sample(pixels []float64, p int, rnd *rand.Rand, samples int) float64 {
 	x, y := s.offsetPixel(p)
+	before := value(pixels, p)
 	for i := 0; i < samples; i++ {
-		original := value(pixels, p)
 		sample := s.trace(x, y, rnd)
-		delta := sample.Minus(val).Length() + sample.Minus(original).Length()*2
-		scale := sample.Length() + val.Length() + original.Length()
-		noise := delta / scale
-		val = sample
 		rgb := sample.Array()
 		pixels[p] += rgb[0]
 		pixels[p+1] += rgb[1]
 		pixels[p+2] += rgb[2]
 		pixels[p+3]++
-		if noise < threshold {
-			i *= adapt
-		}
 	}
+	after := value(pixels, p)
+	delta := before.Minus(after).Length()
+	pixels[p+4] = delta
+	return pixels[p+4]
 }
 
 func value(pixels []float64, i int) Vector3 {
