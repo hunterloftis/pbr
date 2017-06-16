@@ -8,6 +8,7 @@ import (
 )
 
 const adapt = 0.25
+const block = 5
 
 // Sampler traces samples from light paths in a scene
 type Sampler struct {
@@ -25,7 +26,7 @@ func NewSampler(cam *Camera, scene *Scene, bounces int) *Sampler {
 	return &Sampler{
 		Width:   cam.Width,
 		Height:  cam.Height,
-		pixels:  make([]float64, cam.Width*cam.Height*4),
+		pixels:  make([]float64, cam.Width*cam.Height*block),
 		cam:     cam,
 		scene:   scene,
 		bounces: bounces,
@@ -49,10 +50,10 @@ func (s *Sampler) Collect(samples int) {
 
 // Sample does stuff
 func (s *Sampler) Sample(samples int, result chan []float64) {
-	pixels := make([]float64, s.Width*s.Height*4)
+	pixels := make([]float64, s.Width*s.Height*block)
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for i := 0; i < samples; i++ {
-		for p := 0; p < len(pixels); p += 4 {
+		for p := 0; p < len(pixels); p += block {
 			s.sample(pixels, p, rnd)
 		}
 	}
@@ -112,16 +113,16 @@ func (s *Sampler) trace(x, y int, rnd *rand.Rand) Vector3 {
 }
 
 func (s *Sampler) offsetPixel(i int) (x, y int) {
-	pos := i / 4
+	pos := i / block
 	return pos % s.Width, pos / s.Width
 }
 
 // Values gets the average sampled rgb at each pixel
 func (s *Sampler) Values() []float64 {
 	rgb := make([]float64, s.Width*s.Height*3)
-	for p := 0; p < len(s.pixels); p += 4 {
+	for p := 0; p < len(s.pixels); p += block {
 		val := value(s.pixels, p).Array()
-		i := p / 4 * 3
+		i := p / block * 3
 		rgb[i] = val[0]
 		rgb[i+1] = val[1]
 		rgb[i+2] = val[2]
@@ -133,12 +134,12 @@ func (s *Sampler) Values() []float64 {
 func (s *Sampler) Counts() []float64 {
 	rgb := make([]float64, s.Width*s.Height*3)
 	var max float64
-	for p := 0; p < len(s.pixels); p += 4 {
+	for p := 0; p < len(s.pixels); p += block {
 		max = math.Max(max, s.pixels[p+3])
 	}
-	for p := 0; p < len(s.pixels); p += 4 {
+	for p := 0; p < len(s.pixels); p += block {
 		val := (s.pixels[p+3] / max) * 255
-		i := p / 4 * 3
+		i := p / block * 3
 		rgb[i] = val
 		rgb[i+1] = val
 		rgb[i+2] = val
