@@ -2,6 +2,7 @@ package trace
 
 import (
 	"math"
+	"math/rand"
 )
 
 const adapt = 0.25
@@ -72,6 +73,10 @@ func (s *Sampler) trace(x, y int) Vector3 {
 		}
 		light := hit.Mat.Emit(hit.Normal, ray.Dir)
 		energy = energy.Add(light.Mult(signal))
+		if rand.Float64() > signal.Max() {
+			break
+		}
+		signal = signal.Scale(1 / signal.Max())
 		next, dir, strength := hit.Mat.Bsdf(hit.Normal, ray.Dir, hit.Dist)
 		if !next {
 			break

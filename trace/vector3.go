@@ -42,6 +42,11 @@ func (a Vector3) Ave() float64 {
 	return (a.X + a.Y + a.Z) / 3
 }
 
+// Max returns the highest of X, Y, and Z
+func (a Vector3) Max() float64 {
+	return math.Max(a.X, math.Max(a.Y, a.Z))
+}
+
 // Cone returns a random vector within a Cone of the original vector
 // size is 0-1, where 0 is the original vector and 1 is anything within the original hemisphere
 // https://github.com/fogleman/pt/blob/69e74a07b0af72f1601c64120a866d9a5f432e2f/pt/util.go#L24
