@@ -1,8 +1,13 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/hunterloftis/trace/trace"
 )
+
+const samples = 1000
+const out = "test.png"
 
 func main() {
 	scene := trace.Scene{}
@@ -24,8 +29,10 @@ func main() {
 	scene.Add(trace.Sphere{trace.Vector3{100, -150, -50}, 100, light})
 	scene.Add(trace.Sphere{trace.Vector3{0, 10001, -6}, 10000, whitePlastic})
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < samples; i++ {
+		fmt.Printf("Sampling %v/%v...\n", i, samples)
 		sampler.Sample()
 	}
-	renderer.Write(sampler.Values(), "test.png")
+	renderer.Write(sampler.Values(), out)
+	fmt.Printf("Done: %v\n", out)
 }
