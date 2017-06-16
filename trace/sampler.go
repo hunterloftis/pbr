@@ -7,7 +7,8 @@ import (
 	"time"
 )
 
-const adapt = 0.25
+const threshold = 0.25
+const adapt = 2
 const block = 5
 
 // Sampler traces samples from light paths in a scene
@@ -73,8 +74,8 @@ func (s *Sampler) sample(pixels []float64, p int, rnd *rand.Rand, samples int) {
 		pixels[p+1] += rgb[1]
 		pixels[p+2] += rgb[2]
 		pixels[p+3]++
-		if noise < adapt {
-			i *= (1 / adapt)
+		if noise < threshold {
+			i *= adapt
 		}
 	}
 }
