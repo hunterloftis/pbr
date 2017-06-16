@@ -64,8 +64,8 @@ func (s *Sampler) sample(pixels []float64, p int, rnd *rand.Rand, samples int) {
 	for i := 0; i < samples; i++ {
 		original := value(pixels, p)
 		sample := s.trace(x, y, rnd)
-		delta := (sample.Minus(val).Length() + sample.Minus(original).Length()) / 2
-		scale := ((sample.Length() + val.Length() + original.Length()) / 3)
+		delta := sample.Minus(val).Length() + sample.Minus(original).Length()*2
+		scale := sample.Length() + val.Length() + original.Length()
 		noise := delta / scale
 		val = sample
 		rgb := sample.Array()
