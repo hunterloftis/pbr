@@ -69,7 +69,7 @@ func (s *Sampler) scan(samples int, result chan []float64) {
 		fmt.Println(sampled, samples, float64(sampled)/float64(samples), delta, size, mean)
 		delta = 0.0
 		for p := 0; sampled < samples && p < len(pixels); p += block {
-			adapted := int(math.Ceil(pixels[p+4] / mean))
+			adapted := int(math.Floor(pixels[p+4]/mean + 0.5))
 			delta += s.sample(pixels, p, rnd, adapted)
 			sampled += adapted
 		}
@@ -87,10 +87,13 @@ func (s *Sampler) sample(pixels []float64, p int, rnd *rand.Rand, samples int) f
 		pixels[p+1] += rgb[1]
 		pixels[p+2] += rgb[2]
 		pixels[p+3]++
+		// current := value(pixels, p)
+		noise := (math.Min(before.Minus(sample).Length(), 421) + 0.1) / (math.Min(sample.Length(), 421) + 0.1)
+		pixels[p+4] += noise / float64(samples)
 	}
-	after := value(pixels, p)
-	delta := before.Minus(after).Length()
-	pixels[p+4] = delta
+	// after := value(pixels, p)
+	// delta := before.Minus(after).Length()
+	// pixels[p+4] = delta
 	return pixels[p+4]
 }
 
