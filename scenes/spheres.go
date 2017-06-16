@@ -32,10 +32,8 @@ func main() {
 	scene.Add(trace.Sphere{trace.Vector3{100, -150, -50}, 100, light})
 	scene.Add(trace.Sphere{trace.Vector3{0, 10001, -6}, 10000, whitePlastic})
 
-	for i := 0; i < *samples; i++ {
-		fmt.Printf("Sampling %v/%v...\n", i, *samples)
-		sampler.Sample()
-	}
+	fmt.Printf("Collecting %vx%v samples...\n", *samples, *samples)
+	sampler.Collect(*samples)
 	renderer.Write(sampler.Values(), *out)
 	if len(*heat) > 0 {
 		renderer.Write(sampler.Counts(), *heat)

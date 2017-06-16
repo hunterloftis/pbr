@@ -1,6 +1,7 @@
 package trace
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -31,35 +32,55 @@ func NewSampler(cam *Camera, scene *Scene, bounces int) *Sampler {
 	}
 }
 
-// Sample traces light paths for the full image
-func (s *Sampler) Sample() {
-	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	total := float64(s.Width * s.Height)
-	for p := 0; p < len(s.pixels); p += 4 {
-		val := s.value(p)
-		x, y := s.offsetPixel(p)
-		average := math.Floor(float64(s.count) / total)
-		limit := int(average) + 1
-		for j := 0; j < limit; j++ {
-			sample := s.trace(x, y, rnd)
-			variance := sample.Minus(val).Length() / (val.Length() + 1e-6)
-			rgb := sample.Array()
-			val = sample
-			s.pixels[p] += rgb[0]
-			s.pixels[p+1] += rgb[1]
-			s.pixels[p+2] += rgb[2]
-			s.pixels[p+3]++
-			s.count++
-			if variance < adapt {
-				break
-			}
+// Collect traces light paths for the full image
+func (s *Sampler) Collect(samples int) {
+	results := make(chan []float64)
+	for i := 0; i < samples; i++ {
+		go s.Sample(samples, results)
+	}
+	for i := 0; i < samples; i++ {
+		result := <-results
+		fmt.Printf("Sample %v/%v complete.\n", i, samples)
+		for p := 0; p < len(result); p++ {
+			s.pixels[p] += result[p]
 		}
 	}
 }
 
-func (s *Sampler) value(i int) Vector3 {
-	sample := Vector3{s.pixels[i], s.pixels[i+1], s.pixels[i+2]}
-	return sample.Scale(1 / s.pixels[i+3])
+// Sample does stuff
+func (s *Sampler) Sample(samples int, result chan []float64) {
+	pixels := make([]float64, s.Width*s.Height*4)
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	for i := 0; i < samples; i++ {
+		for p := 0; p < len(pixels); p += 4 {
+			s.sample(pixels, p, rnd)
+		}
+	}
+	result <- pixels
+}
+
+func (s *Sampler) sample(pixels []float64, p int, rnd *rand.Rand) {
+	val := value(pixels, p)
+	x, y := s.offsetPixel(p)
+	limit := int(pixels[p+3]) + 1
+	for j := 0; j < limit; j++ {
+		sample := s.trace(x, y, rnd)
+		variance := sample.Minus(val).Length() / (val.Length() + 1e-6)
+		rgb := sample.Array()
+		val = sample
+		pixels[p] += rgb[0]
+		pixels[p+1] += rgb[1]
+		pixels[p+2] += rgb[2]
+		pixels[p+3]++
+		if variance < adapt {
+			break
+		}
+	}
+}
+
+func value(pixels []float64, i int) Vector3 {
+	sample := Vector3{pixels[i], pixels[i+1], pixels[i+2]}
+	return sample.Scale(1 / pixels[i+3])
 }
 
 func (s *Sampler) trace(x, y int, rnd *rand.Rand) Vector3 {
@@ -99,7 +120,7 @@ func (s *Sampler) offsetPixel(i int) (x, y int) {
 func (s *Sampler) Values() []float64 {
 	rgb := make([]float64, s.Width*s.Height*3)
 	for p := 0; p < len(s.pixels); p += 4 {
-		val := s.value(p).Array()
+		val := value(s.pixels, p).Array()
 		i := p / 4 * 3
 		rgb[i] = val[0]
 		rgb[i+1] = val[1]
