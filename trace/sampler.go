@@ -8,6 +8,7 @@ import (
 )
 
 const adapt = 0.25
+const skip = 5
 const block = 5
 
 // Sampler traces samples from light paths in a scene
@@ -34,14 +35,14 @@ func NewSampler(cam *Camera, scene *Scene, bounces int) *Sampler {
 }
 
 // Collect traces light paths for the full image
-func (s *Sampler) Collect(samples int) {
+func (s *Sampler) Collect(frames int, samples int) {
 	results := make(chan []float64)
-	for i := 0; i < samples; i++ {
+	for i := 0; i < frames; i++ {
 		go s.scan(samples, results)
 	}
-	for i := 0; i < samples; i++ {
+	for i := 0; i < frames; i++ {
 		result := <-results
-		fmt.Printf("Sample %v/%v complete.\n", i, samples)
+		fmt.Printf("Frame %v/%v complete.\n", i, frames)
 		for p := 0; p < len(result); p++ {
 			s.pixels[p] += result[p]
 		}
@@ -52,34 +53,33 @@ func (s *Sampler) Collect(samples int) {
 func (s *Sampler) scan(samples int, result chan []float64) {
 	pixels := make([]float64, s.Width*s.Height*block)
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	for i := 0; i < samples; i++ {
-		for p := 0; p < len(pixels); p += block {
-			s.sample(pixels, p, rnd)
-		}
+	for p := 0; p < len(pixels); p += block {
+		s.sample(pixels, p, rnd, samples)
 	}
 	result <- pixels
 }
 
-func (s *Sampler) sample(pixels []float64, p int, rnd *rand.Rand) {
-	val := value(pixels, p)
+func (s *Sampler) sample(pixels []float64, p int, rnd *rand.Rand, samples int) {
 	x, y := s.offsetPixel(p)
-	limit := int(pixels[p+3]) + 1
-	for j := 0; j < limit; j++ {
+	for i := 0; i < samples; i++ {
+		val := value(pixels, p)
 		sample := s.trace(x, y, rnd)
-		variance := sample.Minus(val).Length() / (val.Length() + 1e-6)
+		noise := sample.Minus(val).Length() / sample.Length()
 		rgb := sample.Array()
-		val = sample
 		pixels[p] += rgb[0]
 		pixels[p+1] += rgb[1]
 		pixels[p+2] += rgb[2]
 		pixels[p+3]++
-		if variance < adapt {
-			break
+		if i > 0 && noise < adapt {
+			i *= skip
 		}
 	}
 }
 
 func value(pixels []float64, i int) Vector3 {
+	if pixels[i+3] == 0 {
+		return Vector3{}
+	}
 	sample := Vector3{pixels[i], pixels[i+1], pixels[i+2]}
 	return sample.Scale(1 / pixels[i+3])
 }
