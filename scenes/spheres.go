@@ -10,7 +10,7 @@ import (
 func main() {
 	out := flag.String("out", "trace.png", "Output png filename.")
 	frames := flag.Int("frames", 4, "Number of frames to combine.")
-	samples := flag.Int("samples", 100, "Average per pixel samples to take.")
+	samples := flag.Int("samples", 250, "Average per pixel samples to take.")
 	heat := flag.String("heat", "", "Heatmap png filename.")
 	flag.Parse()
 
