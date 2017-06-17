@@ -7,8 +7,7 @@ import (
 	"time"
 )
 
-const threshold = 0.25
-const adapt = 2
+const adapt = 10
 const block = 5
 
 // Sampler traces samples from light paths in a scene
@@ -53,26 +52,18 @@ func (s *Sampler) Collect(frames int, samples int) {
 func (s *Sampler) scan(samples int, result chan []float64) {
 	pixels := make([]float64, s.Width*s.Height*block)
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	size := float64(len(pixels) / block)
 	sampled := 0
-	for p := 0; p < len(pixels); p += block {
-		s.sample(pixels, p, rnd, 1)
-		sampled++
-	}
-	delta := 0.0
-	for p := 0; p < len(pixels); p += block {
-		delta += s.sample(pixels, p, rnd, 1)
-		sampled++
-	}
+	mean := 1000.0
 	for sampled < samples {
-		size := float64(len(pixels) / block)
-		mean := delta / size
-		fmt.Println(sampled, samples, float64(sampled)/float64(samples), delta, size, mean)
-		delta = 0.0
+		noise := 0.0
+		fmt.Println(float64(sampled) / float64(samples))
 		for p := 0; sampled < samples && p < len(pixels); p += block {
-			adapted := int(math.Floor(pixels[p+4]/mean + 0.5))
-			delta += s.sample(pixels, p, rnd, adapted)
-			sampled += adapted
+			adaptive := 1 + int(math.Min(math.Floor(pixels[p+4]/mean*2), adapt))
+			noise += s.sample(pixels, p, rnd, adaptive)
+			sampled += adaptive
 		}
+		mean = noise / size
 	}
 	result <- pixels
 }
@@ -87,13 +78,14 @@ func (s *Sampler) sample(pixels []float64, p int, rnd *rand.Rand, samples int) f
 		pixels[p+1] += rgb[1]
 		pixels[p+2] += rgb[2]
 		pixels[p+3]++
-		// current := value(pixels, p)
-		noise := (math.Min(before.Minus(sample).Length(), 421) + 0.1) / (math.Min(sample.Length(), 421) + 0.1)
-		pixels[p+4] += noise / float64(samples)
 	}
-	// after := value(pixels, p)
-	// delta := before.Minus(after).Length()
-	// pixels[p+4] = delta
+	after := value(pixels, p)
+	scale := (before.Length() + after.Length()) / 2
+	if scale == 0 {
+		return 1
+	}
+	noise := before.Minus(after).Length() / scale
+	pixels[p+4] = noise
 	return pixels[p+4]
 }
 
