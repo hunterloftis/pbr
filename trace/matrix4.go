@@ -1,5 +1,11 @@
 package trace
 
+var yAxis Vector3
+
+func init() {
+	yAxis = Vector3{0, -1, 0} // TODO: figure out how to make 1 be up
+}
+
 // Matrix4 handles matrix data and operations
 // Column-major (as in math and Direct3D)
 // https://fgiesen.wordpress.com/2012/02/12/row-major-vs-column-major-row-vectors-vs-column-vectors/

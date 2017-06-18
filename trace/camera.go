@@ -2,12 +2,6 @@ package trace
 
 import "math/rand"
 
-var yAxis Vector3
-
-func init() {
-	yAxis = Vector3{0, 1, 0}
-}
-
 // Camera simulates a camera
 type Camera struct {
 	Width   int
@@ -22,7 +16,7 @@ func (c *Camera) Ray(x, y int, rnd *rand.Rand) Ray3 {
 	rx := float64(x) + rnd.Float64()
 	ry := float64(y) + rnd.Float64()
 	px := (rx/float64(c.Width) - 0.5) * aspect
-	py := ry/float64(c.Height) - 0.5
+	py := (ry/float64(c.Height) - 0.5) * -1
 	projected := Vector3{px, py, 1}
 	dir := projected.Minus(c.Origin).Normalize()
 	dirWorld := c.toWorld.ApplyDir(dir)
