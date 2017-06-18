@@ -17,7 +17,7 @@ func (c *Camera) Ray(x, y int, rnd *rand.Rand) Ray3 {
 	ry := float64(y) + rnd.Float64()
 	px := (rx/float64(c.Width) - 0.5) * aspect
 	py := (ry/float64(c.Height) - 0.5) * -1
-	projected := Vector3{px, py, 1}
+	projected := Vector3{px, py, -1}
 	dir := projected.Minus(c.Origin).Normalize()
 	dirWorld := c.toWorld.ApplyDir(dir)
 	return Ray3{Origin: c.Origin, Dir: dirWorld}

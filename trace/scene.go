@@ -54,8 +54,13 @@ func (s *Scene) Intersect(ray Ray3) (intersection bool, hit Hit) {
 // http://gl.ict.usc.edu/Data/HighResProbes/
 func (s *Scene) Env(ray Ray3) Vector3 {
 	if s.image.Width > 0 && s.image.Height > 0 {
-		u := 1 + math.Atan2(ray.Dir.X, -ray.Dir.Z)/math.Pi
-		v := 1 - math.Acos(ray.Dir.Y)/math.Pi
+		u := math.Mod(1+math.Atan2(ray.Dir.X, -ray.Dir.Z)/math.Pi, 1)
+		v := math.Mod(1-math.Acos(ray.Dir.Y)/math.Pi, 1)
+		// if v < 0 || v > 1 || u < 0 || u > 1 {
+		// 	fmt.Println(ray.Dir)
+		// 	fmt.Println(u, v)
+		// 	panic("wtf")
+		// }
 		x := int(u * float64(s.image.Width))
 		y := int(v * float64(s.image.Height))
 		index := (y*s.image.Width + x) * 3

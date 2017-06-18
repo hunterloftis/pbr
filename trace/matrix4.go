@@ -3,7 +3,7 @@ package trace
 var yAxis Vector3
 
 func init() {
-	yAxis = Vector3{0, -1, 0} // TODO: figure out how to make 1 be up
+	yAxis = Vector3{0, 1, 0} // TODO: figure out how to make 1 be up
 }
 
 // Matrix4 handles matrix data and operations
@@ -37,7 +37,7 @@ func NewIDMatrix4() (m Matrix4) {
 // http://www.codinglabs.net/article_world_view_projection_matrix.aspx
 // https://fgiesen.wordpress.com/2012/02/12/row-major-vs-column-major-row-vectors-vs-column-vectors/
 func NewLookMatrix4(o Vector3, to Vector3) Matrix4 {
-	f := to.Minus(o).Normalize() // forward
+	f := o.Minus(to).Normalize() // forward
 	r := yAxis.Cross(f)          // right
 	u := f.Cross(r)              // up
 
