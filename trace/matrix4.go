@@ -37,9 +37,9 @@ func NewIDMatrix4() (m Matrix4) {
 // http://www.codinglabs.net/article_world_view_projection_matrix.aspx
 // https://fgiesen.wordpress.com/2012/02/12/row-major-vs-column-major-row-vectors-vs-column-vectors/
 func NewLookMatrix4(o Vector3, to Vector3) Matrix4 {
-	f := o.Minus(to).Normalize() // forward
-	r := yAxis.Cross(f)          // right
-	u := f.Cross(r)              // up
+	f := o.Minus(to).Normalize()    // forward
+	r := yAxis.Cross(f).Normalize() // right
+	u := f.Cross(r).Normalize()     // up
 
 	return NewMatrix4(
 		r.X, u.X, f.X, 0,
@@ -54,7 +54,7 @@ func (a *Matrix4) Mult(b Matrix4) (result Matrix4) {
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
 			for k := 0; k < 4; k++ {
-				result.el[i][j] += a.el[i][k] * b.el[k][j]
+				result.el[j][i] += a.el[k][i] * b.el[j][k]
 			}
 		}
 	}
@@ -63,17 +63,17 @@ func (a *Matrix4) Mult(b Matrix4) (result Matrix4) {
 
 // ApplyPoint multiplies this matrix4 by a vector, including translation
 func (a *Matrix4) ApplyPoint(v Vector3) (result Vector3) {
-	result.X = v.X*a.el[0][0] + v.Y*a.el[0][1] + v.Z*a.el[0][2] + a.el[0][3]
-	result.Y = v.X*a.el[1][0] + v.Y*a.el[1][1] + v.Z*a.el[1][2] + a.el[1][3]
-	result.Z = v.X*a.el[2][0] + v.Y*a.el[2][1] + v.Z*a.el[2][2] + a.el[2][3]
+	result.X = v.X*a.el[0][0] + v.Y*a.el[1][0] + v.Z*a.el[2][0] + a.el[3][0]
+	result.Y = v.X*a.el[0][1] + v.Y*a.el[1][1] + v.Z*a.el[2][1] + a.el[3][1]
+	result.Z = v.X*a.el[0][2] + v.Y*a.el[1][2] + v.Z*a.el[2][2] + a.el[3][2]
 	// final row assumed to be [0,0,0,1]
 	return
 }
 
 // ApplyDir multiplies this matrix4 by a vector, excluding translation
 func (a *Matrix4) ApplyDir(v Vector3) (result Vector3) {
-	result.X = v.X*a.el[0][0] + v.Y*a.el[0][1] + v.Z*a.el[0][2]
-	result.Y = v.X*a.el[1][0] + v.Y*a.el[1][1] + v.Z*a.el[1][2]
-	result.Z = v.X*a.el[2][0] + v.Y*a.el[2][1] + v.Z*a.el[2][2]
+	result.X = v.X*a.el[0][0] + v.Y*a.el[1][0] + v.Z*a.el[2][0]
+	result.Y = v.X*a.el[0][1] + v.Y*a.el[1][1] + v.Z*a.el[2][1]
+	result.Z = v.X*a.el[0][2] + v.Y*a.el[1][2] + v.Z*a.el[2][2]
 	return
 }

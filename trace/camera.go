@@ -1,6 +1,8 @@
 package trace
 
-import "math/rand"
+import (
+	"math/rand"
+)
 
 // Camera simulates a camera
 type Camera struct {
@@ -25,8 +27,7 @@ func (c *Camera) Ray(x, y int, rnd *rand.Rand) Ray3 {
 
 // LookAt orients the camera
 func (c *Camera) LookAt(x, y, z float64) {
-	at := Vector3{x, y, z}.Normalize()
-	c.toWorld = NewLookMatrix4(c.Origin, at)
+	c.toWorld = NewLookMatrix4(c.Origin, Vector3{x, y, z})
 }
 
 // Move positions the camera
