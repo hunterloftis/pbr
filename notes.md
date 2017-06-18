@@ -24,3 +24,10 @@
 # Participating media
 
 - https://www.scratchapixel.com/lessons/advanced-rendering/volume-rendering-for-artists
+
+# Focal length, focus, depth of field
+
+- http://www.nikonusa.com/en/learn-and-explore/a/tips-and-techniques/understanding-focal-length.html
+- https://www.slrlounge.com/aperture-guide-pt2-shallow-and-deep-depth-of-field/
+- https://physicssoup.wordpress.com/2015/04/26/how-do-object-distance-and-focal-length-affect-depth-of-field/
+- http://www.photopills.com/articles/ultimate-guide-depth-field
