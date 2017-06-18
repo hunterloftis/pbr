@@ -12,6 +12,7 @@ type Camera struct {
 	Lens    float64
 	Sensor  float64
 	origin  Vector3
+	dir     Vector3
 	focus   float64
 	fStop   float64
 	toWorld Matrix4
@@ -38,8 +39,11 @@ func (c *Camera) Ray(x, y float64, rnd *rand.Rand) Ray3 {
 	focalPt := straight.Scale(c.focus)
 	lensPt := c.aperturePoint(rnd)
 	refracted := focalPt.Minus(lensPt).Normalize()
+
+	origin := c.toWorld.ApplyDir(lensPt).Add(c.origin) // TODO: better way?
 	dir := c.toWorld.ApplyDir(refracted)
-	return Ray3{Origin: c.origin, Dir: dir}
+
+	return Ray3{Origin: origin, Dir: dir}
 }
 
 func (c *Camera) sensorPoint(u, v float64) Vector3 {
@@ -64,12 +68,14 @@ func (c *Camera) aperturePoint(rnd *rand.Rand) Vector3 {
 
 // LookAt orients the camera
 func (c *Camera) LookAt(x, y, z float64) {
-	c.toWorld = NewLookMatrix4(c.origin, Vector3{x, y, z})
+	c.dir = Vector3{x, y, z}
+	c.toWorld = NewLookMatrix4(c.origin, c.dir)
 }
 
 // Move positions the camera
 func (c *Camera) Move(x, y, z float64) {
 	c.origin = Vector3{x, y, z}
+	c.toWorld = NewLookMatrix4(c.origin, c.dir)
 }
 
 // Focus on a point
