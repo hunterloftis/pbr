@@ -36,8 +36,8 @@ func main() {
 	scene.Add(trace.Sphere{trace.Vector3{-2.5, -0.02, -4.5}, 1, glass})
 	scene.Add(trace.Sphere{trace.Vector3{150, 250, -100}, 150, light})
 	scene.Add(trace.Sphere{trace.Vector3{0, -10001, -6}, 10000, whitePlastic})
-	// camera.Move(0, 2, 1)
-	camera.LookAt(0, 0, -1)
+	camera.Move(0, 1, 3)
+	camera.LookAt(0, 1, -1)
 
 	frameSamples := (*samples) * sampler.Width * sampler.Height
 	fmt.Printf("Collecting %v frames, taking %v samples/frame...\n", *frames, frameSamples)

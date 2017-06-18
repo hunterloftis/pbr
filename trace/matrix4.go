@@ -42,9 +42,9 @@ func NewLookMatrix4(o Vector3, to Vector3) Matrix4 {
 	u := f.Cross(r)              // up
 
 	return NewMatrix4(
-		r.X, u.X, f.X, o.X,
-		r.Y, u.Y, f.Y, o.Y,
-		r.Z, u.Z, f.Z, o.Z,
+		r.X, u.X, f.X, 0,
+		r.Y, u.Y, f.Y, 0,
+		r.Z, u.Z, f.Z, 0,
 		0, 0, 0, 1,
 	)
 }

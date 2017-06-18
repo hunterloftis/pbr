@@ -18,14 +18,15 @@ func (c *Camera) Ray(x, y int, rnd *rand.Rand) Ray3 {
 	px := (rx/float64(c.Width) - 0.5) * aspect
 	py := (ry/float64(c.Height) - 0.5) * -1
 	projected := Vector3{px, py, -1}
-	dir := projected.Minus(c.Origin).Normalize()
+	dir := projected.Normalize()
 	dirWorld := c.toWorld.ApplyDir(dir)
 	return Ray3{Origin: c.Origin, Dir: dirWorld}
 }
 
 // LookAt orients the camera
 func (c *Camera) LookAt(x, y, z float64) {
-	c.toWorld = NewLookMatrix4(c.Origin, Vector3{x, y, z})
+	at := Vector3{x, y, z}.Normalize()
+	c.toWorld = NewLookMatrix4(c.Origin, at)
 }
 
 // Move positions the camera
