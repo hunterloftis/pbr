@@ -82,7 +82,7 @@ func (s *Sampler) sample(pixels []float64, p int, rnd *rand.Rand, samples int) f
 	after := value(pixels, p)
 	scale := (before.Length() + after.Length()) / 2
 	if scale == 0 {
-		return 1
+		return 0
 	}
 	noise := before.Minus(after).Length() / scale
 	pixels[p+4] = noise

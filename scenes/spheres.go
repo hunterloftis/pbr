@@ -10,7 +10,7 @@ import (
 func main() {
 	out := flag.String("out", "trace.png", "Output png filename.")
 	frames := flag.Int("frames", 4, "Number of frames to combine.")
-	samples := flag.Int("samples", 4, "Average per pixel samples to take.")
+	samples := flag.Int("samples", 250, "Average per pixel samples to take.")
 	heat := flag.String("heat", "", "Heatmap png filename.")
 	flag.Parse()
 
@@ -27,7 +27,7 @@ func main() {
 	glass := trace.NewGlass(0, 0, 0, 0, 1)
 	frostedGlass := trace.NewGlass(0, 1, 0, 0.05, 0.8)
 
-	scene.SetEnv("images/glacier.hdr", 100)
+	// scene.SetEnv("images/glacier.hdr", 100)
 	scene.Add(trace.Sphere{trace.Vector3{1.5, -0.02, -5}, 1, redPlastic})
 	scene.Add(trace.Sphere{trace.Vector3{0, -0.02, -7}, 1, silver})
 	scene.Add(trace.Sphere{trace.Vector3{5, -0.02, -7}, 1, gold})
@@ -36,8 +36,8 @@ func main() {
 	scene.Add(trace.Sphere{trace.Vector3{-2.5, -0.02, -4.5}, 1, glass})
 	scene.Add(trace.Sphere{trace.Vector3{150, 250, -100}, 150, light})
 	scene.Add(trace.Sphere{trace.Vector3{0, -10001, -6}, 10000, whitePlastic})
-	camera.Move(0, 2, 3)
-	camera.LookAt(0, 0, -1)
+	camera.Move(0, 1, 1)
+	camera.LookAt(-0.5, 0, -7)
 
 	frameSamples := (*samples) * sampler.Width * sampler.Height
 	fmt.Printf("Collecting %v frames, taking %v samples/frame...\n", *frames, frameSamples)
