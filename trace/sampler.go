@@ -97,7 +97,7 @@ func value(pixels []float64, i int) Vector3 {
 	return sample.Scale(1 / pixels[i+3])
 }
 
-func (s *Sampler) trace(x, y int, rnd *rand.Rand) Vector3 {
+func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
 	ray := s.cam.Ray(x, y, rnd)
 	signal := Vector3{1, 1, 1}
 	energy := Vector3{0, 0, 0}
@@ -125,9 +125,9 @@ func (s *Sampler) trace(x, y int, rnd *rand.Rand) Vector3 {
 	return energy
 }
 
-func (s *Sampler) offsetPixel(i int) (x, y int) {
+func (s *Sampler) offsetPixel(i int) (x, y float64) {
 	pos := i / block
-	return pos % s.Width, pos / s.Width
+	return float64(pos % s.Width), float64(pos / s.Width)
 }
 
 // Values gets the average sampled rgb at each pixel
