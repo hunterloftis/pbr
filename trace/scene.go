@@ -17,35 +17,26 @@ type RGBAE struct {
 
 // Scene describes a 3d scene
 type Scene struct {
-	Spheres []Sphere
-	image   RGBAE
-}
-
-// Hit describes an intersection
-type Hit struct {
-	Normal Vector3
-	Mat    Material
-	Dist   float64
-	Point  Vector3
+	Surfaces []surface
+	image    RGBAE
 }
 
 // Intersect tests whether a ray hits any objects in the scene
-func (s *Scene) Intersect(ray Ray3) (intersection bool, hit Hit) {
-	var center Vector3
-	hit.Dist = math.MaxFloat64
+func (s *Scene) Intersect(ray Ray3) (hit Hit) {
+	var surf surface
+	hit.Dist = math.Inf(1)
 
-	for _, sphere := range s.Spheres {
-		i, d := sphere.Intersect(ray)
+	for _, s := range s.Surfaces {
+		i, d := s.Intersect(ray)
 		if i && d < hit.Dist {
-			intersection = true
 			hit.Dist = d
-			hit.Mat = sphere.Mat
-			center = sphere.Center
+			surf = s
 		}
 	}
-	if intersection {
+	if !math.IsInf(hit.Dist, 1) {
 		hit.Point = ray.Origin.Add(ray.Dir.Scale(hit.Dist))
-		hit.Normal = hit.Point.Minus(center).Normalize()
+		hit.Mat = surf.MaterialAt(hit.Point)
+		hit.Normal = surf.NormalAt(hit.Point)
 	}
 	return
 }
@@ -68,8 +59,8 @@ func (s *Scene) Env(ray Ray3) Vector3 {
 }
 
 // Add adds a new object to the scene
-func (s *Scene) Add(sphere Sphere) {
-	s.Spheres = append(s.Spheres, sphere)
+func (s *Scene) Add(surf surface) {
+	s.Surfaces = append(s.Surfaces, surf)
 }
 
 // SetEnv sets the environment map
