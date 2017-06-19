@@ -90,6 +90,9 @@ func (m *Material) schlick(incident Vector3, normal Vector3) Vector3 {
 
 // Emit returns the amount of light emitted
 func (m *Material) Emit(normal Vector3, dir Vector3) Vector3 {
+	if m.Light.Max() == 0 {
+		return Vector3{}
+	}
 	cos := math.Max(normal.Dot(dir.Scale(-1)), 0)
 	return m.Light.Scale(cos)
 }

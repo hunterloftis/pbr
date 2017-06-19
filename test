@@ -1,1 +1,1 @@
-go build ./scenes/spheres.go && mkdir -p out && time ./spheres -out out/trace.png -heat out/heat.png && open out/heat.png && open out/trace.png
+go build ./cmd/spheres.go && mkdir -p out && time ./spheres -out out/trace.png -heat out/heat.png && open out/trace.png

@@ -30,3 +30,13 @@ func (s *Sphere) Intersect(r Ray3) (hit bool, dist float64) {
 	}
 	return false, 0
 }
+
+// NormalAt returns the surface normal given a point on the surface
+func (s *Sphere) NormalAt(v Vector3) Vector3 {
+	return v.Minus(s.Center).Normalize()
+}
+
+// MaterialAt returns the material at a given point on the surface
+func (s *Sphere) MaterialAt(v Vector3) Material {
+	return s.Mat
+}

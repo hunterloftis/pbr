@@ -103,25 +103,25 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
 	energy := Vector3{0, 0, 0}
 
 	for bounce := 0; bounce < s.bounces; bounce++ {
-		intersected, hit := s.scene.Intersect(ray)
-		if !intersected {
+		hit := s.scene.Intersect(ray)
+		if math.IsInf(hit.Dist, 1) {
 			energy = energy.Add(s.scene.Env(ray).Mult(signal))
 			break
 		}
-		light := hit.Mat.Emit(hit.Normal, ray.Dir)
-		energy = energy.Add(light.Mult(signal))
+		if e := hit.Mat.Emit(hit.Normal, ray.Dir); e.Max() > 0 {
+			energy = energy.Add(e.Mult(signal))
+		}
 		if rnd.Float64() > signal.Max() {
 			break
 		}
-		signal = signal.Scale(1 / signal.Max())
-		next, dir, strength := hit.Mat.Bsdf(hit.Normal, ray.Dir, hit.Dist, rnd)
-		if !next {
+		if next, dir, strength := hit.Mat.Bsdf(hit.Normal, ray.Dir, hit.Dist, rnd); next {
+			signal = signal.Scale(1 / signal.Max())
+			ray = Ray3{hit.Point, dir}
+			signal = signal.Mult(strength)
+		} else {
 			break
 		}
-		ray = Ray3{hit.Point, dir}
-		signal = signal.Mult(strength)
 	}
-
 	return energy
 }
 
