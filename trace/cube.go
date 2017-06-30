@@ -12,13 +12,31 @@ type Cube struct {
 func (c *Cube) Intersect(ray Ray3) (hit bool, dist float64) {
 	// - translate ray into local space with s.Transform
 	i := c.Pos.Inverse()
-	r := i.Ray(ray)
-	_ = r
+	_ = i
+	r := ray // i.Ray(ray)
 	// - test AABB intersection (https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection)
 	// https://tavianator.com/fast-branchless-raybounding-box-intersections/
+	tx1 := (-0.5 - r.Origin.X) / r.Dir.X
+	tx2 := (0.5 - r.Origin.X) / r.Dir.X
 
-	// - compute distance
-	return false, 0
+	tmin := math.Min(tx1, tx2)
+	tmax := math.Max(tx1, tx2)
+
+	ty1 := (-0.5 - r.Origin.Y) / r.Dir.Y
+	ty2 := (0.5 - r.Origin.Y) / r.Dir.Y
+
+	tmin = math.Max(tmin, math.Min(ty1, ty2))
+	tmax = math.Min(tmax, math.Max(ty1, ty2))
+
+	tz1 := (-0.5 - r.Origin.Z) / r.Dir.Z
+	tz2 := (0.5 - r.Origin.Z) / r.Dir.Z
+
+	tmin = math.Max(tmin, math.Min(tz1, tz2))
+	tmax = math.Min(tmax, math.Max(tz1, tz2))
+
+	hit = tmax > 0 && tmax > tmin
+	dist = tmin
+	return
 }
 
 // NormalAt returns the normal at this point on the surface
