@@ -13,7 +13,7 @@ import (
 func main() {
 	out := flag.String("out", "trace.png", "Output png filename.")
 	frames := flag.Int("frames", 4, "Number of frames to combine.")
-	samples := flag.Int("samples", 10, "Average per pixel samples to take.")
+	samples := flag.Int("samples", 4, "Average per pixel samples to take.")
 	heat := flag.String("heat", "", "Heatmap png filename.")
 	flag.Parse()
 
@@ -32,14 +32,14 @@ func main() {
 	// frostedGlass := trace.NewGlass(0, 1, 0, 0.05, 0.8)
 
 	scene.Add(&trace.Cube{
-		Pos: trace.Identity(), //.Trans(0.13, 0, -3).Scale(0.1, 0.1, 0.1),
+		Pos: trace.Identity().Trans(1, 0, 1).Scale(0.25, 0.25, 0.25),
 		Mat: redPlastic,
 	})
 	scene.Add(&trace.Sphere{trace.Vector3{0, 0, -2}, 0.5, redPlastic})
 	scene.Add(&trace.Sphere{trace.Vector3{15.0, 25.0, -10.0}, 15.0, light})
 	scene.Add(&trace.Sphere{trace.Vector3{0, -10000.5, 0}, 10000, whitePlastic})
 	camera.Move(-4, 4, 4)
-	camera.LookAt(0, 0, 0)
+	camera.LookAt(1, 0, 1)
 	camera.Focus(0, 0, 0, 4)
 
 	frameSamples := (*samples) * sampler.Width * sampler.Height
