@@ -38,7 +38,7 @@ func main() {
 	scene.Add(&trace.Sphere{trace.Vector3{0.13, 0, -3}, 0.1, redPlastic})
 	scene.Add(&trace.Sphere{trace.Vector3{15.0, 25.0, -10.0}, 15.0, light})
 	scene.Add(&trace.Sphere{trace.Vector3{0, -10000.1, -4}, 10000, whitePlastic})
-	camera.Move(0, 0.15, -1.5)
+	camera.Move(0, 0.15, 2)
 	camera.LookAt(0, 0, -4)
 	camera.Focus(0.13, 0, -3, 4)
 
