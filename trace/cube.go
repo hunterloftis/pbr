@@ -43,7 +43,7 @@ func (c *Cube) Intersect(ray Ray3) (hit bool, dist float64) {
 func (c *Cube) NormalAt(p Vector3) Vector3 {
 	var axis Vector3
 	// - translate point into local space
-	p1 := c.Pos.Point(p)
+	p1 := p // p1 := c.Pos.Point(p)
 	// - test x, y, and z to see which one is largest/smallest
 	x := math.Abs(p1.X)
 	y := math.Abs(p1.Y)
@@ -57,7 +57,7 @@ func (c *Cube) NormalAt(p Vector3) Vector3 {
 	}
 	// - translate that axis normal back into world space
 	// TODO: one of these needs to be inverted
-	return c.Pos.Point(axis)
+	return axis // c.Pos.Point(axis)
 }
 
 func sign(n float64) float64 {

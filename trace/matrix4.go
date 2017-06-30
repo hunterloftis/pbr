@@ -73,19 +73,17 @@ func Scale(x, y, z float64) Matrix4 {
 }
 
 // Trans is a chaining translation
-func (a *Matrix4) Trans(x, y, z float64) *Matrix4 {
-	m := a.Mult(Translate(x, y, z))
-	return &m
+func (a Matrix4) Trans(x, y, z float64) Matrix4 {
+	return a.Mult(Translate(x, y, z))
 }
 
 // Scale is a chaining scale
-func (a *Matrix4) Scale(x, y, z float64) *Matrix4 {
-	m := a.Mult(Scale(x, y, z))
-	return &m
+func (a Matrix4) Scale(x, y, z float64) Matrix4 {
+	return a.Mult(Scale(x, y, z))
 }
 
 // Mult multiplies by another matrix4
-func (a *Matrix4) Mult(b Matrix4) (result Matrix4) {
+func (a Matrix4) Mult(b Matrix4) (result Matrix4) {
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
 			for k := 0; k < 4; k++ {
@@ -97,7 +95,7 @@ func (a *Matrix4) Mult(b Matrix4) (result Matrix4) {
 }
 
 // Point multiplies this matrix4 by a vector, including translation
-func (a *Matrix4) Point(v Vector3) (result Vector3) {
+func (a Matrix4) Point(v Vector3) (result Vector3) {
 	result.X = v.X*a.el[0][0] + v.Y*a.el[1][0] + v.Z*a.el[2][0] + a.el[3][0]
 	result.Y = v.X*a.el[0][1] + v.Y*a.el[1][1] + v.Z*a.el[2][1] + a.el[3][1]
 	result.Z = v.X*a.el[0][2] + v.Y*a.el[1][2] + v.Z*a.el[2][2] + a.el[3][2]
@@ -106,7 +104,7 @@ func (a *Matrix4) Point(v Vector3) (result Vector3) {
 }
 
 // Dir multiplies this matrix4 by a vector, excluding translation
-func (a *Matrix4) Dir(v Vector3) (result Vector3) {
+func (a Matrix4) Dir(v Vector3) (result Vector3) {
 	result.X = v.X*a.el[0][0] + v.Y*a.el[1][0] + v.Z*a.el[2][0]
 	result.Y = v.X*a.el[0][1] + v.Y*a.el[1][1] + v.Z*a.el[2][1]
 	result.Z = v.X*a.el[0][2] + v.Y*a.el[1][2] + v.Z*a.el[2][2]
@@ -115,14 +113,14 @@ func (a *Matrix4) Dir(v Vector3) (result Vector3) {
 
 // Ray multiplies this matrix by a ray
 // https://gamedev.stackexchange.com/questions/72440/the-correct-way-to-transform-a-ray-with-a-matrix
-func (a *Matrix4) Ray(r Ray3) (result Ray3) {
+func (a Matrix4) Ray(r Ray3) (result Ray3) {
 	result.Origin = a.Point(r.Origin)
 	result.Dir = a.Dir(r.Dir).Normalize()
 	return
 }
 
 // Inverse returns the inverse of this matrix
-func (a *Matrix4) Inverse() Matrix4 {
+func (a Matrix4) Inverse() Matrix4 {
 	// TODO: invert a 4x4 matrix
 	m := Identity()
 	return m
