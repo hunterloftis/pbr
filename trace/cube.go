@@ -33,7 +33,10 @@ func (c *Cube) Intersect(ray Ray3) (hit bool, dist float64) {
 	tmax = math.Min(tmax, math.Max(tz1, tz2))
 
 	hit = tmax > 0 && tmax > tmin
-	dist = tmin
+	if !hit {
+		return false, 0
+	}
+	dist = c.Pos.Dir(r.Dir.Scale(tmin)).Length() // translate distance from local to global space
 	return
 }
 
@@ -52,7 +55,7 @@ func (c *Cube) NormalAt(p Vector3) Vector3 {
 	} else {
 		normal = Vector3{0, 0, sign(z)}
 	}
-	return c.Pos.Point(normal) // translate normal from local to global space
+	return c.Pos.Dir(normal).Normalize() // translate normal from local to global space
 }
 
 func sign(n float64) float64 {
