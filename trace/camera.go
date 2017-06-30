@@ -40,8 +40,8 @@ func (c *Camera) Ray(x, y float64, rnd *rand.Rand) Ray3 {
 	lensPt := c.aperturePoint(rnd)
 	refracted := focalPt.Minus(lensPt).Normalize()
 
-	origin := c.toWorld.ApplyDir(lensPt).Add(c.origin) // TODO: better way?
-	dir := c.toWorld.ApplyDir(refracted)
+	origin := c.toWorld.Dir(lensPt).Add(c.origin) // TODO: better way?
+	dir := c.toWorld.Dir(refracted)
 
 	return Ray3{Origin: origin, Dir: dir}
 }
@@ -69,13 +69,13 @@ func (c *Camera) aperturePoint(rnd *rand.Rand) Vector3 {
 // LookAt orients the camera
 func (c *Camera) LookAt(x, y, z float64) {
 	c.dir = Vector3{x, y, z}
-	c.toWorld = NewLookMatrix4(c.origin, c.dir)
+	c.toWorld = LookMatrix(c.origin, c.dir)
 }
 
 // Move positions the camera
 func (c *Camera) Move(x, y, z float64) {
 	c.origin = Vector3{x, y, z}
-	c.toWorld = NewLookMatrix4(c.origin, c.dir)
+	c.toWorld = LookMatrix(c.origin, c.dir)
 }
 
 // Focus on a point

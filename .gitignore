@@ -1,3 +1,4 @@
 *.png
 spheres
 images
+.DS_Store
