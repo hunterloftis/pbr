@@ -32,7 +32,7 @@ func main() {
 	// frostedGlass := trace.NewGlass(0, 1, 0, 0.05, 0.8)
 
 	scene.Add(&trace.Cube{
-		Pos: trace.Identity().Trans(1, 0, 1).Scale(0.25, 0.25, 0.25),
+		Pos: trace.Identity().Trans(0, 0.1, 0),
 		Mat: redPlastic,
 	})
 	scene.Add(&trace.Sphere{trace.Vector3{0, 0, -2}, 0.5, redPlastic})

@@ -9,13 +9,11 @@ type Cube struct {
 }
 
 // Intersect tests for an intersection
+// https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
+// https://tavianator.com/fast-branchless-raybounding-box-intersections/
 func (c *Cube) Intersect(ray Ray3) (hit bool, dist float64) {
-	// - translate ray into local space with s.Transform
-	i := c.Pos.Inverse()
-	_ = i
-	r := ray // i.Ray(ray)
-	// - test AABB intersection (https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection)
-	// https://tavianator.com/fast-branchless-raybounding-box-intersections/
+	_, i := c.Pos.Inverse() // global to local transform
+	r := i.Ray(ray)         // translate ray into local space
 	tx1 := (-0.5 - r.Origin.X) / r.Dir.X
 	tx2 := (0.5 - r.Origin.X) / r.Dir.X
 
@@ -41,23 +39,20 @@ func (c *Cube) Intersect(ray Ray3) (hit bool, dist float64) {
 
 // NormalAt returns the normal at this point on the surface
 func (c *Cube) NormalAt(p Vector3) Vector3 {
-	var axis Vector3
-	// - translate point into local space
-	p1 := p // p1 := c.Pos.Point(p)
-	// - test x, y, and z to see which one is largest/smallest
+	var normal Vector3
+	_, i := c.Pos.Inverse() // global to local transform
+	p1 := i.Point(p)        // translate point into local space
 	x := math.Abs(p1.X)
 	y := math.Abs(p1.Y)
 	z := math.Abs(p1.Z)
 	if x > y && x > z {
-		axis = Vector3{sign(x), 0, 0}
+		normal = Vector3{sign(x), 0, 0}
 	} else if y > z {
-		axis = Vector3{0, sign(y), 0}
+		normal = Vector3{0, sign(y), 0}
 	} else {
-		axis = Vector3{0, 0, sign(z)}
+		normal = Vector3{0, 0, sign(z)}
 	}
-	// - translate that axis normal back into world space
-	// TODO: one of these needs to be inverted
-	return axis // c.Pos.Point(axis)
+	return c.Pos.Point(normal) // translate normal from local to global space
 }
 
 func sign(n float64) float64 {
