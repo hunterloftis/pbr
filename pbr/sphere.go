@@ -1,8 +1,6 @@
-package trace
+package pbr
 
 import "math"
-
-const bias = 1e-6
 
 // Sphere describes a 3d sphere
 type Sphere struct {
@@ -21,11 +19,11 @@ func (s *Sphere) Intersect(r Ray3) (hit bool, dist float64) {
 	}
 	root := math.Sqrt(det)
 	t1 := b - root
-	if t1 > bias {
+	if t1 > BIAS {
 		return true, t1
 	}
 	t2 := b + root
-	if t2 > bias {
+	if t2 > BIAS {
 		return true, t2
 	}
 	return false, 0

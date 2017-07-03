@@ -6,40 +6,56 @@ package main
 import (
 	"flag"
 	"fmt"
+	"math"
 
-	"github.com/hunterloftis/trace/trace"
+	"github.com/hunterloftis/pbr/pbr"
 )
 
 func main() {
-	out := flag.String("out", "trace.png", "Output png filename.")
+	out := flag.String("out", "render.png", "Output png filename.")
 	frames := flag.Int("frames", 4, "Number of frames to combine.")
 	samples := flag.Int("samples", 4, "Average per pixel samples to take.")
 	heat := flag.String("heat", "", "Heatmap png filename.")
 	flag.Parse()
 
-	scene := trace.Scene{}
-	camera := trace.NewCamera(960, 540, 0.050)
-	sampler := trace.NewSampler(&camera, &scene, 10)
-	renderer := trace.NewRenderer(&camera)
+	scene := pbr.Scene{}
+	camera := pbr.NewCamera(960, 540, 0.050)
+	sampler := pbr.NewSampler(&camera, &scene, 10)
+	renderer := pbr.NewRenderer(&camera)
 
-	light := trace.NewLight(1000, 1000, 1000)
-	redPlastic := trace.NewPlastic(1, 0, 0, 1)
-	// bluePlastic := trace.NewPlastic(0, 0, 1, 1)
-	whitePlastic := trace.NewPlastic(1, 1, 1, 0)
-	// silver := trace.NewMetal(0.972, 0.960, 0.915, 1)
-	// gold := trace.NewMetal(1.022, 0.782, 0.344, 0.8)
-	// glass := trace.NewGlass(0, 0, 0, 0, 1)
-	// frostedGlass := trace.NewGlass(0, 1, 0, 0.05, 0.8)
+	light := pbr.NewLight(1000, 1000, 1000)
+	redPlastic := pbr.NewPlastic(1, 0, 0, 1)
+	whitePlastic := pbr.NewPlastic(1, 1, 1, 0)
+	silver := pbr.NewMetal(0.972, 0.960, 0.915, 1)
+	gold := pbr.NewMetal(1.022, 0.782, 0.344, 0.9)
+	glass := pbr.NewGlass(0, 0, 0, 0, 1)
 
-	scene.Add(&trace.Cube{
-		Pos: trace.Identity().Trans(0, 0.1, 0).Scale(0.8, 0.8, 0.8),
+	scene.SetEnv("images/glacier.hdr", 100)
+	scene.Add(&pbr.Cube{
+		Pos: pbr.Identity(),
+		Mat: silver,
+	})
+	scene.Add(&pbr.Cube{
+		Pos: pbr.Identity().Trans(2, 0, -4),
+		Mat: gold,
+	})
+	scene.Add(&pbr.Cube{
+		Pos: pbr.Identity().Trans(-1.5, -0.25, 1.25).Scale(1, 0.5, 1),
+		Mat: glass,
+	})
+	scene.Add(&pbr.Cube{
+		Pos: pbr.Identity().Trans(1.75, 0, 2).Rotate(0, 0.25*math.Pi, 0).Scale(0.5, 2, 1),
 		Mat: redPlastic,
 	})
-	scene.Add(&trace.Sphere{trace.Vector3{0, 0, -2}, 0.5, redPlastic})
-	scene.Add(&trace.Sphere{trace.Vector3{15.0, 25.0, -10.0}, 15.0, light})
-	scene.Add(&trace.Sphere{trace.Vector3{0, -10000.5, 0}, 10000, whitePlastic})
-	camera.Move(-4, 4, 4)
-	camera.LookAt(1, 0, 1)
+	scene.Add(&pbr.Cube{
+		Pos: pbr.Identity().Trans(0, -1, 0).Scale(1000, 1, 1000),
+		Mat: whitePlastic,
+	})
+	scene.Add(&pbr.Sphere{pbr.Vector3{-1.5, 0, 0}, 0.5, gold})
+	scene.Add(&pbr.Sphere{pbr.Vector3{2, 0, 0}, 0.5, silver})
+	scene.Add(&pbr.Sphere{pbr.Vector3{50, 30, 0}, 20, light})
+	camera.Move(-6, 2.5, 5)
+	camera.LookAt(0, 0, 0)
 	camera.Focus(0, 0, 0, 4)
 
 	frameSamples := (*samples) * sampler.Width * sampler.Height

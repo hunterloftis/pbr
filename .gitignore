@@ -1,4 +1,3 @@
-*.png
-spheres
-images
+out/*
+bin/*
 .DS_Store

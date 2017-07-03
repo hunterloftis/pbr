@@ -1,4 +1,4 @@
-package trace
+package pbr
 
 import (
 	"math"
@@ -140,4 +140,9 @@ func (a Vector3) Lerp(b Vector3, n float64) Vector3 {
 func (a Vector3) Reflect(b Vector3) Vector3 {
 	cos := b.Dot(a)
 	return a.Minus(b.Scale(2 * cos)).Normalize()
+}
+
+// Equals compares two vectors
+func (a Vector3) Equals(b Vector3) bool {
+	return a.X == b.X && a.Y == b.Y && a.Z == b.Z
 }

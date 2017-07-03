@@ -1,4 +1,4 @@
-package trace
+package pbr
 
 import (
 	"math"
@@ -40,8 +40,8 @@ func (c *Camera) Ray(x, y float64, rnd *rand.Rand) Ray3 {
 	lensPt := c.aperturePoint(rnd)
 	refracted := focalPt.Minus(lensPt).Normalize()
 
-	origin := c.toWorld.Dir(lensPt).Add(c.origin) // TODO: Matrix4.Ray()
-	dir := c.toWorld.Dir(refracted)
+	origin := c.toWorld.MultDir(lensPt).Add(c.origin) // TODO: Matrix4.Ray()
+	dir := c.toWorld.MultDir(refracted)
 
 	return Ray3{Origin: origin, Dir: dir}
 }
