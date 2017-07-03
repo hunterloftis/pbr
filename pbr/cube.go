@@ -1,6 +1,8 @@
-package trace
+package pbr
 
-import "math"
+import (
+	"math"
+)
 
 // Cube describes a unit cube scaled, rotated, and translated by Transform
 type Cube struct {
@@ -13,7 +15,7 @@ type Cube struct {
 // https://tavianator.com/fast-branchless-raybounding-box-intersections/
 func (c *Cube) Intersect(ray Ray3) (hit bool, dist float64) {
 	_, i := c.Pos.Inverse() // global to local transform
-	r := i.Ray(ray)         // translate ray into local space
+	r := i.MultRay(ray)     // translate ray into local space
 	tx1 := (-0.5 - r.Origin.X) / r.Dir.X
 	tx2 := (0.5 - r.Origin.X) / r.Dir.X
 
@@ -32,30 +34,34 @@ func (c *Cube) Intersect(ray Ray3) (hit bool, dist float64) {
 	tmin = math.Max(tmin, math.Min(tz1, tz2))
 	tmax = math.Min(tmax, math.Max(tz1, tz2))
 
-	hit = tmax > 0 && tmax > tmin
+	hit = tmax > 0 && tmax > tmin && tmin > 0
 	if !hit {
 		return false, 0
 	}
-	dist = c.Pos.Dir(r.Dir.Scale(tmin)).Length() // translate distance from local to global space
-	return
+	dist = c.Pos.MultDir(r.Dir.Scale(tmin)).Length() // translate distance from local to global space
+	if dist < BIAS {
+		return false, dist
+	}
+	return true, dist
 }
 
 // NormalAt returns the normal at this point on the surface
 func (c *Cube) NormalAt(p Vector3) Vector3 {
 	var normal Vector3
 	_, i := c.Pos.Inverse() // global to local transform
-	p1 := i.Point(p)        // translate point into local space
+	p1 := i.MultPoint(p)    // translate point into local space
 	x := math.Abs(p1.X)
 	y := math.Abs(p1.Y)
 	z := math.Abs(p1.Z)
 	if x > y && x > z {
-		normal = Vector3{sign(x), 0, 0}
+		normal = Vector3{sign(p1.X), 0, 0}
 	} else if y > z {
-		normal = Vector3{0, sign(y), 0}
+		normal = Vector3{0, sign(p1.Y), 0}
 	} else {
-		normal = Vector3{0, 0, sign(z)}
+		normal = Vector3{0, 0, sign(p1.Z)}
 	}
-	return c.Pos.Dir(normal).Normalize() // translate normal from local to global space
+	// return normal
+	return c.Pos.MultNormal(normal) // translate normal from local to global space
 }
 
 func sign(n float64) float64 {

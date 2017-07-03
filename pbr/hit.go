@@ -1,4 +1,4 @@
-package trace
+package pbr
 
 // Hit describes an intersection
 type Hit struct {

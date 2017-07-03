@@ -1,4 +1,4 @@
-package trace
+package pbr
 
 // Ray3 holds a 3d origin, unit direction
 type Ray3 struct {

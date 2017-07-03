@@ -1,4 +1,4 @@
-package trace
+package pbr
 
 import (
 	"math"
@@ -49,7 +49,7 @@ func (s *Scene) Env(ray Ray3) Vector3 {
 		v := math.Acos(ray.Dir.Y) / math.Pi
 		x := int(u * float64(s.image.Width))
 		y := int(v * float64(s.image.Height))
-		index := (y*s.image.Width + x) * 3
+		index := ((y*s.image.Width + x) * 3) % len(s.image.Data)
 		r := float64(s.image.Data[index])
 		g := float64(s.image.Data[index+1])
 		b := float64(s.image.Data[index+2])

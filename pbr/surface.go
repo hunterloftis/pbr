@@ -1,4 +1,4 @@
-package trace
+package pbr
 
 type surface interface {
 	Intersect(Ray3) (bool, float64)
