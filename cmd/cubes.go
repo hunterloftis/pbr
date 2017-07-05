@@ -11,19 +11,20 @@ import (
 
 func main() {
 	scene := pbr.Scene{}
-	camera := pbr.NewCamera(960, 540, 0.050)
-	renderer := pbr.NewRenderer(&camera, 2)
+	camera := pbr.Camera35mm(960, 540, 0.050)
+	renderer := pbr.CamRenderer(&camera, 2)
 	cli := pbr.NewCLI(&scene, &camera, renderer)
 
-	light := pbr.NewLight(1000, 1000, 1000)
-	redPlastic := pbr.NewPlastic(1, 0, 0, 1)
-	whitePlastic := pbr.NewPlastic(1, 1, 1, 0)
-	bluePlastic := pbr.NewPlastic(0, 0, 1, 1)
-	silver := pbr.NewMetal(0.972, 0.960, 0.915, 1)
-	gold := pbr.NewMetal(1.022, 0.782, 0.344, 0.9)
-	glass := pbr.NewGlass(0, 0, 0, 0, 1)
+	light := pbr.Light(1000, 1000, 1000)
+	redPlastic := pbr.Plastic(1, 0, 0, 1)
+	whitePlastic := pbr.Plastic(1, 1, 1, 0)
+	bluePlastic := pbr.Plastic(0, 0, 1, 1)
+	silver := pbr.Metal(0.972, 0.960, 0.915, 1)
+	gold := pbr.Metal(1.022, 0.782, 0.344, 0.9)
+	glass := pbr.Glass(0, 0, 0, 0, 1)
 
 	scene.SetEnv("images/glacier.hdr", 100)
+
 	scene.Add(&pbr.Cube{
 		Pos: pbr.Identity(),
 		Mat: silver,
@@ -48,8 +49,10 @@ func main() {
 	scene.Add(&pbr.Sphere{pbr.Vector3{-4.5, 0, 1.5}, 0.5, gold})
 	scene.Add(&pbr.Sphere{pbr.Vector3{2, 0, 0}, 0.5, silver})
 	scene.Add(&pbr.Sphere{pbr.Vector3{50, 30, 0}, 20, light})
-	camera.Move(-6, 1.5, 5)
+
+	camera.MoveTo(-6, 1.5, 5)
 	camera.LookAt(0, 0, 0)
 	camera.Focus(0, 0, 0, 1.4)
+
 	cli.Start()
 }

@@ -16,13 +16,13 @@ type Material struct {
 	Metal   float64
 }
 
-// NewLight constructs a new light
-func NewLight(r, g, b float64) Material {
+// Light constructs a new light
+func Light(r, g, b float64) Material {
 	return Material{Light: Vector3{r, g, b}}
 }
 
-// NewPlastic constructs a new plastic material
-func NewPlastic(r, g, b float64, gloss float64) Material {
+// Plastic constructs a new plastic material
+func Plastic(r, g, b float64, gloss float64) Material {
 	return Material{
 		Color:   Vector3{r, g, b},
 		Fresnel: Vector3{0.04, 0.04, 0.04},
@@ -31,8 +31,8 @@ func NewPlastic(r, g, b float64, gloss float64) Material {
 	}
 }
 
-// NewMetal constructs a new metal material
-func NewMetal(r, g, b float64, gloss float64) Material {
+// Metal constructs a new metal material
+func Metal(r, g, b float64, gloss float64) Material {
 	return Material{
 		Fresnel: Vector3{r, g, b},
 		Opacity: 1,
@@ -41,8 +41,8 @@ func NewMetal(r, g, b float64, gloss float64) Material {
 	}
 }
 
-// NewGlass constructs a new glass material
-func NewGlass(r, g, b, opacity float64, gloss float64) Material {
+// Glass constructs a new glass material
+func Glass(r, g, b, opacity float64, gloss float64) Material {
 	return Material{
 		Color:   Vector3{r, g, b},
 		Fresnel: Vector3{0.04, 0.04, 0.04},
