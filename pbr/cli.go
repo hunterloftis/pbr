@@ -49,7 +49,7 @@ func (c Cli) Start() {
 	}
 	<-working
 
-	fmt.Printf("\n => Merging...\n", stat.samples)
+	fmt.Printf("\n => Merging...\n")
 	for i := 0; i < *concurrency; i++ {
 		c.renderer.Merge(<-results)
 	}
