@@ -13,62 +13,40 @@ type Cube struct {
 // Intersect tests for an intersection
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
 // https://tavianator.com/fast-branchless-raybounding-box-intersections/
-func (c *Cube) Intersect(ray Ray3) (hit bool, dist float64) {
-	_, i := c.Pos.Inverse() // global to local transform
+func (c *Cube) Intersect(ray Ray3) (bool, float64) {
+	i := (&c.Pos).Inverse() // global to local transform
 	r := i.MultRay(ray)     // translate ray into local space
 	tx1 := (-0.5 - r.Origin.X) / r.Dir.X
 	tx2 := (0.5 - r.Origin.X) / r.Dir.X
-
-	tmin := math.Min(tx1, tx2)
-	tmax := math.Max(tx1, tx2)
-
+	tmin, tmax := math.Min(tx1, tx2), math.Max(tx1, tx2)
 	ty1 := (-0.5 - r.Origin.Y) / r.Dir.Y
 	ty2 := (0.5 - r.Origin.Y) / r.Dir.Y
-
-	tmin = math.Max(tmin, math.Min(ty1, ty2))
-	tmax = math.Min(tmax, math.Max(ty1, ty2))
-
+	tmin, tmax = math.Max(tmin, math.Min(ty1, ty2)), math.Min(tmax, math.Max(ty1, ty2))
 	tz1 := (-0.5 - r.Origin.Z) / r.Dir.Z
 	tz2 := (0.5 - r.Origin.Z) / r.Dir.Z
-
-	tmin = math.Max(tmin, math.Min(tz1, tz2))
-	tmax = math.Min(tmax, math.Max(tz1, tz2))
-
-	hit = tmax > 0 && tmax > tmin && tmin > 0
-	if !hit {
+	tmin, tmax = math.Max(tmin, math.Min(tz1, tz2)), math.Min(tmax, math.Max(tz1, tz2))
+	if hit := tmin > 0 && tmax >= tmin; !hit {
 		return false, 0
 	}
-	dist = c.Pos.MultDir(r.Dir.Scale(tmin)).Length() // translate distance from local to global space
-	if dist < BIAS {
-		return false, dist
-	}
-	return true, dist
+	dist := c.Pos.MultDir(r.Dir.Scale(tmin)).Length() // translate distance from local to global space
+	return dist >= BIAS, dist
 }
 
 // NormalAt returns the normal at this point on the surface
 func (c *Cube) NormalAt(p Vector3) Vector3 {
-	var normal Vector3
-	_, i := c.Pos.Inverse() // global to local transform
+	i := (&c.Pos).Inverse() // global to local transform
 	p1 := i.MultPoint(p)    // translate point into local space
-	x := math.Abs(p1.X)
-	y := math.Abs(p1.Y)
-	z := math.Abs(p1.Z)
-	if x > y && x > z {
-		normal = Vector3{sign(p1.X), 0, 0}
-	} else if y > z {
-		normal = Vector3{0, sign(p1.Y), 0}
-	} else {
-		normal = Vector3{0, 0, sign(p1.Z)}
+	abs := p1.Abs()
+	var normal Vector3
+	switch {
+	case abs.X > abs.Y && abs.X > abs.Z:
+		normal = Vector3{math.Copysign(1, p1.X), 0, 0}
+	case abs.Y > abs.Z:
+		normal = Vector3{0, math.Copysign(1, p1.Y), 0}
+	default:
+		normal = Vector3{0, 0, math.Copysign(1, p1.Z)}
 	}
-	// return normal
 	return c.Pos.MultNormal(normal) // translate normal from local to global space
-}
-
-func sign(n float64) float64 {
-	if n > 0 {
-		return 1
-	}
-	return -1
 }
 
 // MaterialAt returns the material at this point on the surface

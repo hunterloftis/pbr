@@ -12,7 +12,8 @@ func init() {
 // Column-major (as in math and Direct3D)
 // https://fgiesen.wordpress.com/2012/02/12/row-major-vs-column-major-row-vectors-vs-column-vectors/
 type Matrix4 struct {
-	el [4][4]float64
+	el  [4][4]float64
+	inv *Matrix4
 }
 
 // NewMatrix4 constructs a new matrix
@@ -45,17 +46,17 @@ func LookMatrix(o Vector3, to Vector3) Matrix4 {
 	f := o.Minus(to).Normalize()    // forward
 	r := yAxis.Cross(f).Normalize() // right
 	u := f.Cross(r).Normalize()     // up
-
-	return NewMatrix4(
+	orient := NewMatrix4(
 		r.X, u.X, f.X, 0,
 		r.Y, u.Y, f.Y, 0,
 		r.Z, u.Z, f.Z, 0,
 		0, 0, 0, 1,
 	)
+	return Translation(o.X, o.Y, o.Z).Mult(orient)
 }
 
-// Translate creates a new translation matrix
-func Translate(x, y, z float64) Matrix4 {
+// Translation creates a new translation matrix
+func Translation(x, y, z float64) Matrix4 {
 	return NewMatrix4(
 		1, 0, 0, x,
 		0, 1, 0, y,
@@ -74,35 +75,26 @@ func Scale(x, y, z float64) Matrix4 {
 	)
 }
 
-// RotateX creates a new rotation matrix
-// http://www.dirsig.org/docs/new/affine.html#_rotation
-func RotateX(a float64) Matrix4 {
+// Rotation creates a rotation matrix from an angle-axis Vector representation
+// http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToMatrix/
+func Rotation(v Vector3) Matrix4 {
+	a := v.Length()
 	c := math.Cos(a)
 	s := math.Sin(a)
+	t := 1 - c
+	n := v.Normalize()
+	x, y, z := n.X, n.Y, n.Z
 	return NewMatrix4(
-		1, 0, 0, 0,
-		0, c, -s, 0,
-		0, s, c, 0,
-		0, 0, 0, 1,
-	)
-}
-
-// RotateY creates a new rotation matrix
-// http://www.dirsig.org/docs/new/affine.html#_rotation
-func RotateY(a float64) Matrix4 {
-	c := math.Cos(a)
-	s := math.Sin(a)
-	return NewMatrix4(
-		c, 0, s, 0,
-		0, 1, 0, 0,
-		-s, 0, c, 0,
+		t*x*x+c, t*x*y-z*s, t*x*z+y*s, 0,
+		t*x*y+z*s, t*y*y+c, t*y*z-x*s, 0,
+		t*x*z-y*s, t*y*z+x*s, t*z*z+c, 0,
 		0, 0, 0, 1,
 	)
 }
 
 // Trans is a chaining translation
 func (a Matrix4) Trans(x, y, z float64) Matrix4 {
-	return a.Mult(Translate(x, y, z))
+	return a.Mult(Translation(x, y, z))
 }
 
 // Scale is a chaining scale
@@ -110,13 +102,13 @@ func (a Matrix4) Scale(x, y, z float64) Matrix4 {
 	return a.Mult(Scale(x, y, z))
 }
 
-// Rotate is a chaining rotation
-func (a Matrix4) Rotate(x, y, z float64) Matrix4 {
-	r := RotateX(x).Mult(RotateY(y))
-	return a.Mult(r)
+// Rot is a chaining rotation
+func (a Matrix4) Rot(v Vector3) Matrix4 {
+	return a.Mult(Rotation(v))
 }
 
 // Mult multiplies by another matrix4
+// TODO: a and b might be flipped here
 func (a Matrix4) Mult(b Matrix4) (result Matrix4) {
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
@@ -161,7 +153,10 @@ func (a Matrix4) MultRay(r Ray3) (result Ray3) {
 // Inverse returns the inverse of this matrix
 // https://www.gamedev.net/forums/topic/648190-algorithm-for-4x4-matrix-inverse/
 // https://stackoverflow.com/questions/1148309/inverting-a-4x4-matrix
-func (a Matrix4) Inverse() (bool, Matrix4) {
+func (a *Matrix4) Inverse() *Matrix4 {
+	if a.inv != nil {
+		return a.inv
+	}
 	i := Identity()
 	e := a.el
 	i.el[0][0] = e[1][1]*e[2][2]*e[3][3] - e[1][1]*e[2][3]*e[3][2] - e[2][1]*e[1][2]*e[3][3] + e[2][1]*e[1][3]*e[3][2] + e[3][1]*e[1][2]*e[2][3] - e[3][1]*e[1][3]*e[2][2]
@@ -180,15 +175,12 @@ func (a Matrix4) Inverse() (bool, Matrix4) {
 	i.el[1][3] = e[0][0]*e[1][2]*e[2][3] - e[0][0]*e[1][3]*e[2][2] - e[1][0]*e[0][2]*e[2][3] + e[1][0]*e[0][3]*e[2][2] + e[2][0]*e[0][2]*e[1][3] - e[2][0]*e[0][3]*e[1][2]
 	i.el[2][3] = e[0][0]*e[1][3]*e[2][1] - e[0][0]*e[1][1]*e[2][3] + e[1][0]*e[0][1]*e[2][3] - e[1][0]*e[0][3]*e[2][1] - e[2][0]*e[0][1]*e[1][3] + e[2][0]*e[0][3]*e[1][1]
 	i.el[3][3] = e[0][0]*e[1][1]*e[2][2] - e[0][0]*e[1][2]*e[2][1] - e[1][0]*e[0][1]*e[2][2] + e[1][0]*e[0][2]*e[2][1] + e[2][0]*e[0][1]*e[1][2] - e[2][0]*e[0][2]*e[1][1]
-	det := e[0][0]*i.el[0][0] + e[0][1]*i.el[1][0] + e[0][2]*i.el[2][0] + e[0][3]*i.el[3][0]
-	if det == 0 {
-		return false, i
-	}
-	det = 1.0 / det
+	det := 1.0 / (e[0][0]*i.el[0][0] + e[0][1]*i.el[1][0] + e[0][2]*i.el[2][0] + e[0][3]*i.el[3][0])
 	for j := 0; j < 4; j++ {
 		for k := 0; k < 4; k++ {
 			i.el[j][k] *= det
 		}
 	}
-	return true, i
+	a.inv, i.inv = &i, a
+	return &i
 }
