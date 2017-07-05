@@ -10,6 +10,10 @@ import (
 )
 
 func main() {
+	// f, _ := os.Create("profile.pprof")
+	// pprof.StartCPUProfile(f)
+	// defer pprof.StopCPUProfile()
+
 	scene := pbr.Scene{}
 	camera := pbr.Camera35mm(960, 540, 0.050)
 	renderer := pbr.CamRenderer(&camera, 2)
