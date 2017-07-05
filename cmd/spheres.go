@@ -17,7 +17,7 @@ func main() {
 	scene := pbr.Scene{}
 	camera := pbr.NewCamera(960, 540, 0.050)
 	sampler := pbr.NewSampler(&camera, &scene, 10)
-	renderer := pbr.NewRenderer(&camera)
+	renderer := pbr.NewRenderer(&camera, 1.0)
 	light := pbr.NewLight(1000, 1000, 1000)
 	redPlastic := pbr.NewPlastic(1, 0, 0, 1)
 	bluePlastic := pbr.NewPlastic(0, 0, 1, 1)

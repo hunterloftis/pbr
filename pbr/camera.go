@@ -7,15 +7,15 @@ import (
 
 // Camera simulates a camera
 type Camera struct {
-	Width   int
-	Height  int
-	Lens    float64
-	Sensor  float64
-	origin  Vector3
-	dir     Vector3
-	focus   float64
-	fStop   float64
-	toWorld Matrix4
+	Width  int
+	Height int
+	Lens   float64
+	Sensor float64
+	origin Vector3
+	target Vector3
+	focus  float64
+	fStop  float64
+	pos    Matrix4
 }
 
 // NewCamera makes a new Full-frame camera
@@ -39,11 +39,8 @@ func (c *Camera) Ray(x, y float64, rnd *rand.Rand) Ray3 {
 	focalPt := straight.Scale(c.focus)
 	lensPt := c.aperturePoint(rnd)
 	refracted := focalPt.Minus(lensPt).Normalize()
-
-	origin := c.toWorld.MultDir(lensPt).Add(c.origin) // TODO: Matrix4.Ray()
-	dir := c.toWorld.MultDir(refracted)
-
-	return Ray3{Origin: origin, Dir: dir}
+	ray := Ray3{Origin: lensPt, Dir: refracted}
+	return c.pos.MultRay(ray)
 }
 
 func (c *Camera) sensorPoint(u, v float64) Vector3 {
@@ -68,14 +65,14 @@ func (c *Camera) aperturePoint(rnd *rand.Rand) Vector3 {
 
 // LookAt orients the camera
 func (c *Camera) LookAt(x, y, z float64) {
-	c.dir = Vector3{x, y, z}
-	c.toWorld = LookMatrix(c.origin, c.dir)
+	c.target = Vector3{x, y, z}
+	c.pos = LookMatrix(c.origin, c.target)
 }
 
 // Move positions the camera
 func (c *Camera) Move(x, y, z float64) {
 	c.origin = Vector3{x, y, z}
-	c.toWorld = LookMatrix(c.origin, c.dir)
+	c.pos = LookMatrix(c.origin, c.target)
 }
 
 // Focus on a point

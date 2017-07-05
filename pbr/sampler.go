@@ -1,92 +1,69 @@
 package pbr
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"time"
 )
 
-const adapt = 10
-const block = 5
-
 // Sampler traces samples from light paths in a scene
 type Sampler struct {
 	Width   int
 	Height  int
-	pixels  []float64 // r, g, b, count
+	pixels  []float64 // stored in blocks of `PROPS`
 	cam     *Camera
 	scene   *Scene
 	bounces int
 	count   int
+	noise   float64
+	adapt   int
 }
 
 // NewSampler constructs a new Sampler instance
-func NewSampler(cam *Camera, scene *Scene, bounces int) *Sampler {
+func NewSampler(cam *Camera, scene *Scene, bounces int, adapt int) *Sampler {
 	return &Sampler{
 		Width:   cam.Width,
 		Height:  cam.Height,
-		pixels:  make([]float64, cam.Width*cam.Height*block),
+		pixels:  make([]float64, cam.Width*cam.Height*PROPS),
 		cam:     cam,
 		scene:   scene,
 		bounces: bounces,
+		adapt:   adapt,
 	}
 }
 
-// Collect traces light paths for the full image
-func (s *Sampler) Collect(frames int, samples int) {
-	results := make(chan []float64)
-	for i := 0; i < frames; i++ {
-		go s.scan(samples, results)
-	}
-	for i := 0; i < frames; i++ {
-		result := <-results
-		fmt.Printf("Frame %v/%v complete.\n", i, frames)
-		for p := 0; p < len(result); p++ {
-			s.pixels[p] += result[p]
-		}
-	}
-}
-
-// Scan takes samples of every pixel in the image
-func (s *Sampler) scan(samples int, result chan []float64) {
-	pixels := make([]float64, s.Width*s.Height*block)
+// SampleFrame samples a frame
+func (s *Sampler) SampleFrame() {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	size := float64(len(pixels) / block)
-	sampled := 0
-	mean := 1000.0
-	for sampled < samples {
-		noise := 0.0
-		fmt.Println(float64(sampled) / float64(samples))
-		for p := 0; sampled < samples && p < len(pixels); p += block {
-			adaptive := 1 + int(math.Min(math.Floor(pixels[p+4]/mean*2), adapt))
-			noise += s.sample(pixels, p, rnd, adaptive)
-			sampled += adaptive
-		}
-		mean = noise / size
+	noise := 0.0
+	mean := s.noise + 1e-6
+	limit := float64(s.adapt * 3)
+	for p := 0; p < len(s.pixels); p += PROPS {
+		ratio := s.pixels[p+4] / mean
+		adaptation := math.Floor(math.Pow(ratio, float64(s.adapt)))
+		samples := 1 + int(math.Min(adaptation, limit))
+		noise += s.sample(p, rnd, samples)
 	}
-	result <- pixels
+	s.noise = noise / float64(s.Width*s.Height)
 }
 
-func (s *Sampler) sample(pixels []float64, p int, rnd *rand.Rand, samples int) float64 {
-	x, y := s.offsetPixel(p)
-	before := value(pixels, p)
+// sample samples a pixel
+func (s *Sampler) sample(p int, rnd *rand.Rand, samples int) float64 {
+	x, y := s.pixelAt(p)
+	before := value(s.pixels, p)
 	for i := 0; i < samples; i++ {
 		sample := s.trace(x, y, rnd)
 		rgb := sample.Array()
-		pixels[p] += rgb[0]
-		pixels[p+1] += rgb[1]
-		pixels[p+2] += rgb[2]
-		pixels[p+3]++
+		s.pixels[p] += rgb[0]
+		s.pixels[p+1] += rgb[1]
+		s.pixels[p+2] += rgb[2]
+		s.pixels[p+3]++
 	}
-	after := value(pixels, p)
-	scale := (before.Length() + after.Length()) / 2
-	if scale == 0 {
-		return 0
-	}
+	after := value(s.pixels, p)
+	scale := (before.Length()+after.Length())/2 + 1e-6
 	noise := before.Minus(after).Length() / scale
-	pixels[p+4] = noise
-	return pixels[p+4]
+	s.pixels[p+4] = noise
+	return noise
 }
 
 func value(pixels []float64, i int) Vector3 {
@@ -125,37 +102,12 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
 	return energy
 }
 
-func (s *Sampler) offsetPixel(i int) (x, y float64) {
-	pos := i / block
+func (s *Sampler) pixelAt(i int) (x, y float64) {
+	pos := i / PROPS
 	return float64(pos % s.Width), float64(pos / s.Width)
 }
 
-// Values gets the average sampled rgb at each pixel
-func (s *Sampler) Values() []float64 {
-	rgb := make([]float64, s.Width*s.Height*3)
-	for p := 0; p < len(s.pixels); p += block {
-		val := value(s.pixels, p).Array()
-		i := p / block * 3
-		rgb[i] = val[0]
-		rgb[i+1] = val[1]
-		rgb[i+2] = val[2]
-	}
-	return rgb
-}
-
-// Counts returns the sample count at each pixel as rgb
-func (s *Sampler) Counts() []float64 {
-	rgb := make([]float64, s.Width*s.Height*3)
-	var max float64
-	for p := 0; p < len(s.pixels); p += block {
-		max = math.Max(max, s.pixels[p+3])
-	}
-	for p := 0; p < len(s.pixels); p += block {
-		val := (s.pixels[p+3] / max) * 255
-		i := p / block * 3
-		rgb[i] = val
-		rgb[i+1] = val
-		rgb[i+2] = val
-	}
-	return rgb
+// Pixels returns an array of float64 pixel values
+func (s *Sampler) Pixels() []float64 {
+	return s.pixels
 }

@@ -146,3 +146,8 @@ func (a Vector3) Reflect(b Vector3) Vector3 {
 func (a Vector3) Equals(b Vector3) bool {
 	return a.X == b.X && a.Y == b.Y && a.Z == b.Z
 }
+
+// Abs converts X, Y, and Z to absolute values
+func (a Vector3) Abs() Vector3 {
+	return Vector3{math.Abs(a.X), math.Abs(a.Y), math.Abs(a.Z)}
+}
