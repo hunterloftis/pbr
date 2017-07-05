@@ -33,7 +33,7 @@ func NewSampler(cam *Camera, scene *Scene, bounces int, adapt int) *Sampler {
 }
 
 // SampleFrame samples a frame
-func (s *Sampler) SampleFrame() {
+func (s *Sampler) SampleFrame() (total int) {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	noise := 0.0
 	mean := s.noise + 1e-6
@@ -43,8 +43,10 @@ func (s *Sampler) SampleFrame() {
 		adaptation := math.Floor(math.Pow(ratio, float64(s.adapt)))
 		samples := 1 + int(math.Min(adaptation, limit))
 		noise += s.sample(p, rnd, samples)
+		total += samples
 	}
 	s.noise = noise / float64(s.Width*s.Height)
+	return
 }
 
 // sample samples a pixel
