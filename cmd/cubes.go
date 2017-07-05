@@ -49,10 +49,22 @@ func main() {
 		Pos: pbr.Identity().Trans(0, -1, 0).Scale(1000, 1, 1000),
 		Mat: whitePlastic,
 	})
-	scene.Add(&pbr.Sphere{pbr.Vector3{-1.5, 0, 0}, 0.5, bluePlastic})
-	scene.Add(&pbr.Sphere{pbr.Vector3{-4.5, 0, 1.5}, 0.5, gold})
-	scene.Add(&pbr.Sphere{pbr.Vector3{2, 0, 0}, 0.5, silver})
-	scene.Add(&pbr.Sphere{pbr.Vector3{50, 30, 0}, 20, light})
+	scene.Add(&pbr.Sphere{
+		Pos: pbr.Identity().Trans(-1.5, 0, 0),
+		Mat: bluePlastic,
+	})
+	scene.Add(&pbr.Sphere{
+		Pos: pbr.Identity().Trans(-4.5, 0, 1.5),
+		Mat: gold,
+	})
+	scene.Add(&pbr.Sphere{
+		Pos: pbr.Identity().Trans(2, 0, 0),
+		Mat: silver,
+	})
+	scene.Add(&pbr.Sphere{
+		Pos: pbr.Identity().Trans(50, 30, 0).Scale(40, 40, 40),
+		Mat: light,
+	})
 
 	camera.MoveTo(-6, 1.5, 5)
 	camera.LookAt(0, 0, 0)

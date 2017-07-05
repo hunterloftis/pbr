@@ -4,34 +4,43 @@ import "math"
 
 // Sphere describes a 3d sphere
 type Sphere struct {
-	Center Vector3
-	Radius float64
-	Mat    Material
+	Pos Matrix4
+	Mat Material
 }
 
 // Intersect tests whether the sphere intersects a given ray
-func (s *Sphere) Intersect(r Ray3) (hit bool, dist float64) {
-	op := s.Center.Minus(r.Origin)
+func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64) {
+	i := (&s.Pos).Inverse()
+	r := i.MultRay(ray)
+	op := Vector3{}.Minus(r.Origin)
 	b := op.Dot(r.Dir)
-	det := b*b - op.Dot(op) + s.Radius*s.Radius
+	det := b*b - op.Dot(op) + 0.5*0.5
 	if det < 0 {
 		return false, 0
 	}
 	root := math.Sqrt(det)
 	t1 := b - root
-	if t1 > BIAS {
-		return true, t1
+	if t1 > 0 {
+		dist := s.Pos.MultDir(r.Dir.Scale(t1)).Length()
+		if dist > BIAS {
+			return true, dist
+		}
 	}
 	t2 := b + root
-	if t2 > BIAS {
-		return true, t2
+	if t2 > 0 {
+		dist := s.Pos.MultDir(r.Dir.Scale(t2)).Length()
+		if dist > BIAS {
+			return true, dist
+		}
 	}
 	return false, 0
 }
 
 // NormalAt returns the surface normal given a point on the surface
-func (s *Sphere) NormalAt(v Vector3) Vector3 {
-	return v.Minus(s.Center).Normalize()
+func (s *Sphere) NormalAt(point Vector3) Vector3 {
+	i := (&s.Pos).Inverse()
+	p := i.MultPoint(point)
+	return s.Pos.MultNormal(p.Normalize())
 }
 
 // MaterialAt returns the material at a given point on the surface
