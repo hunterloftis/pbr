@@ -43,9 +43,9 @@ func Identity() Matrix4 {
 // http://www.codinglabs.net/article_world_view_projection_matrix.aspx
 // https://fgiesen.wordpress.com/2012/02/12/row-major-vs-column-major-row-vectors-vs-column-vectors/
 func LookMatrix(o Vector3, to Vector3) Matrix4 {
-	f := o.Minus(to).Normalize()    // forward
-	r := yAxis.Cross(f).Normalize() // right
-	u := f.Cross(r).Normalize()     // up
+	f := o.Minus(to).Unit()    // forward
+	r := yAxis.Cross(f).Unit() // right
+	u := f.Cross(r).Unit()     // up
 	orient := NewMatrix4(
 		r.X, u.X, f.X, 0,
 		r.Y, u.Y, f.Y, 0,
@@ -78,11 +78,11 @@ func Scale(x, y, z float64) Matrix4 {
 // Rotation creates a rotation matrix from an angle-axis Vector representation
 // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToMatrix/
 func Rotation(v Vector3) Matrix4 {
-	a := v.Length()
+	a := v.Len()
 	c := math.Cos(a)
 	s := math.Sin(a)
 	t := 1 - c
-	n := v.Normalize()
+	n := v.Unit()
 	x, y, z := n.X, n.Y, n.Z
 	return NewMatrix4(
 		t*x*x+c, t*x*y-z*s, t*x*z+y*s, 0,
@@ -139,7 +139,7 @@ func (a Matrix4) MultDir(v Vector3) (result Vector3) {
 
 // MultNormal multiplies this matrix4 by a normal vector, renormalizing the result
 func (a Matrix4) MultNormal(v Vector3) (result Vector3) {
-	return a.MultDir(v).Normalize()
+	return a.MultDir(v).Unit()
 }
 
 // MultRay multiplies this matrix by a ray

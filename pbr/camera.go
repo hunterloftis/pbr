@@ -35,10 +35,10 @@ func (c *Camera) Ray(x, y float64, rnd *rand.Rand) Ray3 {
 	px := rx / float64(c.Width)
 	py := ry / float64(c.Height)
 	sensorPt := c.sensorPoint(px, py)
-	straight := Vector3{}.Minus(sensorPt).Normalize()
-	focalPt := straight.Scale(c.focus)
+	straight := Vector3{}.Minus(sensorPt).Unit()
+	focalPt := straight.Scaled(c.focus)
 	lensPt := c.aperturePoint(rnd)
-	refracted := focalPt.Minus(lensPt).Normalize()
+	refracted := focalPt.Minus(lensPt).Unit()
 	ray := Ray3{Origin: lensPt, Dir: refracted}
 	return c.pos.MultRay(ray)
 }
@@ -77,6 +77,6 @@ func (c *Camera) MoveTo(x, y, z float64) {
 
 // Focus on a point
 func (c *Camera) Focus(x, y, z, fStop float64) {
-	c.focus = Vector3{x, y, z}.Minus(c.origin).Length()
+	c.focus = Vector3{x, y, z}.Minus(c.origin).Len()
 	c.fStop = fStop
 }

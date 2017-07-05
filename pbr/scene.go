@@ -34,7 +34,7 @@ func (s *Scene) Intersect(ray Ray3) (hit Hit) {
 		}
 	}
 	if !math.IsInf(hit.Dist, 1) {
-		hit.Point = ray.Origin.Add(ray.Dir.Scale(hit.Dist))
+		hit.Point = ray.Origin.Plus(ray.Dir.Scaled(hit.Dist))
 		hit.Mat = surf.MaterialAt(hit.Point)
 		hit.Normal = surf.NormalAt(hit.Point)
 	}
@@ -53,7 +53,7 @@ func (s *Scene) Env(ray Ray3) Vector3 {
 		r := float64(s.image.Data[index])
 		g := float64(s.image.Data[index+1])
 		b := float64(s.image.Data[index+2])
-		return Vector3{r, g, b}.Scale(s.image.Expose)
+		return Vector3{r, g, b}.Scaled(s.image.Expose)
 	}
 	return Vector3{0, 0, 0}
 }

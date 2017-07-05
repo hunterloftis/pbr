@@ -36,7 +36,7 @@ func (c *Cube) Intersect(ray Ray3) (bool, float64) {
 	if hit := min > 0 && max >= min; !hit {
 		return false, 0
 	}
-	dist := c.Pos.MultDir(r.Dir.Scale(min)).Length() // translate distance from local to global space
+	dist := c.Pos.MultDir(r.Dir.Scaled(min)).Len() // translate distance from local to global space
 	return dist >= BIAS, dist
 }
 
