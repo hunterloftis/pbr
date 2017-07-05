@@ -21,14 +21,14 @@ func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64) {
 	root := math.Sqrt(det)
 	t1 := b - root
 	if t1 > 0 {
-		dist := s.Pos.MultDir(r.Dir.Scale(t1)).Length()
+		dist := s.Pos.MultDir(r.Dir.Scaled(t1)).Len()
 		if dist > BIAS {
 			return true, dist
 		}
 	}
 	t2 := b + root
 	if t2 > 0 {
-		dist := s.Pos.MultDir(r.Dir.Scale(t2)).Length()
+		dist := s.Pos.MultDir(r.Dir.Scaled(t2)).Len()
 		if dist > BIAS {
 			return true, dist
 		}
@@ -40,7 +40,7 @@ func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64) {
 func (s *Sphere) NormalAt(point Vector3) Vector3 {
 	i := (&s.Pos).Inverse()
 	p := i.MultPoint(point)
-	return s.Pos.MultNormal(p.Normalize())
+	return s.Pos.MultNormal(p.Unit())
 }
 
 // MaterialAt returns the material at a given point on the surface

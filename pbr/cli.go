@@ -31,8 +31,8 @@ func NewCLI(scene *Scene, cam *Camera, renderer *Renderer) Cli {
 // Start starts rendering based on CLI parameters
 func (c Cli) Start() {
 	out := flag.String("out", "render.png", "Output png filename.")
-	concurrency := flag.Int("frames", runtime.NumCPU(), "Number of frames to combine.")
 	heat := flag.String("heat", "", "Heatmap png filename.")
+	concurrency := flag.Int("workers", runtime.NumCPU(), "Concurrency level.")
 	flag.Parse()
 
 	working := make(chan struct{})

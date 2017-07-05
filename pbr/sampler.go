@@ -62,8 +62,8 @@ func (s *Sampler) Sample(p int, rnd *rand.Rand, samples int) float64 {
 		s.pixels[p+3]++
 	}
 	after := value(s.pixels, p)
-	scale := (before.Length()+after.Length())/2 + 1e-6
-	noise := before.Minus(after).Length() / scale
+	scale := (before.Len()+after.Len())/2 + 1e-6
+	noise := before.Minus(after).Len() / scale
 	s.pixels[p+4] = noise
 	return noise
 }
@@ -78,7 +78,7 @@ func value(pixels []float64, i int) Vector3 {
 		return Vector3{}
 	}
 	sample := Vector3{pixels[i], pixels[i+1], pixels[i+2]}
-	return sample.Scale(1 / pixels[i+3])
+	return sample.Scaled(1 / pixels[i+3])
 }
 
 func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
@@ -89,19 +89,19 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
 	for bounce := 0; bounce < s.bounces; bounce++ {
 		hit := s.scene.Intersect(ray)
 		if math.IsInf(hit.Dist, 1) {
-			energy = energy.Add(s.scene.Env(ray).Mult(signal))
+			energy = energy.Plus(s.scene.Env(ray).By(signal))
 			break
 		}
 		if e := hit.Mat.Emit(hit.Normal, ray.Dir); e.Max() > 0 {
-			energy = energy.Add(e.Mult(signal))
+			energy = energy.Plus(e.By(signal))
 		}
 		if rnd.Float64() > signal.Max() {
 			break
 		}
 		if next, dir, strength := hit.Mat.Bsdf(hit.Normal, ray.Dir, hit.Dist, rnd); next {
-			signal = signal.Scale(1 / signal.Max())
+			signal = signal.Scaled(1 / signal.Max())
 			ray = Ray3{hit.Point, dir}
-			signal = signal.Mult(strength)
+			signal = signal.By(strength)
 		} else {
 			break
 		}

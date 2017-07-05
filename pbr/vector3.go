@@ -10,31 +10,31 @@ type Vector3 struct {
 	X, Y, Z float64
 }
 
-// Scale multiplies by a scalar
-func (a Vector3) Scale(n float64) Vector3 {
+// Scaled multiplies by a scalar
+func (a Vector3) Scaled(n float64) Vector3 {
 	return Vector3{a.X * n, a.Y * n, a.Z * n}
 }
 
-// Mult multiplies by a Vector3
-func (a Vector3) Mult(b Vector3) Vector3 {
+// By multiplies by a Vector3
+func (a Vector3) By(b Vector3) Vector3 {
 	return Vector3{a.X * b.X, a.Y * b.Y, a.Z * b.Z}
 }
 
-// Add adds Vector3s together
-func (a Vector3) Add(b Vector3) Vector3 {
+// Plus adds Vector3s together
+func (a Vector3) Plus(b Vector3) Vector3 {
 	return Vector3{a.X + b.X, a.Y + b.Y, a.Z + b.Z}
 }
 
-// Refract refracts a vector based on the ratio of coefficients of refraction
-func (a Vector3) Refract(b Vector3, refractA, refractB float64) (bool, Vector3) {
-	ratio := refractA / refractB
+// Refracted refracts a vector based on the ratio of coefficients of refraction
+func (a Vector3) Refracted(b Vector3, indexA, indexB float64) (bool, Vector3) {
+	ratio := indexA / indexB
 	cos := b.Dot(a)
 	k := 1 - ratio*ratio*(1-cos*cos)
 	if k < 0 {
 		return false, a
 	}
-	offset := b.Scale(ratio*cos + math.Sqrt(k))
-	return true, a.Scale(ratio).Minus(offset).Normalize()
+	offset := b.Scaled(ratio*cos + math.Sqrt(k))
+	return true, a.Scaled(ratio).Minus(offset).Unit()
 }
 
 // Ave returns the average of X, Y, and Z
@@ -57,14 +57,14 @@ func (a Vector3) Cone(size float64, rnd *rand.Rand) Vector3 {
 	m1 := math.Sin(theta)
 	m2 := math.Cos(theta)
 	a2 := v * 2 * math.Pi
-	q := NewVectorSphere(rnd)
+	q := SphereVector(rnd)
 	s := a.Cross(q)
 	t := a.Cross(s)
 	d := Vector3{}
-	d = d.Add(s.Scale(m1 * math.Cos(a2)))
-	d = d.Add(t.Scale(m1 * math.Sin(a2)))
-	d = d.Add(a.Scale(m2))
-	return d.Normalize()
+	d = d.Plus(s.Scaled(m1 * math.Cos(a2)))
+	d = d.Plus(t.Scaled(m1 * math.Sin(a2)))
+	d = d.Plus(a.Scaled(m2))
+	return d.Unit()
 }
 
 // Array converts this Vector3 to a fixed Array of length 3
@@ -84,12 +84,12 @@ func (a Vector3) RandHemiCos(rnd *rand.Rand) Vector3 {
 	v := rnd.Float64()
 	r := math.Sqrt(u)
 	theta := 2 * math.Pi * v
-	s := a.Cross(NewVectorSphere(rnd)).Normalize()
+	s := a.Cross(SphereVector(rnd)).Unit()
 	t := a.Cross(s)
 	d := Vector3{}
-	d = d.Add(s.Scale(r * math.Cos(theta)))
-	d = d.Add(t.Scale(r * math.Sin(theta)))
-	d = d.Add(a.Scale(math.Sqrt(1 - u)))
+	d = d.Plus(s.Scaled(r * math.Cos(theta)))
+	d = d.Plus(t.Scaled(r * math.Sin(theta)))
+	d = d.Plus(a.Scaled(math.Sqrt(1 - u)))
 	return d
 }
 
@@ -99,13 +99,13 @@ func (a Vector3) Dot(b Vector3) float64 {
 	return a.X*b.X + a.Y*b.Y + a.Z*b.Z
 }
 
-// NewVectorSphere returns a random unit vector (some point on the edge of a unit sphere)
-func NewVectorSphere(rnd *rand.Rand) Vector3 {
-	return NewVectorAngles(rnd.Float64()*math.Pi*2, math.Asin(rnd.Float64()*2-1))
+// SphereVector returns a random unit vector (some point on the edge of a unit sphere)
+func SphereVector(rnd *rand.Rand) Vector3 {
+	return AngleVector(rnd.Float64()*math.Pi*2, math.Asin(rnd.Float64()*2-1))
 }
 
-// NewVectorAngles creates a vector based on theta and phi
-func NewVectorAngles(theta, phi float64) Vector3 {
+// AngleVector creates a vector based on theta and phi
+func AngleVector(theta, phi float64) Vector3 {
 	return Vector3{math.Cos(theta) * math.Cos(phi), math.Sin(phi), math.Sin(theta) * math.Cos(phi)}
 }
 
@@ -119,14 +119,14 @@ func (a Vector3) Minus(b Vector3) Vector3 {
 	return Vector3{a.X - b.X, a.Y - b.Y, a.Z - b.Z}
 }
 
-// Normalize makes the vector of length 1
-func (a Vector3) Normalize() Vector3 {
-	d := a.Length()
+// Unit returns the vector in the same direction of length 1
+func (a Vector3) Unit() Vector3 {
+	d := a.Len()
 	return Vector3{a.X / d, a.Y / d, a.Z / d}
 }
 
-// Length finds the length of the vector
-func (a Vector3) Length() float64 {
+// Len finds the length of the vector
+func (a Vector3) Len() float64 {
 	return math.Sqrt(a.X*a.X + a.Y*a.Y + a.Z*a.Z)
 }
 
@@ -136,10 +136,10 @@ func (a Vector3) Lerp(b Vector3, n float64) Vector3 {
 	return Vector3{a.X*m + b.X*n, a.Y*m + b.Y*n, a.Z*m + b.Z*n}
 }
 
-// Reflect reflects the vector about a normal (b)
-func (a Vector3) Reflect(b Vector3) Vector3 {
+// Reflected reflects the vector about a normal (b)
+func (a Vector3) Reflected(b Vector3) Vector3 {
 	cos := b.Dot(a)
-	return a.Minus(b.Scale(2 * cos)).Normalize()
+	return a.Minus(b.Scaled(2 * cos)).Unit()
 }
 
 // Equals compares two vectors

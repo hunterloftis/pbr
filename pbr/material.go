@@ -59,11 +59,11 @@ func (m *Material) Bsdf(normal Vector3, incident Vector3, dist float64, rnd *ran
 		reflect := m.schlick(normal, incident)
 		if rnd.Float64() <= reflect.Ave() {
 			tint := Vector3{1, 1, 1}.Lerp(m.Fresnel, m.Metal)
-			return true, incident.Reflect(normal).Cone(1-m.Gloss, rnd), tint
+			return true, incident.Reflected(normal).Cone(1-m.Gloss, rnd), tint
 		}
 		// transmitted (entering)
 		if rnd.Float64() > m.Opacity {
-			refracted, dir := incident.Refract(normal, 1, m.Refract)
+			refracted, dir := incident.Refracted(normal, 1, m.Refract)
 			return refracted, dir.Cone(1-m.Gloss, rnd), Vector3{1, 1, 1}
 		}
 		// absorbed
@@ -71,9 +71,9 @@ func (m *Material) Bsdf(normal Vector3, incident Vector3, dist float64, rnd *ran
 			return false, incident, Vector3{0, 0, 0}
 		}
 		// diffused
-		return true, normal.RandHemiCos(rnd), m.Color.Scale(1 / math.Pi)
+		return true, normal.RandHemiCos(rnd), m.Color.Scaled(1 / math.Pi)
 	}
-	exited, dir := incident.Refract(normal.Scale(-1), m.Refract, 1)
+	exited, dir := incident.Refracted(normal.Scaled(-1), m.Refract, 1)
 	volume := math.Min(m.Opacity*dist*dist, 1)
 	tint := Vector3{1, 1, 1}.Lerp(m.Color, volume)
 	return exited, dir, tint
@@ -82,10 +82,10 @@ func (m *Material) Bsdf(normal Vector3, incident Vector3, dist float64, rnd *ran
 // http://blog.selfshadow.com/publications/s2015-shading-course/hoffman/s2015_pbs_physics_math_slides.pdf
 // http://graphics.stanford.edu/courses/cs348b-10/lectures/reflection_i/reflection_i.pdf
 func (m *Material) schlick(incident Vector3, normal Vector3) Vector3 {
-	cos := incident.Scale(-1).Dot(normal)
+	cos := incident.Scaled(-1).Dot(normal)
 	invFresnel := Vector3{1, 1, 1}.Minus(m.Fresnel)
-	scaled := invFresnel.Scale(math.Pow(1-cos, 5))
-	return m.Fresnel.Add(scaled)
+	scaled := invFresnel.Scaled(math.Pow(1-cos, 5))
+	return m.Fresnel.Plus(scaled)
 }
 
 // Emit returns the amount of light emitted
@@ -93,6 +93,6 @@ func (m *Material) Emit(normal Vector3, dir Vector3) Vector3 {
 	if m.Light.Max() == 0 {
 		return Vector3{}
 	}
-	cos := math.Max(normal.Dot(dir.Scale(-1)), 0)
-	return m.Light.Scale(cos)
+	cos := math.Max(normal.Dot(dir.Scaled(-1)), 0)
+	return m.Light.Scaled(cos)
 }
