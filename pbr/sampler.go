@@ -68,6 +68,11 @@ func (s *Sampler) Sample(p int, rnd *rand.Rand, samples int) float64 {
 	return noise
 }
 
+// Pixels returns an array of float64 pixel values
+func (s *Sampler) Pixels() []float64 {
+	return s.pixels
+}
+
 func value(pixels []float64, i int) Vector3 {
 	if pixels[i+3] == 0 {
 		return Vector3{}
@@ -107,9 +112,4 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
 func (s *Sampler) pixelAt(i int) (x, y float64) {
 	pos := i / PROPS
 	return float64(pos % s.Width), float64(pos / s.Width)
-}
-
-// Pixels returns an array of float64 pixel values
-func (s *Sampler) Pixels() []float64 {
-	return s.pixels
 }
