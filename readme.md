@@ -2,6 +2,8 @@
 
 Learning Go by writing a path tracer.
 
+![Render](https://user-images.githubusercontent.com/364501/27873088-e36c621c-6178-11e7-94c8-19171e05dc50.png)
+
 - Unbiased Monte-Carlo integration
 - Adaptive sampling
 - Russian roulette (early path termination)
