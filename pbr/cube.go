@@ -16,19 +16,27 @@ type Cube struct {
 func (c *Cube) Intersect(ray Ray3) (bool, float64) {
 	i := (&c.Pos).Inverse() // global to local transform
 	r := i.MultRay(ray)     // translate ray into local space
-	tx1 := (-0.5 - r.Origin.X) / r.Dir.X
-	tx2 := (0.5 - r.Origin.X) / r.Dir.X
-	tmin, tmax := math.Min(tx1, tx2), math.Max(tx1, tx2)
-	ty1 := (-0.5 - r.Origin.Y) / r.Dir.Y
-	ty2 := (0.5 - r.Origin.Y) / r.Dir.Y
-	tmin, tmax = math.Max(tmin, math.Min(ty1, ty2)), math.Min(tmax, math.Max(ty1, ty2))
-	tz1 := (-0.5 - r.Origin.Z) / r.Dir.Z
-	tz2 := (0.5 - r.Origin.Z) / r.Dir.Z
-	tmin, tmax = math.Max(tmin, math.Min(tz1, tz2)), math.Min(tmax, math.Max(tz1, tz2))
-	if hit := tmin > 0 && tmax >= tmin; !hit {
+	x1 := (-0.5 - r.Origin.X) / r.Dir.X
+	x2 := (0.5 - r.Origin.X) / r.Dir.X
+	y1 := (-0.5 - r.Origin.Y) / r.Dir.Y
+	y2 := (0.5 - r.Origin.Y) / r.Dir.Y
+	z1 := (-0.5 - r.Origin.Z) / r.Dir.Z
+	z2 := (0.5 - r.Origin.Z) / r.Dir.Z
+	if x1 > x2 {
+		x1, x2 = x2, x1
+	}
+	if y1 > y2 {
+		y1, y2 = y2, y1
+	}
+	if z1 > z2 {
+		z1, z2 = z2, z1
+	}
+	min := math.Max(math.Max(x1, y1), z1)
+	max := math.Min(math.Min(x2, y2), z2)
+	if hit := min > 0 && max >= min; !hit {
 		return false, 0
 	}
-	dist := c.Pos.MultDir(r.Dir.Scale(tmin)).Length() // translate distance from local to global space
+	dist := c.Pos.MultDir(r.Dir.Scale(min)).Length() // translate distance from local to global space
 	return dist >= BIAS, dist
 }
 

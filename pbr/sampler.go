@@ -42,15 +42,15 @@ func (s *Sampler) SampleFrame() (total int) {
 		ratio := s.pixels[p+4] / mean
 		adaptation := math.Floor(math.Pow(ratio, float64(s.adapt)))
 		samples := 1 + int(math.Min(adaptation, limit))
-		noise += s.sample(p, rnd, samples)
+		noise += s.Sample(p, rnd, samples)
 		total += samples
 	}
 	s.noise = noise / float64(s.Width*s.Height)
 	return
 }
 
-// sample samples a pixel
-func (s *Sampler) sample(p int, rnd *rand.Rand, samples int) float64 {
+// Sample samples a pixel
+func (s *Sampler) Sample(p int, rnd *rand.Rand, samples int) float64 {
 	x, y := s.pixelAt(p)
 	before := value(s.pixels, p)
 	for i := 0; i < samples; i++ {
