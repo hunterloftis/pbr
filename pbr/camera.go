@@ -18,13 +18,13 @@ type Camera struct {
 	pos    Matrix4
 }
 
-// NewCamera makes a new Full-frame camera
-func NewCamera(width, height int, lens float64) Camera {
+// Camera35mm makes a new Full-frame camera
+func Camera35mm(width, height int, lens float64) Camera {
 	return Camera{
 		Width:  width,
 		Height: height,
 		Lens:   lens,
-		Sensor: 0.024, // height (24mm, full frame standard)
+		Sensor: 0.024, // height (36mm x 24mm, 35mm full frame standard)
 	}
 }
 
@@ -69,8 +69,8 @@ func (c *Camera) LookAt(x, y, z float64) {
 	c.pos = LookMatrix(c.origin, c.target)
 }
 
-// Move positions the camera
-func (c *Camera) Move(x, y, z float64) {
+// MoveTo positions the camera
+func (c *Camera) MoveTo(x, y, z float64) {
 	c.origin = Vector3{x, y, z}
 	c.pos = LookMatrix(c.origin, c.target)
 }

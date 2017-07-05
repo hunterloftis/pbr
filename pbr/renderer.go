@@ -15,8 +15,8 @@ type Renderer struct {
 	pixels   []float64
 }
 
-// NewRenderer sizes a Renderer to match a Camera
-func NewRenderer(cam *Camera, exp float64) *Renderer {
+// CamRenderer sizes a Renderer to match a Camera
+func CamRenderer(cam *Camera, exp float64) *Renderer {
 	return &Renderer{
 		Width:    cam.Width,
 		Height:   cam.Height,
