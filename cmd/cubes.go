@@ -1,8 +1,5 @@
 package main
 
-// TODO: tweet for feedback
-// https://arschles.svbtle.com/orthogonality-in-go
-
 import (
 	"math"
 
