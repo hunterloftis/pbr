@@ -3,6 +3,7 @@ package pbr
 import (
 	"flag"
 	"fmt"
+	"math"
 	"os"
 	"os/signal"
 	"runtime"
@@ -30,9 +31,10 @@ func NewCLI(scene *Scene, cam *Camera, renderer *Renderer) Cli {
 
 // Start starts rendering based on CLI parameters
 func (c Cli) Start() {
-	out := flag.String("out", "render.png", "Output png filename.")
-	heat := flag.String("heat", "", "Heatmap png filename.")
-	concurrency := flag.Int("workers", runtime.NumCPU(), "Concurrency level.")
+	out := flag.String("out", "render.png", "Output png filename")
+	heat := flag.String("heat", "", "Heatmap png filename")
+	workers := flag.Int("workers", runtime.NumCPU(), "Concurrency level")
+	samples := flag.Float64("samples", math.Inf(1), "Max samples per pixel")
 	flag.Parse()
 
 	working := make(chan struct{})
@@ -40,17 +42,14 @@ func (c Cli) Start() {
 	results := make(chan []float64)
 
 	signal.Notify(interrupted, os.Interrupt, syscall.SIGTERM)
-	go func() { <-interrupted; close(working) }()
+	go func() { <-interrupted; fmt.Println(""); close(working) }()
 
-	fmt.Printf("Rendering (%v workers)\n", *concurrency)
+	fmt.Printf("Rendering (%v workers, %v samples/pixel)\n", *workers, *samples)
 	stat := statistic{}
-	for i := 0; i < *concurrency; i++ {
-		go c.worker(&stat, working, results) // instantiate a worker ala https://play.golang.org/p/Sfx1JL_6K2
+	for i := 0; i < *workers; i++ {
+		go c.worker(&stat, *samples, working, results)
 	}
-	<-working
-
-	fmt.Printf("\n => Merging...\n")
-	for i := 0; i < *concurrency; i++ {
+	for i := 0; i < *workers; i++ {
 		c.renderer.Merge(<-results)
 	}
 	fmt.Printf(" => Writing...\n")
@@ -62,7 +61,7 @@ func (c Cli) Start() {
 	}
 }
 
-func (c Cli) worker(stat *statistic, done <-chan struct{}, results chan<- []float64) {
+func (c Cli) worker(stat *statistic, max float64, done <-chan struct{}, results chan<- []float64) {
 	sampler := NewSampler(c.cam, c.scene, 10, 3)
 	pixels := sampler.Width * sampler.Height
 	for {
@@ -76,6 +75,10 @@ func (c Cli) worker(stat *statistic, done <-chan struct{}, results chan<- []floa
 			results <- sampler.Pixels()
 			return
 		default:
+			if float64(stat.samples/pixels) >= max {
+				results <- sampler.Pixels()
+				return
+			}
 		}
 	}
 }
