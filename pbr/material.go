@@ -5,7 +5,7 @@ import (
 	"math/rand"
 )
 
-// Material describes the properties of a physically based material
+// Material describes the properties of a physically-based material
 type Material struct {
 	Color   Vector3
 	Fresnel Vector3
@@ -17,11 +17,19 @@ type Material struct {
 }
 
 // Light constructs a new light
+// r, g, b (0-Inf) specifies the light color
 func Light(r, g, b float64) Material {
 	return Material{Light: Vector3{r, g, b}}
 }
 
+// DayLight constructs a new light with a DayLight color temperature.
+func DayLight() Material {
+	return Light(2550, 2550, 2510)
+}
+
 // Plastic constructs a new plastic material
+// r, g, b (0-1) controls the color
+// gloss (0-1) controls the microfacet roughness (how polished the surface looks)
 func Plastic(r, g, b float64, gloss float64) Material {
 	return Material{
 		Color:   Vector3{r, g, b},
@@ -32,6 +40,8 @@ func Plastic(r, g, b float64, gloss float64) Material {
 }
 
 // Metal constructs a new metal material
+// r, g, b (0-1) controls the fresnel color
+// gloss (0-1) controls the microfacet roughness (how polished the surface looks)
 func Metal(r, g, b float64, gloss float64) Material {
 	return Material{
 		Fresnel: Vector3{r, g, b},
@@ -42,6 +52,9 @@ func Metal(r, g, b float64, gloss float64) Material {
 }
 
 // Glass constructs a new glass material
+// r, g, b (0-1) controls the color
+// opacity (0-1) controls how much light is transmitted through the glass
+// gloss (0-1) controls the microfacet roughness (how polished the surface looks)
 func Glass(r, g, b, opacity float64, gloss float64) Material {
 	return Material{
 		Color:   Vector3{r, g, b},
@@ -52,7 +65,8 @@ func Glass(r, g, b, opacity float64, gloss float64) Material {
 	}
 }
 
-// Bsdf returns next rays predicted by the material's bidirectional scattering distribution function
+// Bsdf returns next rays predicted by the Material's
+// Bidirectional Scattering Distribution Function
 func (m *Material) Bsdf(normal Vector3, incident Vector3, dist float64, rnd *rand.Rand) (next bool, dir Vector3, signal Vector3) {
 	if incident.Enters(normal) {
 		// reflected
@@ -79,6 +93,16 @@ func (m *Material) Bsdf(normal Vector3, incident Vector3, dist float64, rnd *ran
 	return exited, dir, tint
 }
 
+// Emit returns the amount of light emitted
+// from the Material at a given angle
+func (m *Material) Emit(normal Vector3, dir Vector3) Vector3 {
+	if m.Light.Max() == 0 {
+		return Vector3{}
+	}
+	cos := math.Max(normal.Dot(dir.Scaled(-1)), 0)
+	return m.Light.Scaled(cos)
+}
+
 // http://blog.selfshadow.com/publications/s2015-shading-course/hoffman/s2015_pbs_physics_math_slides.pdf
 // http://graphics.stanford.edu/courses/cs348b-10/lectures/reflection_i/reflection_i.pdf
 func (m *Material) schlick(incident Vector3, normal Vector3) Vector3 {
@@ -86,13 +110,4 @@ func (m *Material) schlick(incident Vector3, normal Vector3) Vector3 {
 	invFresnel := Vector3{1, 1, 1}.Minus(m.Fresnel)
 	scaled := invFresnel.Scaled(math.Pow(1-cos, 5))
 	return m.Fresnel.Plus(scaled)
-}
-
-// Emit returns the amount of light emitted
-func (m *Material) Emit(normal Vector3, dir Vector3) Vector3 {
-	if m.Light.Max() == 0 {
-		return Vector3{}
-	}
-	cos := math.Max(normal.Dot(dir.Scaled(-1)), 0)
-	return m.Light.Scaled(cos)
 }

@@ -4,10 +4,18 @@ import (
 	"math"
 )
 
-// Cube describes a unit cube scaled, rotated, and translated by Transform
+// Cube describes a unit cube scaled, rotated, and translated by Pos.
 type Cube struct {
 	Pos Matrix4
 	Mat Material
+}
+
+// UnitCube returns a pointer to a new 1x1x1 Cube Surface with position pos and material mat.
+func UnitCube(pos Matrix4, mat Material) *Cube {
+	return &Cube{
+		Pos: pos,
+		Mat: mat,
+	}
 }
 
 // Intersect tests for an intersection
@@ -37,7 +45,7 @@ func (c *Cube) Intersect(ray Ray3) (bool, float64) {
 		return false, 0
 	}
 	dist := c.Pos.MultDir(r.Dir.Scaled(min)).Len() // translate distance from local to global space
-	return dist >= BIAS, dist
+	return dist >= Bias, dist
 }
 
 // NormalAt returns the normal at this point on the surface

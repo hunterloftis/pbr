@@ -7,11 +7,12 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"runtime/pprof"
 	"sync"
 	"syscall"
 )
 
-// Cli is a command line abstraction for rendering
+// Cli is an abstraction for executing a render via a terminal.
 type Cli struct {
 	scene    *Scene
 	cam      *Camera
@@ -23,19 +24,29 @@ type statistic struct {
 	samples int
 }
 
-// NewCLI makes a new CLI
-func NewCLI(scene *Scene, cam *Camera, renderer *Renderer) Cli {
+// CliRunner constructs a CLI from pointers to a scene, camera, and renderer.
+func CliRunner(scene *Scene, cam *Camera, renderer *Renderer) Cli {
 	c := Cli{scene, cam, renderer}
 	return c
 }
 
-// Start starts rendering based on CLI parameters
+// Start parses command-line flags and creates
+// workers to render its given scene, in parallel, from the point-of-view of its given camera.
+// Unless given a -samples argument, it renders increasingly high-fidelity images
+// until it's interrupted by a signal (like SIGINT / Ctrl+C).
 func (c Cli) Start() {
 	out := flag.String("out", "render.png", "Output png filename")
 	heat := flag.String("heat", "", "Heatmap png filename")
 	workers := flag.Int("workers", runtime.NumCPU(), "Concurrency level")
 	samples := flag.Float64("samples", math.Inf(1), "Max samples per pixel")
+	profile := flag.Bool("profile", false, "Record performance into profile.pprof")
 	flag.Parse()
+
+	if *profile {
+		f, _ := os.Create("profile.pprof")
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 
 	working := make(chan struct{})
 	interrupted := make(chan os.Signal, 2)
@@ -65,20 +76,21 @@ func (c Cli) worker(stat *statistic, max float64, done <-chan struct{}, results 
 	sampler := NewSampler(c.cam, c.scene, 10, 3)
 	pixels := sampler.Width * sampler.Height
 	for {
-		samples := sampler.SampleFrame()
-		stat.Lock()
-		stat.samples += samples
-		stat.Unlock()
-		fmt.Printf(" => %v samples (%v / pixel)\n", stat.samples, stat.samples/pixels)
 		select {
 		case <-done:
 			results <- sampler.Pixels()
 			return
 		default:
 			if float64(stat.samples/pixels) >= max {
+				fmt.Printf(" => sample limit\n")
 				results <- sampler.Pixels()
 				return
 			}
+			samples := sampler.SampleFrame()
+			stat.Lock()
+			stat.samples += samples
+			stat.Unlock()
+			fmt.Printf(" => %v samples (%v / pixel)\n", stat.samples, stat.samples/pixels)
 		}
 	}
 }

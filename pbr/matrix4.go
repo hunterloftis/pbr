@@ -27,8 +27,8 @@ func NewMatrix4(a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4 f
 	return
 }
 
-// Identity creates a new identity matrix
-func Identity() Matrix4 {
+// Ident creates a new identity matrix
+func Ident() Matrix4 {
 	return NewMatrix4(
 		1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -157,7 +157,7 @@ func (a *Matrix4) Inverse() *Matrix4 {
 	if a.inv != nil {
 		return a.inv
 	}
-	i := Identity()
+	i := Ident()
 	e := a.el
 	i.el[0][0] = e[1][1]*e[2][2]*e[3][3] - e[1][1]*e[2][3]*e[3][2] - e[2][1]*e[1][2]*e[3][3] + e[2][1]*e[1][3]*e[3][2] + e[3][1]*e[1][2]*e[2][3] - e[3][1]*e[1][3]*e[2][2]
 	i.el[1][0] = e[1][0]*e[2][3]*e[3][2] - e[1][0]*e[2][2]*e[3][3] + e[2][0]*e[1][2]*e[3][3] - e[2][0]*e[1][3]*e[3][2] - e[3][0]*e[1][2]*e[2][3] + e[3][0]*e[1][3]*e[2][2]

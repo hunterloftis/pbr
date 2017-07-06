@@ -37,9 +37,10 @@ func (r *Renderer) Merge(pixels []float64) {
 
 // Rgb averages each sample into an rgb value
 func (r *Renderer) Rgb() []float64 {
-	rgb := make([]float64, len(r.pixels)/PROPS*3)
-	for i := 0; i < len(r.pixels); i += PROPS {
-		i2 := i / PROPS * 3
+	props := len(Props)
+	rgb := make([]float64, len(r.pixels)/props*3)
+	for i := 0; i < len(r.pixels); i += props {
+		i2 := i / props * 3
 		count := r.pixels[i+3]
 		rgb[i2] = r.pixels[i] / count
 		rgb[i2+1] = r.pixels[i+1] / count
@@ -50,13 +51,14 @@ func (r *Renderer) Rgb() []float64 {
 
 // Heat returns a heatmap of the sample count for each pixel
 func (r *Renderer) Heat() []float64 {
-	heat := make([]float64, len(r.pixels)/PROPS*3)
+	props := len(Props)
+	heat := make([]float64, len(r.pixels)/props*3)
 	max := 0.0
-	for i := 3; i < len(r.pixels); i += PROPS {
+	for i := 3; i < len(r.pixels); i += props {
 		max = math.Max(max, r.pixels[i])
 	}
-	for i := 0; i < len(r.pixels); i += PROPS {
-		i2 := i / PROPS * 3
+	for i := 0; i < len(r.pixels); i += props {
+		i2 := i / props * 3
 		heat[i2] = r.pixels[i+3] / max * 255
 		heat[i2+1] = r.pixels[i+3] / max * 255
 		heat[i2+2] = r.pixels[i+3] / max * 255
