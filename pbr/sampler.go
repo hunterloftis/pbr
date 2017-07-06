@@ -43,9 +43,8 @@ func (s *Sampler) SampleFrame() (total int) {
 	noise := 0.0
 	mean := s.noise + 1e-6
 	max := s.adapt * 3
-	props := Elements
 	length := len(s.pixels)
-	for p := 0; p < length; p += props {
+	for p := 0; p < length; p += Elements {
 		samples := s.Adaptive(s.pixels[p+Noise], mean, max)
 		noise += s.Sample(p, rnd, samples)
 		total += samples
