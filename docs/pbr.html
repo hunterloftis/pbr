@@ -166,6 +166,9 @@ Cli provides an easy mechanism for Rendering PNG files from a terminal.
 				
 				
 					
+					<dd>&nbsp; &nbsp; <a href="#Matrix4.Equals">func (a Matrix4) Equals(b Matrix4) bool</a></dd>
+				
+					
 					<dd>&nbsp; &nbsp; <a href="#Matrix4.Inverse">func (a *Matrix4) Inverse() *Matrix4</a></dd>
 				
 					
@@ -226,6 +229,9 @@ Cli provides an easy mechanism for Rendering PNG files from a terminal.
 					
 					<dd>&nbsp; &nbsp; <a href="#NewSampler">func NewSampler(cam *Camera, scene *Scene, bounces int, adapt int) *Sampler</a></dd>
 				
+				
+					
+					<dd>&nbsp; &nbsp; <a href="#Sampler.Adaptive">func (s *Sampler) Adaptive(noise float64, mean float64, max int) int</a></dd>
 				
 					
 					<dd>&nbsp; &nbsp; <a href="#Sampler.Pixels">func (s *Sampler) Pixels() []float64</a></dd>
@@ -935,7 +941,20 @@ Translation creates a new translation matrix
 
 			
 				
-				<h3 id="Matrix4.Inverse">func (*Matrix4) <a href="/src/target/matrix4.go?s=4242:4278#L146">Inverse</a>
+				<h3 id="Matrix4.Equals">func (Matrix4) <a href="/src/target/matrix4.go?s=2931:2970#L114">Equals</a>
+					<a class="permalink" href="#Matrix4.Equals">&#xb6;</a>
+				</h3>
+				<pre>func (a <a href="#Matrix4">Matrix4</a>) Equals(b <a href="#Matrix4">Matrix4</a>) <a href="/pkg/builtin/#bool">bool</a></pre>
+				<p>
+Equals tests whether two Matrices have equal values
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Matrix4.Inverse">func (*Matrix4) <a href="/src/target/matrix4.go?s=4470:4506#L158">Inverse</a>
 					<a class="permalink" href="#Matrix4.Inverse">&#xb6;</a>
 				</h3>
 				<pre>func (a *<a href="#Matrix4">Matrix4</a>) Inverse() *<a href="#Matrix4">Matrix4</a></pre>
@@ -964,7 +983,7 @@ TODO: a and b might be flipped here
 				
 			
 				
-				<h3 id="Matrix4.MultDir">func (Matrix4) <a href="/src/target/matrix4.go?s=3346:3398#L123">MultDir</a>
+				<h3 id="Matrix4.MultDir">func (Matrix4) <a href="/src/target/matrix4.go?s=3574:3626#L135">MultDir</a>
 					<a class="permalink" href="#Matrix4.MultDir">&#xb6;</a>
 				</h3>
 				<pre>func (a <a href="#Matrix4">Matrix4</a>) MultDir(v <a href="#Vector3">Vector3</a>) (result <a href="#Vector3">Vector3</a>)</pre>
@@ -977,7 +996,7 @@ MultDir multiplies this matrix4 by a vector, excluding translation
 				
 			
 				
-				<h3 id="Matrix4.MultNormal">func (Matrix4) <a href="/src/target/matrix4.go?s=3678:3733#L131">MultNormal</a>
+				<h3 id="Matrix4.MultNormal">func (Matrix4) <a href="/src/target/matrix4.go?s=3906:3961#L143">MultNormal</a>
 					<a class="permalink" href="#Matrix4.MultNormal">&#xb6;</a>
 				</h3>
 				<pre>func (a <a href="#Matrix4">Matrix4</a>) MultNormal(v <a href="#Vector3">Vector3</a>) (result <a href="#Vector3">Vector3</a>)</pre>
@@ -990,7 +1009,7 @@ MultNormal multiplies this matrix4 by a normal vector, renormalizing the result
 				
 			
 				
-				<h3 id="Matrix4.MultPoint">func (Matrix4) <a href="/src/target/matrix4.go?s=2948:3002#L114">MultPoint</a>
+				<h3 id="Matrix4.MultPoint">func (Matrix4) <a href="/src/target/matrix4.go?s=3176:3230#L126">MultPoint</a>
 					<a class="permalink" href="#Matrix4.MultPoint">&#xb6;</a>
 				</h3>
 				<pre>func (a <a href="#Matrix4">Matrix4</a>) MultPoint(v <a href="#Vector3">Vector3</a>) (result <a href="#Vector3">Vector3</a>)</pre>
@@ -1003,7 +1022,7 @@ MultPoint multiplies this matrix4 by a vector, including translation
 				
 			
 				
-				<h3 id="Matrix4.MultRay">func (Matrix4) <a href="/src/target/matrix4.go?s=3912:3958#L137">MultRay</a>
+				<h3 id="Matrix4.MultRay">func (Matrix4) <a href="/src/target/matrix4.go?s=4140:4186#L149">MultRay</a>
 					<a class="permalink" href="#Matrix4.MultRay">&#xb6;</a>
 				</h3>
 				<pre>func (a <a href="#Matrix4">Matrix4</a>) MultRay(r <a href="#Ray3">Ray3</a>) (result <a href="#Ray3">Ray3</a>)</pre>
@@ -1232,7 +1251,20 @@ adapt specifies how adaptive sampling should be to noise (0 = none, 3 = medium, 
 
 			
 				
-				<h3 id="Sampler.Pixels">func (*Sampler) <a href="/src/target/sampler.go?s=2218:2254#L69">Pixels</a>
+				<h3 id="Sampler.Adaptive">func (*Sampler) <a href="/src/target/sampler.go?s=1589:1657#L47">Adaptive</a>
+					<a class="permalink" href="#Sampler.Adaptive">&#xb6;</a>
+				</h3>
+				<pre>func (s *<a href="#Sampler">Sampler</a>) Adaptive(noise <a href="/pkg/builtin/#float64">float64</a>, mean <a href="/pkg/builtin/#float64">float64</a>, max <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#int">int</a></pre>
+				<p>
+Adaptive returns the number of samples to take given specific and average noise values.
+</p>
+
+				
+				
+				
+			
+				
+				<h3 id="Sampler.Pixels">func (*Sampler) <a href="/src/target/sampler.go?s=2404:2440#L73">Pixels</a>
 					<a class="permalink" href="#Sampler.Pixels">&#xb6;</a>
 				</h3>
 				<pre>func (s *<a href="#Sampler">Sampler</a>) Pixels() []<a href="/pkg/builtin/#float64">float64</a></pre>
@@ -1245,7 +1277,7 @@ Pixels returns an array of float64 pixel values.
 				
 			
 				
-				<h3 id="Sampler.Sample">func (*Sampler) <a href="/src/target/sampler.go?s=1681:1749#L50">Sample</a>
+				<h3 id="Sampler.Sample">func (*Sampler) <a href="/src/target/sampler.go?s=1867:1935#L54">Sample</a>
 					<a class="permalink" href="#Sampler.Sample">&#xb6;</a>
 				</h3>
 				<pre>func (s *<a href="#Sampler">Sampler</a>) Sample(p <a href="/pkg/builtin/#int">int</a>, rnd *<a href="/pkg/math/rand/">rand</a>.<a href="/pkg/math/rand/#Rand">Rand</a>, samples <a href="/pkg/builtin/#int">int</a>) <a href="/pkg/builtin/#float64">float64</a></pre>
