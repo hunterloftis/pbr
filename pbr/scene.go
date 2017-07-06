@@ -17,13 +17,18 @@ type RGBAE struct {
 
 // Scene describes a 3d scene
 type Scene struct {
-	Surfaces []surface
+	Surfaces []Surface
 	image    RGBAE
+}
+
+// EmptyScene creates and returns a pointer to an empty Scene.
+func EmptyScene() *Scene {
+	return &Scene{}
 }
 
 // Intersect tests whether a ray hits any objects in the scene
 func (s *Scene) Intersect(ray Ray3) (hit Hit) {
-	var surf surface
+	var surf Surface
 	hit.Dist = math.Inf(1)
 
 	for _, s := range s.Surfaces {
@@ -58,9 +63,9 @@ func (s *Scene) Env(ray Ray3) Vector3 {
 	return Vector3{0, 0, 0}
 }
 
-// Add adds a new object to the scene
-func (s *Scene) Add(surf surface) {
-	s.Surfaces = append(s.Surfaces, surf)
+// Add adds new Surfaces to the scene
+func (s *Scene) Add(surfaces ...Surface) {
+	s.Surfaces = append(s.Surfaces, surfaces...)
 }
 
 // SetEnv sets the environment map

@@ -24,7 +24,7 @@ func NewSampler(cam *Camera, scene *Scene, bounces int, adapt int) *Sampler {
 	return &Sampler{
 		Width:   cam.Width,
 		Height:  cam.Height,
-		pixels:  make([]float64, cam.Width*cam.Height*PROPS),
+		pixels:  make([]float64, cam.Width*cam.Height*len(Props)),
 		cam:     cam,
 		scene:   scene,
 		bounces: bounces,
@@ -38,7 +38,9 @@ func (s *Sampler) SampleFrame() (total int) {
 	noise := 0.0
 	mean := s.noise + 1e-6
 	limit := float64(s.adapt * 3)
-	for p := 0; p < len(s.pixels); p += PROPS {
+	props := len(Props)
+	length := len(s.pixels)
+	for p := 0; p < length; p += props {
 		ratio := s.pixels[p+4] / mean
 		adaptation := math.Floor(math.Pow(ratio, float64(s.adapt)))
 		samples := 1 + int(math.Min(adaptation, limit))
@@ -82,7 +84,7 @@ func value(pixels []float64, i int) Vector3 {
 }
 
 func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
-	ray := s.cam.Ray(x, y, rnd)
+	ray := s.cam.ray(x, y, rnd)
 	signal := Vector3{1, 1, 1}
 	energy := Vector3{0, 0, 0}
 
@@ -110,6 +112,6 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
 }
 
 func (s *Sampler) pixelAt(i int) (x, y float64) {
-	pos := i / PROPS
+	pos := i / len(Props)
 	return float64(pos % s.Width), float64(pos / s.Width)
 }
