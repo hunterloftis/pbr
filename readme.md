@@ -2,6 +2,7 @@
 
 Learning Go by writing a path tracer.
 [[ API Docs ]](https://hunterloftis.github.io/pbr/docs/pbr.html)
+[[ Source ]](https://github.com/hunterloftis/pbr)
 
 ![Render](https://user-images.githubusercontent.com/364501/27873088-e36c621c-6178-11e7-94c8-19171e05dc50.png)
 
