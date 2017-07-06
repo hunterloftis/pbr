@@ -120,6 +120,18 @@ func (a Matrix4) Mult(b Matrix4) (result Matrix4) {
 	return
 }
 
+// Equals tests whether two Matrices have equal values
+func (a Matrix4) Equals(b Matrix4) bool {
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 4; j++ {
+			if a.el[i][j] != b.el[i][j] {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // MultPoint multiplies this matrix4 by a vector, including translation
 func (a Matrix4) MultPoint(v Vector3) (result Vector3) {
 	result.X = v.X*a.el[0][0] + v.Y*a.el[1][0] + v.Z*a.el[2][0] + a.el[3][0]
