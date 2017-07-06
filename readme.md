@@ -16,6 +16,7 @@ Learning Go by writing a path tracer.
 - Physically-based cameras
   - Sensor, aperture, focus, depth-of-field
 - Anti-aliasing
+- [API Documentation](https://hunterloftis.github.io/pbr/docs/pbr.html)
 
 ## Quick start
 
