@@ -27,8 +27,8 @@ func NewMatrix4(a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4 f
 	return
 }
 
-// Identity creates a new identity matrix
-func Identity() Matrix4 {
+// Ident creates a new identity matrix
+func Ident() Matrix4 {
 	return NewMatrix4(
 		1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -120,6 +120,18 @@ func (a Matrix4) Mult(b Matrix4) (result Matrix4) {
 	return
 }
 
+// Equals tests whether two Matrices have equal values
+func (a Matrix4) Equals(b Matrix4) bool {
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 4; j++ {
+			if a.el[i][j] != b.el[i][j] {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // MultPoint multiplies this matrix4 by a vector, including translation
 func (a Matrix4) MultPoint(v Vector3) (result Vector3) {
 	result.X = v.X*a.el[0][0] + v.Y*a.el[1][0] + v.Z*a.el[2][0] + a.el[3][0]
@@ -157,7 +169,7 @@ func (a *Matrix4) Inverse() *Matrix4 {
 	if a.inv != nil {
 		return a.inv
 	}
-	i := Identity()
+	i := Ident()
 	e := a.el
 	i.el[0][0] = e[1][1]*e[2][2]*e[3][3] - e[1][1]*e[2][3]*e[3][2] - e[2][1]*e[1][2]*e[3][3] + e[2][1]*e[1][3]*e[3][2] + e[3][1]*e[1][2]*e[2][3] - e[3][1]*e[1][3]*e[2][2]
 	i.el[1][0] = e[1][0]*e[2][3]*e[3][2] - e[1][0]*e[2][2]*e[3][3] + e[2][0]*e[1][2]*e[3][3] - e[2][0]*e[1][3]*e[3][2] - e[3][0]*e[1][2]*e[2][3] + e[3][0]*e[1][3]*e[2][2]

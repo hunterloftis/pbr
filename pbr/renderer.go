@@ -2,9 +2,7 @@ package pbr
 
 import (
 	"image"
-	"image/png"
 	"math"
-	"os"
 )
 
 // Renderer renders the results of a trace to a file
@@ -36,60 +34,35 @@ func (r *Renderer) Merge(pixels []float64) {
 }
 
 // Rgb averages each sample into an rgb value
-func (r *Renderer) Rgb() []float64 {
-	rgb := make([]float64, len(r.pixels)/PROPS*3)
-	for i := 0; i < len(r.pixels); i += PROPS {
-		i2 := i / PROPS * 3
-		count := r.pixels[i+3]
-		rgb[i2] = r.pixels[i] / count
-		rgb[i2+1] = r.pixels[i+1] / count
-		rgb[i2+2] = r.pixels[i+2] / count
+// TODO: better to return image.Image or *image.Image? Tradeoffs?
+func (r *Renderer) Rgb() image.Image {
+	im := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
+	for i := 0; i < len(r.pixels); i += Elements {
+		i2 := i / Elements * 4
+		count := r.pixels[i+Count]
+		im.Pix[i2] = r.color(r.pixels[i+Red] / count)
+		im.Pix[i2+1] = r.color(r.pixels[i+Green] / count)
+		im.Pix[i2+2] = r.color(r.pixels[i+Blue] / count)
+		im.Pix[i2+3] = 255
 	}
-	return rgb
+	return im
 }
 
 // Heat returns a heatmap of the sample count for each pixel
-func (r *Renderer) Heat() []float64 {
-	heat := make([]float64, len(r.pixels)/PROPS*3)
+func (r *Renderer) Heat() image.Image {
+	im := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
 	max := 0.0
-	for i := 3; i < len(r.pixels); i += PROPS {
+	for i := Count; i < len(r.pixels); i += Elements {
 		max = math.Max(max, r.pixels[i])
 	}
-	for i := 0; i < len(r.pixels); i += PROPS {
-		i2 := i / PROPS * 3
-		heat[i2] = r.pixels[i+3] / max * 255
-		heat[i2+1] = r.pixels[i+3] / max * 255
-		heat[i2+2] = r.pixels[i+3] / max * 255
+	for i := 0; i < len(r.pixels); i += Elements {
+		i2 := i / Elements * 4
+		im.Pix[i2] = r.color(r.pixels[i+Count] / max * 255)
+		im.Pix[i2+1] = r.color(r.pixels[i+Count] / max * 255)
+		im.Pix[i2+2] = r.color(r.pixels[i+Count] / max * 255)
+		im.Pix[i2+3] = 255
 	}
-	return heat
-}
-
-// WriteRGB writes RGB data to a file
-func (r *Renderer) WriteRGB(file string) error {
-	return r.Write(r.Rgb(), file)
-}
-
-// WriteHeat writes heat (count) data to a file
-func (r *Renderer) WriteHeat(file string) error {
-	return r.Write(r.Heat(), file)
-}
-
-// Write writes RGB data to a png
-func (r *Renderer) Write(rgb []float64, file string) error {
-	f, err := os.Create(file)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	m := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
-	for i := 0; i < len(rgb); i += 3 {
-		i2 := i / 3 * 4
-		m.Pix[i2] = r.color(rgb[i])
-		m.Pix[i2+1] = r.color(rgb[i+1])
-		m.Pix[i2+2] = r.color(rgb[i+2])
-		m.Pix[i2+3] = 255
-	}
-	return png.Encode(f, m)
+	return im
 }
 
 func (r *Renderer) color(n float64) uint8 {

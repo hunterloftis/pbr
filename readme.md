@@ -22,7 +22,7 @@ Learning Go by writing a path tracer.
 ```
 $ go get -u github.com/hunterloftis/pbr/pbr
 $ cd $GOPATH/src/github.com/hunterloftis/pbr
-$ ./test
+$ ./run
 ```
 
 By default, the renderer runs until it receives a signal (like Ctrl + C)

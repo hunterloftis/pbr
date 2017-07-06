@@ -1,8 +1,16 @@
 package pbr
 
-// BIAS is the minimum distance unit
-const BIAS = 1e-6
+// Bias is the minimum distance unit.
+// Applying bias provides more robust processing of geometry.
+const Bias = 1e-6
 
-// PROPS is the number of properties stored in each float64 array
-// red, green, blue, count, noise
-const PROPS = 5
+// Pixel elements are stored in specific offsets.
+// These constants allow easy access, eg `someFloat64Array[i + Blue]`
+const (
+	Red      = 0
+	Green    = 1
+	Blue     = 2
+	Count    = 3
+	Noise    = 4
+	Elements = 5
+)
