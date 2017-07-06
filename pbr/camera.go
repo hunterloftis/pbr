@@ -5,7 +5,9 @@ import (
 	"math/rand"
 )
 
-// Camera simulates a camera
+// Camera generates rays from a simulated physical camera into a Scene.
+// The rays produced are determined by position,
+// orientation, sensor type, focus, exposure, and lens selection.
 type Camera struct {
 	Width  int
 	Height int
@@ -18,9 +20,9 @@ type Camera struct {
 	pos    Matrix4
 }
 
-// Camera35mm makes a new Full-frame camera
-func Camera35mm(width, height int, lens float64) Camera {
-	return Camera{
+// Camera35mm makes a new Full-frame (35mm) camera.
+func Camera35mm(width, height int, lens float64) *Camera {
+	return &Camera{
 		Width:  width,
 		Height: height,
 		Lens:   lens,
@@ -28,8 +30,25 @@ func Camera35mm(width, height int, lens float64) Camera {
 	}
 }
 
-// Ray creates a Ray originating from the Camera
-func (c *Camera) Ray(x, y float64, rnd *rand.Rand) Ray3 {
+// LookAt orients the camera
+func (c *Camera) LookAt(x, y, z float64) {
+	c.target = Vector3{x, y, z}
+	c.pos = LookMatrix(c.origin, c.target)
+}
+
+// MoveTo positions the camera
+func (c *Camera) MoveTo(x, y, z float64) {
+	c.origin = Vector3{x, y, z}
+	c.pos = LookMatrix(c.origin, c.target)
+}
+
+// Focus on a point
+func (c *Camera) Focus(x, y, z, fStop float64) {
+	c.focus = Vector3{x, y, z}.Minus(c.origin).Len()
+	c.fStop = fStop
+}
+
+func (c *Camera) ray(x, y float64, rnd *rand.Rand) Ray3 {
 	rx := x + rnd.Float64()
 	ry := y + rnd.Float64()
 	px := rx / float64(c.Width)
@@ -61,22 +80,4 @@ func (c *Camera) aperturePoint(rnd *rand.Rand) Vector3 {
 	x := r * math.Cos(t)
 	y := r * math.Sin(t)
 	return Vector3{x, y, 0}
-}
-
-// LookAt orients the camera
-func (c *Camera) LookAt(x, y, z float64) {
-	c.target = Vector3{x, y, z}
-	c.pos = LookMatrix(c.origin, c.target)
-}
-
-// MoveTo positions the camera
-func (c *Camera) MoveTo(x, y, z float64) {
-	c.origin = Vector3{x, y, z}
-	c.pos = LookMatrix(c.origin, c.target)
-}
-
-// Focus on a point
-func (c *Camera) Focus(x, y, z, fStop float64) {
-	c.focus = Vector3{x, y, z}.Minus(c.origin).Len()
-	c.fStop = fStop
 }

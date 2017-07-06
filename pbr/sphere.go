@@ -8,6 +8,14 @@ type Sphere struct {
 	Mat Material
 }
 
+// UnitSphere returns a pointer to a new 1x1x1 Sphere Surface with position pos and material mat.
+func UnitSphere(pos Matrix4, mat Material) *Sphere {
+	return &Sphere{
+		Pos: pos,
+		Mat: mat,
+	}
+}
+
 // Intersect tests whether the sphere intersects a given ray
 func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64) {
 	i := (&s.Pos).Inverse()
@@ -22,14 +30,14 @@ func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64) {
 	t1 := b - root
 	if t1 > 0 {
 		dist := s.Pos.MultDir(r.Dir.Scaled(t1)).Len()
-		if dist > BIAS {
+		if dist > Bias {
 			return true, dist
 		}
 	}
 	t2 := b + root
 	if t2 > 0 {
 		dist := s.Pos.MultDir(r.Dir.Scaled(t2)).Len()
-		if dist > BIAS {
+		if dist > Bias {
 			return true, dist
 		}
 	}
