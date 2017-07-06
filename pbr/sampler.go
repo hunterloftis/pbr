@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-// Sampler traces samples from light paths in a scene
+// Sampler samples pixels for a Scene by tracing Rays from a Camera.
 type Sampler struct {
 	Width   int
 	Height  int
-	pixels  []float64 // stored in blocks of `PROPS`
+	pixels  []float64 // stored in a flat array of Elements
 	cam     *Camera
 	scene   *Scene
 	bounces int
@@ -19,7 +19,10 @@ type Sampler struct {
 	adapt   int
 }
 
-// NewSampler constructs a new Sampler instance
+// NewSampler constructs a new Sampler instance.
+// The Sampler samples Rays from the Camera into the Scene.
+// bounces specifies the maximum number of times a Ray can bounce around the scene (eg, 10).
+// adapt specifies how adaptive sampling should be to noise (0 = none, 3 = medium, 4 = high).
 func NewSampler(cam *Camera, scene *Scene, bounces int, adapt int) *Sampler {
 	return &Sampler{
 		Width:   cam.Width,
@@ -32,18 +35,18 @@ func NewSampler(cam *Camera, scene *Scene, bounces int, adapt int) *Sampler {
 	}
 }
 
-// SampleFrame samples a frame
+// SampleFrame samples every pixel in the Camera's frame at least once.
+// Depending on the Sampler's `adapt` value, noisy pixels may be sampled several times.
+// It returns the total number of samples taken.
 func (s *Sampler) SampleFrame() (total int) {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	noise := 0.0
 	mean := s.noise + 1e-6
-	limit := float64(s.adapt * 3)
+	max := s.adapt * 3
 	props := Elements
 	length := len(s.pixels)
 	for p := 0; p < length; p += props {
-		ratio := s.pixels[p+Count] / mean
-		adaptation := math.Floor(math.Pow(ratio, float64(s.adapt)))
-		samples := 1 + int(math.Min(adaptation, limit))
+		samples := s.Adaptive(s.pixels[p+Noise], mean, max)
 		noise += s.Sample(p, rnd, samples)
 		total += samples
 	}
@@ -51,7 +54,14 @@ func (s *Sampler) SampleFrame() (total int) {
 	return
 }
 
-// Sample samples a pixel
+// Adaptive returns the number of samples to take given specific and average noise values.
+func (s *Sampler) Adaptive(noise float64, mean float64, max int) int {
+	ratio := noise/mean + Bias
+	return int(math.Min(math.Ceil(math.Pow(ratio, float64(s.adapt))), float64(max)))
+}
+
+// Sample samples a single pixel `samples` times.
+// The pixel is specified by the index `p`.
 func (s *Sampler) Sample(p int, rnd *rand.Rand, samples int) float64 {
 	x, y := s.pixelAt(p)
 	before := value(s.pixels, p)
@@ -70,7 +80,7 @@ func (s *Sampler) Sample(p int, rnd *rand.Rand, samples int) float64 {
 	return noise
 }
 
-// Pixels returns an array of float64 pixel values
+// Pixels returns an array of float64 pixel values.
 func (s *Sampler) Pixels() []float64 {
 	return s.pixels
 }

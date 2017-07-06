@@ -1,11 +1,11 @@
 package pbr
 
-// Bias is the minimum distance unit
-// Applying bias provides more robust processing of geometry
+// Bias is the minimum distance unit.
+// Applying bias provides more robust processing of geometry.
 const Bias = 1e-6
 
-// The various Elements of a pixel
-// are each stored in a specific offset in flattened arrays
+// Pixel elements are stored in specific offsets.
+// These constants allow easy access, eg `someFloat64Array[i + Blue]`
 const (
 	Red      = 0
 	Green    = 1

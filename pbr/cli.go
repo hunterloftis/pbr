@@ -43,6 +43,8 @@ func (c Cli) Render() {
 	workers := flag.Int("workers", runtime.NumCPU(), "Concurrency level")
 	samples := flag.Float64("samples", math.Inf(1), "Max samples per pixel")
 	profile := flag.Bool("profile", false, "Record performance into profile.pprof")
+	adapt := flag.Int("adapt", 4, "Adaptive sampling; 0=off, 3=medium, 5=high")
+	bounces := flag.Int("bounces", 10, "Maximum light bounces")
 	flag.Parse()
 
 	if *profile {
@@ -58,10 +60,10 @@ func (c Cli) Render() {
 	signal.Notify(interrupted, os.Interrupt, syscall.SIGTERM)
 	go func() { <-interrupted; fmt.Printf("\n => Interrupting...\n"); close(working) }()
 
-	fmt.Printf("Rendering (%v workers, %v samples/pixel)\n", *workers, *samples)
+	fmt.Printf("Rendering (%v workers, %v bounces, per-pixel samples=%v, adapt=%v)\n", *workers, *bounces, *samples, *adapt)
 	stat := statistic{}
 	for i := 0; i < *workers; i++ {
-		go c.worker(&stat, *samples, working, results)
+		go c.worker(&stat, *samples, *bounces, *adapt, working, results)
 	}
 	for i := 0; i < *workers; i++ {
 		c.renderer.Merge(<-results)
@@ -75,8 +77,9 @@ func (c Cli) Render() {
 	}
 }
 
-func (c Cli) worker(stat *statistic, max float64, done <-chan struct{}, results chan<- []float64) {
-	sampler := NewSampler(c.cam, c.scene, 10, 3)
+// TODO: this is a really long argument list
+func (c Cli) worker(stat *statistic, max float64, bounces int, adapt int, done <-chan struct{}, results chan<- []float64) {
+	sampler := NewSampler(c.cam, c.scene, bounces, adapt)
 	pixels := sampler.Width * sampler.Height
 	for {
 		select {
