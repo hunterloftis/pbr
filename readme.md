@@ -1,6 +1,7 @@
 # A Physically-Based Renderer in Go
 
 Learning Go by writing a path tracer.
+[[ API Docs ]](https://hunterloftis.github.io/pbr/docs/pbr.html)
 
 ![Render](https://user-images.githubusercontent.com/364501/27873088-e36c621c-6178-11e7-94c8-19171e05dc50.png)
 
@@ -16,7 +17,6 @@ Learning Go by writing a path tracer.
 - Physically-based cameras
   - Sensor, aperture, focus, depth-of-field
 - Anti-aliasing
-- [API Documentation](https://hunterloftis.github.io/pbr/docs/pbr.html)
 
 ## Quick start
 
