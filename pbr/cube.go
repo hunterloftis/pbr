@@ -18,7 +18,9 @@ func UnitCube(pos Matrix4, mat Material) *Cube {
 	}
 }
 
-// Intersect tests for an intersection
+// Intersect tests for an intersection between a Ray3 and this Cube
+// It returns whether there was an intersection (bool) and the intersection distance along the ray (float64)
+// Both the Ray3 and the distance are in world space.
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
 // https://tavianator.com/fast-branchless-raybounding-box-intersections/
 func (c *Cube) Intersect(ray Ray3) (bool, float64) {
@@ -48,7 +50,7 @@ func (c *Cube) Intersect(ray Ray3) (bool, float64) {
 	return dist >= Bias, dist
 }
 
-// NormalAt returns the normal at this point on the surface
+// NormalAt returns the normal Vector3 at this point on the Surface
 func (c *Cube) NormalAt(p Vector3) Vector3 {
 	i := (&c.Pos).Inverse() // global to local transform
 	p1 := i.MultPoint(p)    // translate point into local space
@@ -65,7 +67,7 @@ func (c *Cube) NormalAt(p Vector3) Vector3 {
 	return c.Pos.MultNormal(normal) // translate normal from local to global space
 }
 
-// MaterialAt returns the material at this point on the surface
+// MaterialAt returns the Material at this point on the Surface
 func (c *Cube) MaterialAt(v Vector3) Material {
 	return c.Mat
 }

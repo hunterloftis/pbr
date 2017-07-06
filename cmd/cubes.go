@@ -38,5 +38,5 @@ func main() {
 	camera.LookAt(0, 0, 0)
 	camera.Focus(0, 0, 0, 1.4)
 
-	cli.Start()
+	cli.Render()
 }

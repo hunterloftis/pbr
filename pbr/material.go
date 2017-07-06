@@ -7,13 +7,13 @@ import (
 
 // Material describes the properties of a physically-based material
 type Material struct {
-	Color   Vector3
-	Fresnel Vector3
-	Light   Vector3
-	Refract float64
-	Opacity float64
-	Gloss   float64
-	Metal   float64
+	Color   Vector3 // Albedo color, used for diffuse light
+	Fresnel Vector3 // Fresnel coefficients, used for fresnel reflectivity
+	Light   Vector3 // Light emittance, used if this Material is a light source
+	Refract float64 // Index of refraction
+	Opacity float64 // Amount of light transmitted through this Material
+	Gloss   float64 // Microsurface roughness (how "polished" is this Material)
+	Metal   float64 // The metallic range of electric (1) or dielectric (0), controls energy absorption
 }
 
 // Light constructs a new light
