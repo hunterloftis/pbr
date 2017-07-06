@@ -3,6 +3,8 @@ package pbr
 import (
 	"flag"
 	"fmt"
+	"image"
+	"image/png"
 	"math"
 	"os"
 	"os/signal"
@@ -30,11 +32,12 @@ func CliRunner(scene *Scene, cam *Camera, renderer *Renderer) Cli {
 	return c
 }
 
-// Start parses command-line flags and creates
+// Render parses command-line flags and creates
 // workers to render its given scene, in parallel, from the point-of-view of its given camera.
 // Unless given a -samples argument, it renders increasingly high-fidelity images
 // until it's interrupted by a signal (like SIGINT / Ctrl+C).
-func (c Cli) Start() {
+// Once it receives a signal or passes its sampling threshold, it writes results to PNGs.
+func (c Cli) Render() {
 	out := flag.String("out", "render.png", "Output png filename")
 	heat := flag.String("heat", "", "Heatmap png filename")
 	workers := flag.Int("workers", runtime.NumCPU(), "Concurrency level")
@@ -53,7 +56,7 @@ func (c Cli) Start() {
 	results := make(chan []float64)
 
 	signal.Notify(interrupted, os.Interrupt, syscall.SIGTERM)
-	go func() { <-interrupted; fmt.Println(""); close(working) }()
+	go func() { <-interrupted; fmt.Printf("\n => Interrupting...\n"); close(working) }()
 
 	fmt.Printf("Rendering (%v workers, %v samples/pixel)\n", *workers, *samples)
 	stat := statistic{}
@@ -64,10 +67,10 @@ func (c Cli) Start() {
 		c.renderer.Merge(<-results)
 	}
 	fmt.Printf(" => Writing...\n")
-	c.renderer.WriteRGB(*out)
+	writePNG(*out, c.renderer.Rgb())
 	fmt.Printf("    RGB: %v\n", *out)
 	if len(*heat) > 0 {
-		c.renderer.WriteHeat(*heat)
+		writePNG(*heat, c.renderer.Heat())
 		fmt.Printf("    Heat: %v\n", *heat)
 	}
 }
@@ -93,4 +96,13 @@ func (c Cli) worker(stat *statistic, max float64, done <-chan struct{}, results 
 			fmt.Printf(" => %v samples (%v / pixel)\n", stat.samples, stat.samples/pixels)
 		}
 	}
+}
+
+func writePNG(file string, i image.Image) error {
+	f, err := os.Create(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return png.Encode(f, i)
 }

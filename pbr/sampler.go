@@ -24,7 +24,7 @@ func NewSampler(cam *Camera, scene *Scene, bounces int, adapt int) *Sampler {
 	return &Sampler{
 		Width:   cam.Width,
 		Height:  cam.Height,
-		pixels:  make([]float64, cam.Width*cam.Height*len(Props)),
+		pixels:  make([]float64, cam.Width*cam.Height*Elements),
 		cam:     cam,
 		scene:   scene,
 		bounces: bounces,
@@ -38,10 +38,10 @@ func (s *Sampler) SampleFrame() (total int) {
 	noise := 0.0
 	mean := s.noise + 1e-6
 	limit := float64(s.adapt * 3)
-	props := len(Props)
+	props := Elements
 	length := len(s.pixels)
 	for p := 0; p < length; p += props {
-		ratio := s.pixels[p+4] / mean
+		ratio := s.pixels[p+Count] / mean
 		adaptation := math.Floor(math.Pow(ratio, float64(s.adapt)))
 		samples := 1 + int(math.Min(adaptation, limit))
 		noise += s.Sample(p, rnd, samples)
@@ -58,15 +58,15 @@ func (s *Sampler) Sample(p int, rnd *rand.Rand, samples int) float64 {
 	for i := 0; i < samples; i++ {
 		sample := s.trace(x, y, rnd)
 		rgb := sample.Array()
-		s.pixels[p] += rgb[0]
-		s.pixels[p+1] += rgb[1]
-		s.pixels[p+2] += rgb[2]
-		s.pixels[p+3]++
+		s.pixels[p+Red] += rgb[0]
+		s.pixels[p+Green] += rgb[1]
+		s.pixels[p+Blue] += rgb[2]
+		s.pixels[p+Count]++
 	}
 	after := value(s.pixels, p)
 	scale := (before.Len()+after.Len())/2 + 1e-6
 	noise := before.Minus(after).Len() / scale
-	s.pixels[p+4] = noise
+	s.pixels[p+Noise] = noise
 	return noise
 }
 
@@ -76,11 +76,11 @@ func (s *Sampler) Pixels() []float64 {
 }
 
 func value(pixels []float64, i int) Vector3 {
-	if pixels[i+3] == 0 {
+	if pixels[i+Count] == 0 {
 		return Vector3{}
 	}
-	sample := Vector3{pixels[i], pixels[i+1], pixels[i+2]}
-	return sample.Scaled(1 / pixels[i+3])
+	sample := Vector3{pixels[i+Red], pixels[i+Green], pixels[i+Blue]}
+	return sample.Scaled(1 / pixels[i+Count])
 }
 
 func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
@@ -112,6 +112,6 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
 }
 
 func (s *Sampler) pixelAt(i int) (x, y float64) {
-	pos := i / len(Props)
+	pos := i / Elements
 	return float64(pos % s.Width), float64(pos / s.Width)
 }
