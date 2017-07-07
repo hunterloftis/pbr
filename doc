@@ -1,3 +1,0 @@
-mkdir -p docs
-godoc -html ./pbr > docs/pbr.html
-open docs/pbr.html
