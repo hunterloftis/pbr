@@ -41,7 +41,7 @@ func NewSampler(cam *Camera, scene *Scene, bounces int, adapt int) *Sampler {
 func (s *Sampler) SampleFrame() (total int) {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	noise := 0.0
-	mean := s.noise + 1e-6
+	mean := s.noise + Bias
 	max := s.adapt * 3
 	length := len(s.pixels)
 	for p := 0; p < length; p += Elements {
