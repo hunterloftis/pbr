@@ -50,3 +50,9 @@
 - http://www.saunalahti.fi/~sevesalm/ssRay/ShowImage.php?img=18
 - http://www.saunalahti.fi/~sevesalm/ssRay/ShowImage.php?img=14
 - http://www.saunalahti.fi/~sevesalm/ssRay/ShowImage.php?img=5
+- https://www.disneyanimation.com/technology/innovations/hyperion
+
+# sRGB (& fixing in Go)
+
+- http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html
+- http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html#C.sRGB
