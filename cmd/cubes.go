@@ -2,7 +2,6 @@ package main
 
 import (
 	"math"
-	"os"
 
 	"github.com/hunterloftis/pbr/pbr"
 )
@@ -23,9 +22,7 @@ func main() {
 	// glass := pbr.Glass(1, 1, 1, 1)
 	greenGlass := pbr.Glass(0.8, 1, 0.7, 0.95)
 
-	bg, _ := os.Open("images/glacier.hdr")
-	defer bg.Close()
-	scene.SetPano(bg, 100)
+	scene.SetSky(40, 45, 50)
 
 	scene.Add(
 		pbr.UnitCube(pbr.Ident().Rot(pbr.Vector3{0, -0.25 * math.Pi, 0}), redPlastic),
@@ -39,7 +36,7 @@ func main() {
 		pbr.UnitSphere(pbr.Ident().Trans(0, -0.25, 2).Scale(1, 0.5, 1), greenGlass),
 	)
 
-	camera.MoveTo(-6, 3.5, 8)
+	camera.MoveTo(-6, 1.5, 8)
 	camera.LookAt(0, 0, 0)
 	camera.Focus(0, 0, 0, 1.4)
 
