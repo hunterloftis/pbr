@@ -37,7 +37,8 @@
 
 - https://seblagarde.wordpress.com/2011/08/17/feeding-a-physical-based-lighting-mode/
 - https://computergraphics.stackexchange.com/questions/4771/fresnel-and-specular-colour
-- http://www.visual-barn.com/f0-converting-substance-fresnel-vray-values/
+- https://en.wikipedia.org/wiki/List_of_refractive_indices
+- https://3dcoat.com/pbr/
 
 # Reference images
 
@@ -45,3 +46,7 @@
 - https://sc01.alicdn.com/kf/HTB1idF6FVXXXXXeXVXXq6xXFXXX0/200276016/HTB1idF6FVXXXXXeXVXXq6xXFXXX0.jpg
 - http://www.armourproducts.com/media/ecom/prodlg/60-3873.jpg
 - https://thumbs.dreamstime.com/z/solid-glass-cube-physics-theme-studio-photography-light-back-blue-toned-34557378.jpg
+- http://www.saunalahti.fi/~sevesalm/ssRay/ShowImage.php?img=26
+- http://www.saunalahti.fi/~sevesalm/ssRay/ShowImage.php?img=18
+- http://www.saunalahti.fi/~sevesalm/ssRay/ShowImage.php?img=14
+- http://www.saunalahti.fi/~sevesalm/ssRay/ShowImage.php?img=5
