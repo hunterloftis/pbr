@@ -33,6 +33,7 @@ func main() {
 		pbr.UnitSphere(pbr.Ident().Trans(-2, 0.01, -2), greenGlass),
 		pbr.UnitSphere(pbr.Ident().Trans(3, 0.5, 0).Scale(2, 2, 2), greenGlass),
 		pbr.UnitSphere(pbr.Ident().Trans(70, 300, 60).Scale(300, 300, 300), light),
+		pbr.UnitSphere(pbr.Ident().Trans(0, -0.25, 2).Scale(1, 0.5, 1), greenGlass),
 	)
 
 	camera.MoveTo(-6, 3.5, 8)
