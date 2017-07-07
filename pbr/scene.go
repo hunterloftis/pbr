@@ -19,6 +19,7 @@ type RGBAE struct {
 type Scene struct {
 	Surfaces []Surface
 	pano     *RGBAE
+	sky      Vector3
 }
 
 // EmptyScene creates and returns a pointer to an empty Scene.
@@ -49,7 +50,7 @@ func (s *Scene) Intersect(ray Ray3) (hit Hit) {
 // Env returns the light value from the environment map.
 // http://gl.ict.usc.edu/Data/HighResProbes/
 func (s *Scene) Env(ray Ray3) Vector3 {
-	if s.pano.Width > 0 && s.pano.Height > 0 {
+	if s.pano != nil {
 		u := 1 + math.Atan2(ray.Dir.X, -ray.Dir.Z)/math.Pi
 		v := math.Acos(ray.Dir.Y) / math.Pi
 		x := int(u * float64(s.pano.Width))
@@ -60,7 +61,7 @@ func (s *Scene) Env(ray Ray3) Vector3 {
 		b := float64(s.pano.Data[index+2])
 		return Vector3{r, g, b}.Scaled(s.pano.Expose)
 	}
-	return Vector3{0, 0, 0}
+	return s.sky
 }
 
 // Add adds new Surfaces to the scene.
@@ -72,4 +73,9 @@ func (s *Scene) Add(surfaces ...Surface) {
 func (s *Scene) SetPano(r io.Reader, expose float64) {
 	width, height, data, _ := rgbe.Decode(r)
 	s.pano = &RGBAE{Width: width, Height: height, Data: data, Expose: expose}
+}
+
+// SetSky sets the sky color
+func (s *Scene) SetSky(r, g, b float64) {
+	s.sky = Vector3{r, g, b}
 }
