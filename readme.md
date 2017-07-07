@@ -6,18 +6,18 @@ Package pbr implements Physically-Based Rendering with a Monte Carlo path tracer
 
 ![Render](https://user-images.githubusercontent.com/364501/27945162-6dd1715e-62b9-11e7-9a2c-4fa7787c773b.png)
 
-- Unbiased Monte-Carlo integration
-- Adaptive sampling
-- Russian roulette (early path termination)
+- Unbiased [Monte-Carlo integration](https://en.wikipedia.org/wiki/Monte_Carlo_integration)
+- Adaptive [sampling](https://renderman.pixar.com/resources/RenderMan_20/risSampling.html)
+- [Russian roulette](https://computergraphics.stackexchange.com/questions/2316/is-russian-roulette-really-the-answer)
 - Parametric shapes (spheres, cubes)
-- Physically-based materials
+- Physically-based [materials](https://www.marmoset.co/posts/basic-theory-of-physically-based-rendering/)
   - Fresnel reflection, transmission, absorption, diffusion
   - Color, refractive indices, gloss, transparency, separate fresnel channels, metals
 - Arbitrary light sources ('everything is a light')
-- Environment maps
+- [Environment maps](http://gl.ict.usc.edu/Data/HighResProbes/)
 - Physically-based cameras
   - Sensor, aperture, focus, depth-of-field
-- Anti-aliasing
+- [Supersampled anti-aliasing](https://en.wikipedia.org/wiki/Supersampling)
 
 ## Quick start
 
