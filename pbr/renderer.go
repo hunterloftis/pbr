@@ -34,7 +34,6 @@ func (r *Renderer) Merge(pixels []float64) {
 }
 
 // Rgb averages each sample into an rgb value
-// TODO: better to return image.Image or *image.Image? Tradeoffs?
 func (r *Renderer) Rgb() image.Image {
 	im := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
 	for i := 0; i < len(r.pixels); i += Elements {
