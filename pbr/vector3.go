@@ -67,11 +67,6 @@ func (a Vector3) Cone(size float64, rnd *rand.Rand) Vector3 {
 	return d.Unit()
 }
 
-// Array converts this Vector3 to a fixed Array of length 3
-func (a Vector3) Array() [3]float64 {
-	return [3]float64{a.X, a.Y, a.Z}
-}
-
 // Enters returns whether this Vector is entering the plane represented by a normal Vector
 func (a Vector3) Enters(b Vector3) bool {
 	return b.Dot(a) < 0

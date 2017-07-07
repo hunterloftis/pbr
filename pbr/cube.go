@@ -26,14 +26,13 @@ func UnitCube(pos *Matrix4, mat *Material) *Cube {
 func (c *Cube) Intersect(ray Ray3) (bool, float64) {
 	inv := c.Pos.Inverse() // global to local transform
 	r := inv.MultRay(ray)  // translate ray into local space
-	or := r.Origin.Array()
-	dir := r.Dir.Array()
+	or := [3]float64{r.Origin.X, r.Origin.Y, r.Origin.Z}
+	dir := [3]float64{r.Dir.X, r.Dir.Y, r.Dir.Z}
 	t0 := 0.0
 	t1 := math.Inf(1)
 	for i := 0; i < 3; i++ {
-		invDir := 1 / dir[i]
-		tNear := (-0.5 - or[i]) * invDir
-		tFar := (0.5 - or[i]) * invDir
+		tNear := (-0.5 - or[i]) / dir[i]
+		tFar := (0.5 - or[i]) / dir[i]
 		if tNear > tFar {
 			tNear, tFar = tFar, tNear
 		}

@@ -66,7 +66,7 @@ func (s *Sampler) Sample(p int, rnd *rand.Rand, samples int) float64 {
 	before := value(s.pixels, p)
 	for i := 0; i < samples; i++ {
 		sample := s.trace(x, y, rnd)
-		rgb := sample.Array()
+		rgb := [3]float64{sample.X, sample.Y, sample.Z}
 		s.pixels[p+Red] += rgb[0]
 		s.pixels[p+Green] += rgb[1]
 		s.pixels[p+Blue] += rgb[2]
