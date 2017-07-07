@@ -43,7 +43,7 @@ func (c Cli) Render() {
 	workers := flag.Int("workers", runtime.NumCPU(), "Concurrency level")
 	samples := flag.Float64("samples", math.Inf(1), "Max samples per pixel")
 	profile := flag.Bool("profile", false, "Record performance into profile.pprof")
-	adapt := flag.Int("adapt", 4, "Adaptive sampling; 0=off, 3=medium, 5=high")
+	adapt := flag.Int("adapt", 3, "Adaptive sampling; 0=off, 3=medium, 5=high")
 	bounces := flag.Int("bounces", 10, "Maximum light bounces")
 	flag.Parse()
 
