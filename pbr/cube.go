@@ -7,11 +7,11 @@ import (
 // Cube describes a unit cube scaled, rotated, and translated by Pos.
 type Cube struct {
 	Pos Matrix4
-	Mat Material
+	Mat *Material
 }
 
 // UnitCube returns a pointer to a new 1x1x1 Cube Surface with position pos and material mat.
-func UnitCube(pos Matrix4, mat Material) *Cube {
+func UnitCube(pos Matrix4, mat *Material) *Cube {
 	return &Cube{
 		Pos: pos,
 		Mat: mat,
@@ -78,6 +78,6 @@ func (c *Cube) NormalAt(p Vector3) Vector3 {
 }
 
 // MaterialAt returns the Material at this point on the Surface
-func (c *Cube) MaterialAt(v Vector3) Material {
+func (c *Cube) MaterialAt(v Vector3) *Material {
 	return c.Mat
 }

@@ -19,20 +19,20 @@ type Material struct {
 
 // Light constructs a new light
 // r, g, b (0-Inf) specifies the light color
-func Light(r, g, b float64) Material {
-	return Material{Light: Vector3{r, g, b}}
+func Light(r, g, b float64) *Material {
+	return &Material{Light: Vector3{r, g, b}}
 }
 
 // DayLight constructs a new light with a DayLight color temperature.
-func DayLight() Material {
+func DayLight() *Material {
 	return Light(2550, 2550, 2510)
 }
 
 // Plastic constructs a new plastic material
 // r, g, b (0-1) controls the color
 // gloss (0-1) controls the microfacet roughness (how polished the surface looks)
-func Plastic(r, g, b float64, gloss float64) Material {
-	return Material{
+func Plastic(r, g, b float64, gloss float64) *Material {
+	return &Material{
 		Color:   Vector3{r, g, b},
 		Fresnel: Vector3{0.04, 0.04, 0.04},
 		Opacity: 1,
@@ -43,8 +43,8 @@ func Plastic(r, g, b float64, gloss float64) Material {
 // Lambert constructs a new plastic material
 // r, g, b (0-1) controls the color
 // gloss (0-1) controls the microfacet roughness (how polished the surface looks)
-func Lambert(r, g, b float64, gloss float64) Material {
-	return Material{
+func Lambert(r, g, b float64, gloss float64) *Material {
+	return &Material{
 		Color:   Vector3{r, g, b},
 		Fresnel: Vector3{0.02, 0.02, 0.02},
 		Opacity: 1,
@@ -55,8 +55,8 @@ func Lambert(r, g, b float64, gloss float64) Material {
 // Metal constructs a new metal material
 // r, g, b (0-1) controls the fresnel color
 // gloss (0-1) controls the microfacet roughness (how polished the surface looks)
-func Metal(r, g, b float64, gloss float64) Material {
-	return Material{
+func Metal(r, g, b float64, gloss float64) *Material {
+	return &Material{
 		Fresnel: Vector3{r, g, b},
 		Opacity: 1,
 		Gloss:   gloss,
@@ -67,8 +67,8 @@ func Metal(r, g, b float64, gloss float64) Material {
 // Glass constructs a new glass material
 // r, g, b (0-1) controls the transmission of the glass (beer-lambert)
 // gloss (0-1) controls the microfacet roughness (how polished the surface looks)
-func Glass(r, g, b, gloss float64) Material {
-	return Material{
+func Glass(r, g, b, gloss float64) *Material {
+	return &Material{
 		Color:   Vector3{r, g, b},
 		Fresnel: Vector3{0.042, 0.042, 0.042},
 		Refract: 1.514,

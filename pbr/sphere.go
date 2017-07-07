@@ -5,11 +5,11 @@ import "math"
 // Sphere describes a 3d sphere
 type Sphere struct {
 	Pos Matrix4
-	Mat Material
+	Mat *Material
 }
 
 // UnitSphere returns a pointer to a new 1x1x1 Sphere Surface with position pos and material mat.
-func UnitSphere(pos Matrix4, mat Material) *Sphere {
+func UnitSphere(pos Matrix4, mat *Material) *Sphere {
 	return &Sphere{
 		Pos: pos,
 		Mat: mat,
@@ -52,6 +52,6 @@ func (s *Sphere) NormalAt(point Vector3) Vector3 {
 }
 
 // MaterialAt returns the material at a given point on the surface
-func (s *Sphere) MaterialAt(v Vector3) Material {
+func (s *Sphere) MaterialAt(v Vector3) *Material {
 	return s.Mat
 }
