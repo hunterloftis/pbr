@@ -17,3 +17,6 @@ const (
 
 // Air is the refractive index of air
 const Air = 1.00029
+
+// Up is the unit vector orienting towards the sky
+var Up = Vector3{0, 1, 0}

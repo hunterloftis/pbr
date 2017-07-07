@@ -17,12 +17,12 @@ func main() {
 	whitePlastic := pbr.Plastic(1, 1, 1, 0.8)
 	// grayLambert := pbr.Lambert(0.2, 0.2, 0.2, 0.1)
 	// bluePlastic := pbr.Plastic(0, 0, 1, 1)
-	silver := pbr.Metal(0.972, 0.960, 0.915, 1)
+	silver := pbr.Metal(0.95, 0.93, 0.88, 1)
 	gold := pbr.Metal(1.022, 0.782, 0.344, 0.9)
 	// glass := pbr.Glass(1, 1, 1, 1)
 	greenGlass := pbr.Glass(0.8, 1, 0.7, 0.95)
 
-	scene.SetSky(30, 40, 50)
+	scene.SetSky(pbr.Vector3{30, 40, 50}, pbr.Vector3{})
 
 	scene.Add(
 		pbr.UnitCube(pbr.Ident().Rot(pbr.Vector3{0, -0.25 * math.Pi, 0}), redPlastic),
