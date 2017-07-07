@@ -4,7 +4,7 @@ Learning Go by writing a path tracer.
 [[ API Docs ]](https://hunterloftis.github.io/pbr/docs/pbr.html)
 [[ Source ]](https://github.com/hunterloftis/pbr)
 
-![Render](https://user-images.githubusercontent.com/364501/27945123-3f49e35c-62b9-11e7-833f-b579fe95919a.png)
+![Render](https://user-images.githubusercontent.com/364501/27945162-6dd1715e-62b9-11e7-9a2c-4fa7787c773b.png)
 
 - Unbiased Monte-Carlo integration
 - Adaptive sampling
