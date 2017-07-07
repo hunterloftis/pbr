@@ -103,7 +103,7 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
 			energy = energy.Plus(s.scene.Env(ray).By(signal))
 			break
 		}
-		if e := hit.Mat.Emit(hit.Normal, ray.Dir); e.Max() > 0 {
+		if emits, e := hit.Mat.Emit(hit.Normal, ray.Dir); emits {
 			energy = energy.Plus(e.By(signal))
 		}
 		if rnd.Float64() > signal.Max() {

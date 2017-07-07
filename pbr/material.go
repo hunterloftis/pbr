@@ -105,14 +105,13 @@ func (m *Material) Bsdf(norm, inc Vector3, dist float64, rnd *rand.Rand) (bool, 
 	return m.exit(norm, inc, dist, rnd)
 }
 
-// Emit returns the amount of light emitted
-// from the Material at a given angle
-func (m *Material) Emit(normal Vector3, dir Vector3) Vector3 {
-	if m.Light.Max() == 0 {
-		return Vector3{}
+// Emit returns the amount of light emitted from the Material at a given angle.
+func (m *Material) Emit(normal Vector3, dir Vector3) (bool, Vector3) {
+	if m.Light.Max() == 0 { // TODO: cache m.Light.Max() as m.light
+		return false, Vector3{}
 	}
-	cos := math.Max(normal.Dot(dir.Scaled(-1)), 0)
-	return m.Light.Scaled(cos)
+	cos := math.Max(normal.Dot(dir.Scaled(-1)), 0) // instead of scaling -1, can I invert the normal?
+	return true, m.Light.Scaled(cos)
 }
 
 func (m *Material) reflect(norm, inc Vector3, rnd *rand.Rand) (bool, Vector3, Vector3) {
