@@ -1,7 +1,7 @@
 # A Physically-Based Renderer in Go
 
 Learning Go by writing a path tracer.
-[[ API Docs ]](https://hunterloftis.github.io/pbr/docs/pbr.html)
+[[ API Docs ]](https://godoc.org/github.com/hunterloftis/pbr/pbr)
 [[ Source ]](https://github.com/hunterloftis/pbr)
 
 ![Render](https://user-images.githubusercontent.com/364501/27945162-6dd1715e-62b9-11e7-9a2c-4fa7787c773b.png)
