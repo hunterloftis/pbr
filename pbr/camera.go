@@ -17,7 +17,7 @@ type Camera struct {
 	target Vector3
 	focus  float64
 	fStop  float64
-	pos    Matrix4
+	pos    *Matrix4
 }
 
 // Camera35mm makes a new Full-frame (35mm) camera.

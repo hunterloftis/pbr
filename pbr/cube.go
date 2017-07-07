@@ -6,12 +6,12 @@ import (
 
 // Cube describes a unit cube scaled, rotated, and translated by Pos.
 type Cube struct {
-	Pos Matrix4
+	Pos *Matrix4
 	Mat *Material
 }
 
 // UnitCube returns a pointer to a new 1x1x1 Cube Surface with position pos and material mat.
-func UnitCube(pos Matrix4, mat *Material) *Cube {
+func UnitCube(pos *Matrix4, mat *Material) *Cube {
 	return &Cube{
 		Pos: pos,
 		Mat: mat,
@@ -24,8 +24,8 @@ func UnitCube(pos Matrix4, mat *Material) *Cube {
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
 // https://tavianator.com/fast-branchless-raybounding-box-intersections/
 func (c *Cube) Intersect(ray Ray3) (bool, float64) {
-	inv := (&c.Pos).Inverse() // global to local transform
-	r := inv.MultRay(ray)     // translate ray into local space
+	inv := c.Pos.Inverse() // global to local transform
+	r := inv.MultRay(ray)  // translate ray into local space
 	or := r.Origin.Array()
 	dir := r.Dir.Array()
 	t0 := 0.0
@@ -62,8 +62,8 @@ func (c *Cube) Intersect(ray Ray3) (bool, float64) {
 
 // NormalAt returns the normal Vector3 at this point on the Surface
 func (c *Cube) NormalAt(p Vector3) Vector3 {
-	i := (&c.Pos).Inverse() // global to local transform
-	p1 := i.MultPoint(p)    // translate point into local space
+	i := c.Pos.Inverse() // global to local transform
+	p1 := i.MultPoint(p) // translate point into local space
 	abs := p1.Abs()
 	var normal Vector3
 	switch {
