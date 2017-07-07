@@ -4,12 +4,12 @@ import "math"
 
 // Sphere describes a 3d sphere
 type Sphere struct {
-	Pos Matrix4
+	Pos *Matrix4
 	Mat *Material
 }
 
 // UnitSphere returns a pointer to a new 1x1x1 Sphere Surface with position pos and material mat.
-func UnitSphere(pos Matrix4, mat *Material) *Sphere {
+func UnitSphere(pos *Matrix4, mat *Material) *Sphere {
 	return &Sphere{
 		Pos: pos,
 		Mat: mat,
@@ -18,7 +18,7 @@ func UnitSphere(pos Matrix4, mat *Material) *Sphere {
 
 // Intersect tests whether the sphere intersects a given ray
 func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64) {
-	i := (&s.Pos).Inverse()
+	i := s.Pos.Inverse()
 	r := i.MultRay(ray)
 	op := Vector3{}.Minus(r.Origin)
 	b := op.Dot(r.Dir)
@@ -46,7 +46,7 @@ func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64) {
 
 // NormalAt returns the surface normal given a point on the surface
 func (s *Sphere) NormalAt(point Vector3) Vector3 {
-	i := (&s.Pos).Inverse()
+	i := s.Pos.Inverse()
 	p := i.MultPoint(point)
 	return s.Pos.MultNormal(p.Unit())
 }
