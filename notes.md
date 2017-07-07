@@ -1,3 +1,7 @@
+# Overviews
+
+- http://renderwonk.com/publications/s2010-shading-course/hoffman/s2010_physically_based_shading_hoffman_a.pdf
+
 # Go concurrency
 
 - https://talks.golang.org/2012/concurrency.slide#25
@@ -56,3 +60,8 @@
 
 - http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html
 - http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html#C.sRGB
+
+# toread
+
+- http://www.cs.columbia.edu/~yonghao/siga10/yue-adapted-free-path-sampling.pdf
+- https://placeholderart.wordpress.com/2014/12/15/implementing-a-physically-based-camera-automatic-exposure/
