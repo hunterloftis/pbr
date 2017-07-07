@@ -19,7 +19,8 @@ type RGBAE struct {
 type Scene struct {
 	Surfaces []Surface
 	pano     *RGBAE
-	sky      Vector3
+	skyUp    Vector3
+	skyDown  Vector3
 }
 
 // EmptyScene creates and returns a pointer to an empty Scene.
@@ -61,7 +62,8 @@ func (s *Scene) Env(ray Ray3) Vector3 {
 		b := float64(s.pano.Data[index+2])
 		return Vector3{r, g, b}.Scaled(s.pano.Expose)
 	}
-	return s.sky
+	vertical := math.Max((ray.Dir.Dot(Up)+0.5)/2, 0)
+	return s.skyDown.Lerp(s.skyUp, vertical)
 }
 
 // Add adds new Surfaces to the scene.
@@ -76,6 +78,7 @@ func (s *Scene) SetPano(r io.Reader, expose float64) {
 }
 
 // SetSky sets the sky color
-func (s *Scene) SetSky(r, g, b float64) {
-	s.sky = Vector3{r, g, b}
+func (s *Scene) SetSky(up, down Vector3) {
+	s.skyUp = up
+	s.skyDown = down
 }
