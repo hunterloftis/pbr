@@ -1,8 +1,8 @@
 package pbr
 
 import (
+	"io"
 	"math"
-	"os"
 
 	"github.com/Opioid/rgbe"
 )
@@ -18,7 +18,7 @@ type RGBAE struct {
 // Scene describes a 3d scene
 type Scene struct {
 	Surfaces []Surface
-	image    RGBAE
+	pano     *RGBAE
 }
 
 // EmptyScene creates and returns a pointer to an empty Scene.
@@ -46,32 +46,30 @@ func (s *Scene) Intersect(ray Ray3) (hit Hit) {
 	return
 }
 
-// Env returns the light value from the environment map
+// Env returns the light value from the environment map.
 // http://gl.ict.usc.edu/Data/HighResProbes/
 func (s *Scene) Env(ray Ray3) Vector3 {
-	if s.image.Width > 0 && s.image.Height > 0 {
+	if s.pano.Width > 0 && s.pano.Height > 0 {
 		u := 1 + math.Atan2(ray.Dir.X, -ray.Dir.Z)/math.Pi
 		v := math.Acos(ray.Dir.Y) / math.Pi
-		x := int(u * float64(s.image.Width))
-		y := int(v * float64(s.image.Height))
-		index := ((y*s.image.Width + x) * 3) % len(s.image.Data)
-		r := float64(s.image.Data[index])
-		g := float64(s.image.Data[index+1])
-		b := float64(s.image.Data[index+2])
-		return Vector3{r, g, b}.Scaled(s.image.Expose)
+		x := int(u * float64(s.pano.Width))
+		y := int(v * float64(s.pano.Height))
+		index := ((y*s.pano.Width + x) * 3) % len(s.pano.Data)
+		r := float64(s.pano.Data[index])
+		g := float64(s.pano.Data[index+1])
+		b := float64(s.pano.Data[index+2])
+		return Vector3{r, g, b}.Scaled(s.pano.Expose)
 	}
 	return Vector3{0, 0, 0}
 }
 
-// Add adds new Surfaces to the scene
+// Add adds new Surfaces to the scene.
 func (s *Scene) Add(surfaces ...Surface) {
 	s.Surfaces = append(s.Surfaces, surfaces...)
 }
 
-// SetEnv sets the environment map
-func (s *Scene) SetEnv(file string, expose float64) {
-	fi, _ := os.Open(file)
-	defer fi.Close()
-	width, height, data, _ := rgbe.Decode(fi)
-	s.image = RGBAE{Width: width, Height: height, Data: data, Expose: expose}
+// SetPano sets the environment to an HDR (radiance) panoramic mapping.
+func (s *Scene) SetPano(r io.Reader, expose float64) {
+	width, height, data, _ := rgbe.Decode(r)
+	s.pano = &RGBAE{Width: width, Height: height, Data: data, Expose: expose}
 }
