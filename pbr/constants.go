@@ -14,3 +14,6 @@ const (
 	Noise    = 4
 	Elements = 5
 )
+
+// Air is the refractive index of air
+const Air = 1.00029
