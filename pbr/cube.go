@@ -24,30 +24,40 @@ func UnitCube(pos Matrix4, mat Material) *Cube {
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
 // https://tavianator.com/fast-branchless-raybounding-box-intersections/
 func (c *Cube) Intersect(ray Ray3) (bool, float64) {
-	i := (&c.Pos).Inverse() // global to local transform
-	r := i.MultRay(ray)     // translate ray into local space
-	x1 := (-0.5 - r.Origin.X) / r.Dir.X
-	x2 := (0.5 - r.Origin.X) / r.Dir.X
-	y1 := (-0.5 - r.Origin.Y) / r.Dir.Y
-	y2 := (0.5 - r.Origin.Y) / r.Dir.Y
-	z1 := (-0.5 - r.Origin.Z) / r.Dir.Z
-	z2 := (0.5 - r.Origin.Z) / r.Dir.Z
-	if x1 > x2 {
-		x1, x2 = x2, x1
+	inv := (&c.Pos).Inverse() // global to local transform
+	r := inv.MultRay(ray)     // translate ray into local space
+	or := r.Origin.Array()
+	dir := r.Dir.Array()
+	t0 := 0.0
+	t1 := math.Inf(1)
+	for i := 0; i < 3; i++ {
+		invDir := 1 / dir[i]
+		tNear := (-0.5 - or[i]) * invDir
+		tFar := (0.5 - or[i]) * invDir
+		if tNear > tFar {
+			tNear, tFar = tFar, tNear
+		}
+		if tNear > t0 {
+			t0 = tNear
+		}
+		if tFar < t1 {
+			t1 = tFar
+		}
+		if t0 > t1 {
+			return false, 0
+		}
 	}
-	if y1 > y2 {
-		y1, y2 = y2, y1
+	if t0 > 0 {
+		if dist := c.Pos.MultDir(r.Dir.Scaled(t0)).Len(); dist >= Bias {
+			return true, dist
+		}
 	}
-	if z1 > z2 {
-		z1, z2 = z2, z1
+	if t1 > 0 {
+		if dist := c.Pos.MultDir(r.Dir.Scaled(t1)).Len(); dist >= Bias {
+			return true, dist
+		}
 	}
-	min := math.Max(math.Max(x1, y1), z1)
-	max := math.Min(math.Min(x2, y2), z2)
-	if hit := min > 0 && max >= min; !hit {
-		return false, 0
-	}
-	dist := c.Pos.MultDir(r.Dir.Scaled(min)).Len() // translate distance from local to global space
-	return dist >= Bias, dist
+	return false, 0
 }
 
 // NormalAt returns the normal Vector3 at this point on the Surface
