@@ -12,6 +12,7 @@ import (
 	"runtime/pprof"
 	"sync"
 	"syscall"
+	"time"
 )
 
 // Cli is an abstraction for executing a render via a terminal.
@@ -24,6 +25,7 @@ type Cli struct {
 type statistic struct {
 	sync.Mutex
 	samples int
+	start   int64
 }
 
 // CliRunner constructs a CLI from pointers to a scene, camera, and renderer.
@@ -61,7 +63,7 @@ func (c Cli) Render() {
 	go func() { <-interrupted; fmt.Printf("\n => Interrupting...\n"); close(working) }()
 
 	fmt.Printf("Rendering (%v workers, %v bounces, per-pixel samples=%v, adapt=%v)\n", *workers, *bounces, *samples, *adapt)
-	stat := statistic{}
+	stat := statistic{start: time.Now().UnixNano()}
 	for i := 0; i < *workers; i++ {
 		go c.worker(&stat, *samples, *bounces, *adapt, working, results)
 	}
@@ -96,7 +98,8 @@ func (c Cli) worker(stat *statistic, max float64, bounces int, adapt int, done <
 			stat.Lock()
 			stat.samples += samples
 			stat.Unlock()
-			fmt.Printf(" => %v samples (%v / pixel)\n", stat.samples, stat.samples/pixels)
+			ms := float64(time.Now().UnixNano()-stat.start) * 1e-6
+			fmt.Printf(" => %v samples (%v / pixel, %v / ms)\n", stat.samples, stat.samples/pixels, int(float64(stat.samples)/ms))
 		}
 	}
 }
