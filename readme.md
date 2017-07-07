@@ -1,4 +1,4 @@
-# PBR: a Physically-Based Renderer in Go
+# pbr: a Physically-Based Renderer in Go
 
 Package pbr implements Physically-Based Rendering with a Monte Carlo path tracer.
 [[ API Docs ]](https://godoc.org/github.com/hunterloftis/pbr/pbr)
