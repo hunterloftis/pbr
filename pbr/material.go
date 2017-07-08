@@ -14,11 +14,11 @@ type Material struct {
 	Transmit float64 // 0 = opaque, 1 = transparent, (0-1) = tinted thin surface
 	Gloss    float64 // Microsurface roughness (Material "polish")
 	Metal    float64 // The metallic range of electric (1) or dielectric (0), controls energy absorption
+	Grid     bool
 
 	absorbance Vector3 // Initd absorbance
 	refract    float64 // Initd index of refraction
 	fresnel    float64 // Initd average Fresnel value
-	grid       float64
 }
 
 // Light constructs a new light
@@ -84,11 +84,6 @@ func (m *Material) Init() *Material {
 		Z: 2 - math.Log10(m.Color.Z*100),
 	}
 	m.refract = (1 + math.Sqrt(m.fresnel)) / (1 - math.Sqrt(m.fresnel))
-	return m
-}
-
-// Grid applies a grid to a material
-func (m *Material) Grid() *Material {
 	return m
 }
 
