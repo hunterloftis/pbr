@@ -76,5 +76,11 @@ func (c *Cube) At(p Vector3) (Vector3, *Material) {
 		normal = Vector3{0, 0, math.Copysign(1, p1.Z)}
 	}
 	// translate normal from local to global space
-	return c.Pos.MultNormal(normal), c.Mat
+	mat := c.Mat
+	if c.Grid != nil {
+		if delta := math.Abs(p.X - math.Floor(p.X)); delta < 0.1 {
+			mat = c.Grid
+		}
+	}
+	return c.Pos.MultNormal(normal), mat
 }
