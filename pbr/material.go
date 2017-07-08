@@ -90,26 +90,26 @@ func (m *Material) Init() *Material {
 }
 
 // Bsdf is an attempt at a new bsdf
-func (m *Material) Bsdf(norm, inc Vector3, dist float64, rnd *rand.Rand) (bool, Vector3, Vector3) {
-	if inc.Enters(norm) {
-		reflect := schlick(norm, inc, m.fresnel, 0, 0)
+func (m *Material) Bsdf(hit Hit, rnd *rand.Rand) (bool, Vector3, Vector3) {
+	if hit.Incident.Enters(hit.Normal) {
+		reflect := schlick(hit.Normal, hit.Incident, m.fresnel, 0, 0)
 		switch {
 		// reflect
 		case rnd.Float64() < reflect:
-			return m.reflect(norm, inc, rnd)
+			return m.reflect(hit.Normal, hit.Incident, rnd)
 		// transmit (in)
 		case rnd.Float64() < m.Transmit:
-			return m.transmit(norm, inc, rnd)
+			return m.transmit(hit.Normal, hit.Incident, rnd)
 		// absorb
 		case rnd.Float64() < m.Metal:
-			return m.absorb(norm, inc)
+			return m.absorb(hit.Normal, hit.Incident)
 		// diffuse
 		default:
-			return m.diffuse(norm, inc, rnd)
+			return m.diffuse(hit.Normal, hit.Incident, rnd)
 		}
 	}
 	// transmit (out)
-	return m.exit(norm, inc, dist, rnd)
+	return m.exit(hit.Normal, hit.Incident, hit.Dist, rnd)
 }
 
 // Emit returns the amount of light emitted from the Material at a given angle.
