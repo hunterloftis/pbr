@@ -105,16 +105,14 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
 		}
 		point := ray.Moved(dist)
 		normal, mat := surface.At(point)
-		if emits, e := mat.Emit(normal, ray.Dir); emits {
-			energy = energy.Plus(e.By(signal))
-		}
+		emit := mat.Emit(normal, ray.Dir)
+		energy = energy.Plus(emit.By(signal))
 		if rnd.Float64() > signal.Max() {
 			break
 		}
 		if next, dir, strength := mat.Bsdf(normal, ray.Dir, dist, rnd); next {
-			signal = signal.Scaled(1 / signal.Max())
+			signal = signal.Scaled(1 / signal.Max()).By(strength)
 			ray = Ray3{point, dir}
-			signal = signal.By(strength)
 		} else {
 			break
 		}
