@@ -6,7 +6,7 @@ type Ray3 struct {
 	Dir    Vector3
 }
 
-// Move returns the point dist distance along the ray
-func (r Ray3) Move(dist float64) Vector3 {
+// Moved returns the point dist distance along the ray
+func (r Ray3) Moved(dist float64) Vector3 {
 	return r.Origin.Plus(r.Dir.Scaled(dist))
 }
