@@ -14,7 +14,7 @@ func main() {
 
 	light := pbr.Light(1500, 1500, 1500)
 	redPlastic := pbr.Plastic(1, 0, 0, 1)
-	whiteGrid := pbr.Plastic(1, 1, 1, 0.8)
+	whiteGrid := pbr.Plastic(1, 1, 1, 0.8).Grid()
 	// grayLambert := pbr.Lambert(0.2, 0.2, 0.2, 0.1)
 	// bluePlastic := pbr.Plastic(0, 0, 1, 1)
 	silver := pbr.Metal(0.95, 0.93, 0.88, 1)

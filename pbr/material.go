@@ -87,6 +87,11 @@ func (m *Material) Init() *Material {
 	return m
 }
 
+// Grid applies a grid to a material
+func (m *Material) Grid() *Material {
+	return m
+}
+
 // Bsdf is an attempt at a new bsdf
 func (m *Material) Bsdf(norm, inc Vector3, dist float64, rnd *rand.Rand) (bool, Vector3, Vector3) {
 	if inc.Enters(norm) {
