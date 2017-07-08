@@ -44,6 +44,7 @@ func (s *Scene) Intersect(ray Ray3) (hit Hit) {
 		hit.Point = ray.Origin.Plus(ray.Dir.Scaled(hit.Dist))
 		hit.Mat = surf.MaterialAt(hit.Point)
 		hit.Normal = surf.NormalAt(hit.Point)
+		hit.Incident = ray.Dir
 	}
 	return
 }

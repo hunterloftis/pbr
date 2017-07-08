@@ -109,7 +109,7 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
 		if rnd.Float64() > signal.Max() {
 			break
 		}
-		if next, dir, strength := hit.Mat.Bsdf(hit.Normal, ray.Dir, hit.Dist, rnd); next {
+		if next, dir, strength := hit.Mat.Bsdf(hit, rnd); next {
 			signal = signal.Scaled(1 / signal.Max())
 			ray = Ray3{hit.Point, dir}
 			signal = signal.By(strength)
