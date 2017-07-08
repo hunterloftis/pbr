@@ -59,8 +59,8 @@ func (c *Cube) Intersect(ray Ray3) (bool, float64) {
 	return false, 0
 }
 
-// NormalAt returns the normal Vector3 at this point on the Surface
-func (c *Cube) NormalAt(p Vector3) Vector3 {
+// At returns the normal Vector3 at this point on the Surface
+func (c *Cube) At(p Vector3) (Vector3, *Material) {
 	i := c.Pos.Inverse() // global to local transform
 	p1 := i.MultPoint(p) // translate point into local space
 	abs := p1.Abs()
@@ -73,10 +73,6 @@ func (c *Cube) NormalAt(p Vector3) Vector3 {
 	default:
 		normal = Vector3{0, 0, math.Copysign(1, p1.Z)}
 	}
-	return c.Pos.MultNormal(normal) // translate normal from local to global space
-}
-
-// MaterialAt returns the Material at this point on the Surface
-func (c *Cube) MaterialAt(v Vector3) *Material {
-	return c.Mat
+	// translate normal from local to global space
+	return c.Pos.MultNormal(normal), c.Mat
 }

@@ -92,26 +92,37 @@ func value(pixels []float64, i int) Vector3 {
 	return sample.Scaled(1 / pixels[i+Count])
 }
 
+// if hit {
+
+// 		hit.Point = ray.Origin.Plus(ray.Dir.Scaled(hit.Dist))
+// 		mat = surf.MaterialAt(hit.Point)
+// 		normal = surf.NormalAt(hit.Point)
+// 		hit.Incident = ray.Dir
+// 	}
+// 	return
+
 func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Vector3 {
 	ray := s.cam.ray(x, y, rnd)
 	signal := Vector3{1, 1, 1}
 	energy := Vector3{0, 0, 0}
 
 	for bounce := 0; bounce < s.bounces; bounce++ {
-		hit := s.scene.Intersect(ray)
-		if math.IsInf(hit.Dist, 1) {
+		hit, surface, dist := s.scene.Intersect(ray)
+		if !hit {
 			energy = energy.Plus(s.scene.Env(ray).By(signal))
 			break
 		}
-		if emits, e := hit.Mat.Emit(hit.Normal, ray.Dir); emits {
+		point := ray.Move(dist)
+		normal, mat := surface.At(point)
+		if emits, e := mat.Emit(normal, ray.Dir); emits {
 			energy = energy.Plus(e.By(signal))
 		}
 		if rnd.Float64() > signal.Max() {
 			break
 		}
-		if next, dir, strength := hit.Mat.Bsdf(hit, rnd); next {
+		if next, dir, strength := mat.Bsdf(normal, ray.Dir, dist, rnd); next {
 			signal = signal.Scaled(1 / signal.Max())
-			ray = Ray3{hit.Point, dir}
+			ray = Ray3{point, dir}
 			signal = signal.By(strength)
 		} else {
 			break

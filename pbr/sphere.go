@@ -44,14 +44,9 @@ func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64) {
 	return false, 0
 }
 
-// NormalAt returns the surface normal given a point on the surface
-func (s *Sphere) NormalAt(point Vector3) Vector3 {
+// At returns the surface normal given a point on the surface
+func (s *Sphere) At(point Vector3) (Vector3, *Material) {
 	i := s.Pos.Inverse()
 	p := i.MultPoint(point)
-	return s.Pos.MultNormal(p.Unit())
-}
-
-// MaterialAt returns the material at a given point on the surface
-func (s *Sphere) MaterialAt(v Vector3) *Material {
-	return s.Mat
+	return s.Pos.MultNormal(p.Unit()), s.Mat
 }

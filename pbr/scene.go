@@ -29,22 +29,13 @@ func EmptyScene() *Scene {
 }
 
 // Intersect tests whether a ray hits any objects in the scene
-func (s *Scene) Intersect(ray Ray3) (hit Hit) {
-	var surf Surface
-	hit.Dist = math.Inf(1)
-
+func (s *Scene) Intersect(ray Ray3) (hit bool, surf Surface, dist float64) {
+	dist = math.Inf(1)
 	for _, s := range s.Surfaces {
 		i, d := s.Intersect(ray)
-		if i && d < hit.Dist {
-			hit.Dist = d
-			surf = s
+		if i && d < dist {
+			hit, dist, surf = true, d, s
 		}
-	}
-	if !math.IsInf(hit.Dist, 1) {
-		hit.Point = ray.Origin.Plus(ray.Dir.Scaled(hit.Dist))
-		hit.Mat = surf.MaterialAt(hit.Point)
-		hit.Normal = surf.NormalAt(hit.Point)
-		hit.Incident = ray.Dir
 	}
 	return
 }
