@@ -112,7 +112,7 @@ func (m *Material) Bsdf(norm, inc Vector3, dist float64, rnd *rand.Rand) (bool, 
 
 // Emit returns the amount of light emitted from the Material at a given angle.
 func (m *Material) Emit(normal, dir Vector3) Vector3 {
-	cos := math.Max(normal.Dot(dir.Scaled(-1)), 0) // instead of scaling -1, can I invert the normal?
+	cos := math.Max(normal.Dot(dir.Scaled(-1)), 0)
 	return m.Light.Scaled(cos)
 }
 
