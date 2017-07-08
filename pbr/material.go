@@ -18,7 +18,6 @@ type Material struct {
 	absorbance Vector3 // Initd absorbance
 	refract    float64 // Initd index of refraction
 	fresnel    float64 // Initd average Fresnel value
-	light      bool    // Initd light emission
 	grid       float64
 }
 
@@ -85,7 +84,6 @@ func (m *Material) Init() *Material {
 		Z: 2 - math.Log10(m.Color.Z*100),
 	}
 	m.refract = (1 + math.Sqrt(m.fresnel)) / (1 - math.Sqrt(m.fresnel))
-	m.light = m.Light.Max() > 0
 	return m
 }
 
@@ -113,12 +111,9 @@ func (m *Material) Bsdf(norm, inc Vector3, dist float64, rnd *rand.Rand) (bool, 
 }
 
 // Emit returns the amount of light emitted from the Material at a given angle.
-func (m *Material) Emit(normal, dir Vector3) (bool, Vector3) {
-	if !m.light {
-		return false, Vector3{}
-	}
+func (m *Material) Emit(normal, dir Vector3) Vector3 {
 	cos := math.Max(normal.Dot(dir.Scaled(-1)), 0) // instead of scaling -1, can I invert the normal?
-	return true, m.Light.Scaled(cos)
+	return m.Light.Scaled(cos)
 }
 
 func (m *Material) reflect(norm, inc Vector3, rnd *rand.Rand) (bool, Vector3, Vector3) {
