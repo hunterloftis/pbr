@@ -6,25 +6,27 @@ import (
 )
 
 // Material describes the properties of a physically-based material
+// Zero-value is a black, opaque, diffuse, non-metallic surface
 type Material struct {
-	Color   Vector3 // Diffuse color for opaque surfaces, transmission coefficients for transparent surfaces
-	Fresnel Vector3 // Fresnel coefficients, used for fresnel reflectivity and computing the refractive index
-	Light   Vector3 // Light emittance, used if this Material is a light source
-	Opacity float64 // 0 = transparent, 1 = opaque, (0-1) = tinted thin surface
-	Gloss   float64 // Microsurface roughness (Material "polish")
-	Metal   float64 // The metallic range of electric (1) or dielectric (0), controls energy absorption
+	Color    Vector3 // Diffuse color for opaque surfaces, transmission coefficients for transparent surfaces
+	Fresnel  Vector3 // Fresnel coefficients, used for fresnel reflectivity and computing the refractive index
+	Light    Vector3 // Light emittance, used if this Material is a light source
+	Transmit float64 // 0 = opaque, 1 = transparent, (0-1) = tinted thin surface
+	Gloss    float64 // Microsurface roughness (Material "polish")
+	Metal    float64 // The metallic range of electric (1) or dielectric (0), controls energy absorption
 
-	absorbance Vector3 // precomputed absorbance
-	refract    float64 // precomputed index of refraction
-	fresnel    float64 // precomputed average Fresnel value
-	light      bool    // precomputed light emission
+	absorbance Vector3 // Initd absorbance
+	refract    float64 // Initd index of refraction
+	fresnel    float64 // Initd average Fresnel value
+	light      bool    // Initd light emission
+	grid       float64
 }
 
 // Light constructs a new light
 // r, g, b (0-Inf) specifies the light color
 func Light(r, g, b float64) *Material {
 	m := Material{Light: Vector3{r, g, b}}
-	return m.precompute()
+	return m.Init()
 }
 
 // Plastic constructs a new plastic material
@@ -34,23 +36,19 @@ func Plastic(r, g, b float64, gloss float64) *Material {
 	m := Material{
 		Color:   Vector3{r, g, b},
 		Fresnel: Vector3{0.04, 0.04, 0.04},
-		Opacity: 1,
 		Gloss:   gloss,
 	}
-	return m.precompute()
+	return m.Init()
 }
 
 // Lambert constructs a new plastic material
 // r, g, b (0-1) controls the color
-// gloss (0-1) controls the microfacet roughness (how polished the surface looks)
-func Lambert(r, g, b float64, gloss float64) *Material {
+func Lambert(r, g, b float64) *Material {
 	m := Material{
 		Color:   Vector3{r, g, b},
 		Fresnel: Vector3{0.02, 0.02, 0.02},
-		Opacity: 1,
-		Gloss:   gloss,
 	}
-	return m.precompute()
+	return m.Init()
 }
 
 // Metal constructs a new metal material
@@ -59,11 +57,10 @@ func Lambert(r, g, b float64, gloss float64) *Material {
 func Metal(r, g, b float64, gloss float64) *Material {
 	m := Material{
 		Fresnel: Vector3{r, g, b},
-		Opacity: 1,
 		Gloss:   gloss,
 		Metal:   1,
 	}
-	return m.precompute()
+	return m.Init()
 }
 
 // Glass constructs a new glass material
@@ -71,17 +68,17 @@ func Metal(r, g, b float64, gloss float64) *Material {
 // gloss (0-1) controls the microfacet roughness (how polished the surface looks)
 func Glass(r, g, b, gloss float64) *Material {
 	m := Material{
-		Color:   Vector3{r, g, b},
-		Fresnel: Vector3{0.042, 0.042, 0.042},
-		Opacity: 0,
-		Gloss:   gloss,
+		Color:    Vector3{r, g, b},
+		Fresnel:  Vector3{0.042, 0.042, 0.042},
+		Transmit: 1,
+		Gloss:    gloss,
 	}
-	return m.precompute()
+	return m.Init()
 }
 
-// precompute assigns several properties for optimization
-func (m *Material) precompute() *Material {
-	m.fresnel = m.Fresnel.Ave()
+// Init assigns several properties for optimization
+func (m *Material) Init() *Material {
+	m.fresnel = math.Min(m.Fresnel.Ave(), 0.02)
 	m.absorbance = Vector3{
 		X: 2 - math.Log10(m.Color.X*100),
 		Y: 2 - math.Log10(m.Color.Y*100),
@@ -101,7 +98,7 @@ func (m *Material) Bsdf(norm, inc Vector3, dist float64, rnd *rand.Rand) (bool, 
 		case rnd.Float64() < reflect:
 			return m.reflect(norm, inc, rnd)
 		// transmit (in)
-		case rnd.Float64() >= m.Opacity:
+		case rnd.Float64() < m.Transmit:
 			return m.transmit(norm, inc, rnd)
 		// absorb
 		case rnd.Float64() < m.Metal:
@@ -142,7 +139,7 @@ func (m *Material) transmit(norm, inc Vector3, rnd *rand.Rand) (bool, Vector3, V
 }
 
 func (m *Material) exit(norm, inc Vector3, dist float64, rnd *rand.Rand) (bool, Vector3, Vector3) {
-	if m.Opacity == 1 {
+	if m.Transmit == 0 {
 		return false, inc, Vector3{}
 	}
 	if rnd.Float64() >= schlick(norm, inc, 0, m.refract, 1.0) {
