@@ -78,7 +78,7 @@ func Glass(r, g, b, gloss float64) *Material {
 
 // Init assigns several properties for optimization
 func (m *Material) Init() *Material {
-	m.fresnel = math.Min(m.Fresnel.Ave(), 0.02)
+	m.fresnel = math.Max(m.Fresnel.Ave(), 0.02)
 	m.absorbance = Vector3{
 		X: 2 - math.Log10(m.Color.X*100),
 		Y: 2 - math.Log10(m.Color.Y*100),
