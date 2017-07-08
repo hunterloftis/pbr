@@ -78,7 +78,10 @@ func (c *Cube) At(p Vector3) (Vector3, *Material) {
 	// translate normal from local to global space
 	mat := c.Mat
 	if c.Grid != nil {
-		if delta := math.Abs(p.X - math.Floor(p.X)); delta < 0.1 {
+		x, z := p.X*20, p.Z*20
+		if dx := math.Abs(x - math.Floor(x)); dx < 0.03 {
+			mat = c.Grid
+		} else if dz := math.Abs(z - math.Floor(z)); dz < 0.03 {
 			mat = c.Grid
 		}
 	}

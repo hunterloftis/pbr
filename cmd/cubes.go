@@ -25,21 +25,21 @@ func main() {
 	scene.SetSky(pbr.Vector3{40, 50, 60}, pbr.Vector3{})
 
 	scene.Add(
-		pbr.UnitCube(pbr.Ident().Rot(pbr.Vector3{0, -0.25 * math.Pi, 0}).Scale(0.1, 0.1, 0.1), redPlastic, nil),
+		pbr.UnitCube(pbr.Ident().Rot(pbr.Vector3{0, -0.25 * math.Pi, 0}).Scale(0.1, 0.1, 0.1), silver, nil),
 		pbr.UnitCube(pbr.Ident().Trans(0, 0, -0.4).Rot(pbr.Vector3{0, 0.1 * math.Pi, 0}).Scale(0.1, 0.1, 0.1), gold, nil),
-		pbr.UnitCube(pbr.Ident().Trans(-0.3, 0, 0.3).Rot(pbr.Vector3{0, -0.1 * math.Pi, 0}).Scale(0.1, 0.1, 0.1), greenGlass, nil),
+		pbr.UnitCube(pbr.Ident().Trans(-0.4, 0, 0.2).Rot(pbr.Vector3{0, -0.1 * math.Pi, 0}).Scale(0.1, 0.1, 0.1), bluePlastic, nil),
 		pbr.UnitCube(pbr.Ident().Trans(0.175, 0.05, 0.175).Rot(pbr.Vector3{0, 0.55 * math.Pi, 0}).Scale(0.01, 0.2, 0.1), greenGlass, nil),
 		pbr.UnitCube(pbr.Ident().Trans(0, -0.55, 0).Scale(1000, 1, 1000), whitePlastic, bluePlastic),
-		pbr.UnitSphere(pbr.Ident().Trans(-0.2, 0.001, -0.2).Scale(0.1, 0.1, 0.1), greenGlass),
+		pbr.UnitSphere(pbr.Ident().Trans(-0.2, 0.001, 0.1).Scale(0.1, 0.1, 0.1), greenGlass),
 		pbr.UnitSphere(pbr.Ident().Trans(0.3, 0.05, 0).Scale(0.2, 0.2, 0.2), greenGlass),
 		pbr.UnitSphere(pbr.Ident().Trans(7, 30, 6).Scale(30, 30, 30), light),
-		pbr.UnitSphere(pbr.Ident().Trans(0, -0.025, 0.2).Scale(0.1, 0.05, 0.1), greenGlass),
+		pbr.UnitSphere(pbr.Ident().Trans(0, -0.025, 0.2).Scale(0.1, 0.05, 0.1), redPlastic),
 		pbr.UnitSphere(pbr.Ident().Trans(0.45, 0.05, -0.4).Scale(0.2, 0.2, 0.2), silver),
 	)
 
-	camera.MoveTo(-0.6, 0.12, 0.8)
-	camera.LookAt(0, 0, 0)
-	camera.Focus(0, -0.025, 0.2, 4)
+	camera.MoveTo(-0.6, 0.3, 0.8)
+	camera.LookAt(-0.1, 0.001, 0.1)
+	camera.Focus(-0.1, 0.001, 0.1, 4)
 
 	cli.Render()
 }
