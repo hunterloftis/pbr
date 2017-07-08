@@ -6,15 +6,17 @@ import (
 
 // Cube describes a unit cube scaled, rotated, and translated by Pos.
 type Cube struct {
-	Pos *Matrix4
-	Mat *Material
+	Pos  *Matrix4
+	Mat  *Material
+	Grid *Material
 }
 
 // UnitCube returns a pointer to a new 1x1x1 Cube Surface with position pos and material mat.
-func UnitCube(pos *Matrix4, mat *Material) *Cube {
+func UnitCube(pos *Matrix4, mat *Material, grid *Material) *Cube {
 	return &Cube{
-		Pos: pos,
-		Mat: mat,
+		Pos:  pos,
+		Mat:  mat,
+		Grid: grid,
 	}
 }
 
