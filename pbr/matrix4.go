@@ -149,8 +149,8 @@ func (a *Matrix4) MultDist(v Vector3) (result Vector3) {
 	return
 }
 
-// MultNormal multiplies this matrix4 by a normal vector, renormalizing the result
-func (a *Matrix4) MultNormal(v Direction) (result Direction) {
+// MultDir multiplies this matrix4 by a direction, renormalizing the result
+func (a *Matrix4) MultDir(v Direction) (result Direction) {
 	return a.MultDist(Vector3(v)).Unit()
 }
 
@@ -158,7 +158,7 @@ func (a *Matrix4) MultNormal(v Direction) (result Direction) {
 // https://gamedev.stackexchange.com/questions/72440/the-correct-way-to-transform-a-ray-with-a-matrix
 func (a *Matrix4) MultRay(r Ray3) (result Ray3) {
 	result.Origin = a.MultPoint(r.Origin)
-	result.Dir = a.MultNormal(r.Dir)
+	result.Dir = a.MultDir(r.Dir)
 	return
 }
 
