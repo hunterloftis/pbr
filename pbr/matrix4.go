@@ -149,7 +149,7 @@ func (a *Matrix4) MultDist(v Vector3) (result Vector3) {
 	return
 }
 
-// MultDir multiplies this matrix4 by a normal vector, renormalizing the result
+// MultDir multiplies this matrix4 by a direction, renormalizing the result
 func (a *Matrix4) MultDir(v Direction) (result Direction) {
 	return a.MultDist(Vector3(v)).Unit()
 }
