@@ -100,13 +100,13 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Energy {
 	for bounce := 0; bounce < s.bounces; bounce++ {
 		hit, surface, dist := s.scene.Intersect(ray)
 		if !hit {
-			energy = energy.Gained(s.scene.Env(ray), signal)
+			energy = energy.Merged(s.scene.Env(ray), signal)
 			break
 		}
 		point := ray.Moved(dist)
 		normal, mat := surface.At(point)
-		energy = energy.Gained(mat.Emit(normal, ray.Dir), signal)
-		signal = signal.Amplify(rnd) // "Russian Roulette"
+		energy = energy.Merged(mat.Emit(normal, ray.Dir), signal)
+		signal = signal.RandomGain(rnd) // "Russian Roulette"
 		if signal == (Energy{}) {
 			break
 		}

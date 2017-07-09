@@ -115,7 +115,7 @@ func (m *Material) Bsdf(norm, inc Direction, dist float64, rnd *rand.Rand) (bool
 // Emit returns the amount of light emitted from the Material at a given angle.
 func (m *Material) Emit(normal, dir Direction) Energy {
 	cos := math.Max(normal.Cos(dir.Inv()), 0)
-	return m.Light.Scaled(cos)
+	return m.Light.Amplified(cos)
 }
 
 func (m *Material) reflect(norm, inc Direction, rnd *rand.Rand) (bool, Direction, Energy) {
@@ -153,7 +153,7 @@ func (m *Material) exit(norm, inc Direction, dist float64, rnd *rand.Rand) (bool
 }
 
 func (m *Material) diffuse(norm, inc Direction, rnd *rand.Rand) (bool, Direction, Energy) {
-	return true, norm.RandHemiCos(rnd), m.Color.Scaled(1 / math.Pi)
+	return true, norm.RandHemiCos(rnd), m.Color.Amplified(1 / math.Pi)
 }
 
 func (m *Material) absorb(norm, inc Direction) (bool, Direction, Energy) {

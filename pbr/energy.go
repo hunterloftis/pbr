@@ -4,31 +4,32 @@ import (
 	"math/rand"
 )
 
-// Energy is a way to store RGB light energy
+// Energy stores RGB light energy as a 3D Vector.
 type Energy Vector3
 
-// Gained does stuff
-func (a Energy) Gained(b Energy, signal Energy) Energy {
-	return Energy(Vector3(a).Plus(Vector3(b).By(Vector3(signal))))
+// Merged merges energy b into energy a with a given signal strength.
+func (a Energy) Merged(b Energy, signal Energy) Energy {
+	return Energy{a.X + b.X*signal.X, a.Y + b.Y*signal.Y, a.Z + b.Z*signal.Z}
 }
 
-// Scaled scales energy
-func (a Energy) Scaled(n float64) Energy {
+// Amplified returns energy a scaled by n.
+func (a Energy) Amplified(n float64) Energy {
 	return Energy{a.X * n, a.Y * n, a.Z * n}
 }
 
-// Amplify randomly amplifies or destroys a signal.
-// Strong signals get less amplification and are less likely to be destroyed.
-// Weak signals are more likely to be destroyed but get more amplification.
+// RandomGain randomly amplifies or destroys a signal.
+// Strong signals are less likely to be destroyed and gain less amplification.
+// Weak signals are more likely to be destroyed but gain more amplification.
 // This creates greater overall system throughput (higher energy per signal, fewer signals).
-func (a Energy) Amplify(rnd *rand.Rand) Energy {
-	if rnd.Float64() > Vector3(a).Max() {
+func (a Energy) RandomGain(rnd *rand.Rand) Energy {
+	max := Vector3(a).Max()
+	if rnd.Float64() > max {
 		return Energy{}
 	}
-	return a.Scaled(1 / Vector3(a).Max())
+	return a.Amplified(1 / max)
 }
 
-// Strength multiplies one energy by another
+// Strength returns energy a multiplied by energy b.
 func (a Energy) Strength(b Energy) Energy {
 	return Energy{a.X * b.X, a.Y * b.Y, a.Z * b.Z}
 }
