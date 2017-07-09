@@ -121,7 +121,6 @@ func (m *Material) Emit(normal, dir Direction) Energy {
 func (m *Material) reflect(norm, inc Direction, rnd *rand.Rand) (bool, Direction, Energy) {
 	// TODO: if reflection enters the normal, invert the reflection about the normal
 	if refl := inc.Reflected(norm).Cone(1-m.Gloss, rnd); !refl.Enters(norm) {
-		// TODO: clean up all this casting
 		return true, refl, Energy(Vector3{1, 1, 1}.Lerp(Vector3(m.Fresnel), m.Metal))
 	}
 	return m.diffuse(norm, inc, rnd)
