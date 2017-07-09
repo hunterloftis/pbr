@@ -5,41 +5,39 @@ import (
 	"math/rand"
 )
 
-// Direction is a unit vector that specifies a direction
+// Direction is a unit vector that specifies a direction in 3D space.
 type Direction Vector3
 
-// Unit returns the vector in the same direction of length 1
-// TODO: rename this to "Direction" and put Unit back on Vector3?
+// Unit normalizes a Vector3 into a Direction.
 func (a Vector3) Unit() Direction {
 	d := a.Len()
 	return Direction(Vector3{a.X / d, a.Y / d, a.Z / d})
 }
 
-// Inv inverts a Direction
+// Inv inverts a Direction.
 func (a Direction) Inv() Direction {
 	return Direction{-a.X, -a.Y, -a.Z}
 }
 
-// Enters returns whether this Vector is entering the plane represented by a normal Vector
-func (a Direction) Enters(b Direction) bool {
-	return b.Cos(a) < 0
+// Enters returns whether this Vector is entering the plane represented by a normal Vector.
+func (a Direction) Enters(normal Direction) bool {
+	return normal.Cos(a) < 0
 }
 
-// Cos returns the dot product of two vectors
-// (which is also the cosine of the angle between them)
+// Cos returns the dot product of two unit vectors, which is also the cosine of the angle between them.
 func (a Direction) Cos(b Direction) float64 {
 	return a.X*b.X + a.Y*b.Y + a.Z*b.Z
 }
 
-// Refracted refracts a vector based on the ratio of coefficients of refraction
-func (a Direction) Refracted(b Direction, indexA, indexB float64) (bool, Direction) {
+// Refracted refracts a vector through the plane represented by a normal, based on the ratio of refraction indices.
+func (a Direction) Refracted(normal Direction, indexA, indexB float64) (bool, Direction) {
 	ratio := indexA / indexB
-	cos := b.Cos(a)
+	cos := normal.Cos(a)
 	k := 1 - ratio*ratio*(1-cos*cos)
 	if k < 0 {
 		return false, a
 	}
-	offset := b.Scaled(ratio*cos + math.Sqrt(k))
+	offset := normal.Scaled(ratio*cos + math.Sqrt(k))
 	return true, a.Scaled(ratio).Minus(offset).Unit()
 }
 
