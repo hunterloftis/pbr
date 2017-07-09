@@ -105,7 +105,7 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Energy {
 		}
 		point := ray.Moved(dist)
 		normal, mat := surface.At(point)
-		energy = energy.Gained(Energy(mat.Emit(normal, ray.Dir)), signal)
+		energy = energy.Gained(mat.Emit(normal, ray.Dir), signal)
 		if rnd.Float64() > Vector3(signal).Max() {
 			break
 		}

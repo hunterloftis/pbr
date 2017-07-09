@@ -10,7 +10,7 @@ import (
 type Material struct {
 	Color    Vector3 // Diffuse color for opaque surfaces, transmission coefficients for transparent surfaces
 	Fresnel  Vector3 // Fresnel coefficients, used for fresnel reflectivity and computing the refractive index
-	Light    Vector3 // Light emittance, used if this Material is a light source
+	Light    Energy  // Light emittance, used if this Material is a light source
 	Transmit float64 // 0 = opaque, 1 = transparent, (0-1) = tinted thin surface
 	Gloss    float64 // Microsurface roughness (Material "polish")
 	Metal    float64 // The metallic range of electric (1) or dielectric (0), controls energy absorption
@@ -24,7 +24,9 @@ type Material struct {
 // Light constructs a new light
 // r, g, b (0-Inf) specifies the light color
 func Light(r, g, b float64) *Material {
-	m := Material{Light: Vector3{r, g, b}}
+	m := Material{
+		Light: Energy{r, g, b},
+	}
 	return m.Init()
 }
 
@@ -111,7 +113,7 @@ func (m *Material) Bsdf(norm, inc Direction, dist float64, rnd *rand.Rand) (bool
 }
 
 // Emit returns the amount of light emitted from the Material at a given angle.
-func (m *Material) Emit(normal, dir Direction) Vector3 {
+func (m *Material) Emit(normal, dir Direction) Energy {
 	cos := math.Max(normal.Cos(dir.Inv()), 0)
 	return m.Light.Scaled(cos)
 }
