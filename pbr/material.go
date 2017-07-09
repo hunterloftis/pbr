@@ -88,7 +88,7 @@ func (m *Material) Init() *Material {
 }
 
 // Bsdf is an attempt at a new bsdf
-func (m *Material) Bsdf(norm, inc Vector3, dist float64, rnd *rand.Rand) (bool, Vector3, Vector3) {
+func (m *Material) Bsdf(norm, inc Direction, dist float64, rnd *rand.Rand) (bool, Direction, Vector3) {
 	if inc.Enters(norm) {
 		reflect := schlick(norm, inc, m.fresnel, 0, 0)
 		switch {
@@ -111,19 +111,20 @@ func (m *Material) Bsdf(norm, inc Vector3, dist float64, rnd *rand.Rand) (bool, 
 }
 
 // Emit returns the amount of light emitted from the Material at a given angle.
-func (m *Material) Emit(normal, dir Vector3) Vector3 {
-	cos := math.Max(normal.Dot(dir.Scaled(-1)), 0)
+func (m *Material) Emit(normal, dir Direction) Vector3 {
+	cos := math.Max(normal.Cos(dir.Inv()), 0)
 	return m.Light.Scaled(cos)
 }
 
-func (m *Material) reflect(norm, inc Vector3, rnd *rand.Rand) (bool, Vector3, Vector3) {
+func (m *Material) reflect(norm, inc Direction, rnd *rand.Rand) (bool, Direction, Vector3) {
+	// TODO: if reflection enters the normal, invert the reflection about the normal
 	if refl := inc.Reflected(norm).Cone(1-m.Gloss, rnd); !refl.Enters(norm) {
 		return true, refl, Vector3{1, 1, 1}.Lerp(m.Fresnel, m.Metal)
 	}
 	return m.diffuse(norm, inc, rnd)
 }
 
-func (m *Material) transmit(norm, inc Vector3, rnd *rand.Rand) (bool, Vector3, Vector3) {
+func (m *Material) transmit(norm, inc Direction, rnd *rand.Rand) (bool, Direction, Vector3) {
 	if entered, refr := inc.Refracted(norm, 1, m.refract); entered {
 		if spread := refr.Cone(1-m.Gloss, rnd); spread.Enters(norm) {
 			return true, spread, Vector3{1, 1, 1}
@@ -133,26 +134,26 @@ func (m *Material) transmit(norm, inc Vector3, rnd *rand.Rand) (bool, Vector3, V
 	return m.diffuse(norm, inc, rnd)
 }
 
-func (m *Material) exit(norm, inc Vector3, dist float64, rnd *rand.Rand) (bool, Vector3, Vector3) {
+func (m *Material) exit(norm, inc Direction, dist float64, rnd *rand.Rand) (bool, Direction, Vector3) {
 	if m.Transmit == 0 {
 		return false, inc, Vector3{}
 	}
 	if rnd.Float64() >= schlick(norm, inc, 0, m.refract, 1.0) {
-		if exited, refr := inc.Refracted(norm.Scaled(-1), m.refract, 1); exited {
+		if exited, refr := inc.Refracted(norm.Inv(), m.refract, 1); exited {
 			if spread := refr.Cone(1-m.Gloss, rnd); !spread.Enters(norm) {
 				return true, spread, beers(dist, m.absorbance)
 			}
 			return true, refr, beers(dist, m.absorbance)
 		}
 	}
-	return true, inc.Reflected(norm.Scaled(-1)), beers(dist, m.absorbance)
+	return true, inc.Reflected(norm.Inv()), beers(dist, m.absorbance)
 }
 
-func (m *Material) diffuse(norm, inc Vector3, rnd *rand.Rand) (bool, Vector3, Vector3) {
+func (m *Material) diffuse(norm, inc Direction, rnd *rand.Rand) (bool, Direction, Vector3) {
 	return true, norm.RandHemiCos(rnd), m.Color.Scaled(1 / math.Pi)
 }
 
-func (m *Material) absorb(norm, inc Vector3) (bool, Vector3, Vector3) {
+func (m *Material) absorb(norm, inc Direction) (bool, Direction, Vector3) {
 	return false, inc, Vector3{}
 }
 
@@ -162,8 +163,8 @@ func (m *Material) absorb(norm, inc Vector3) (bool, Vector3, Vector3) {
 // https://www.bramz.net/data/writings/reflection_transmission.pdf
 // http://blog.selfshadow.com/publications/s2015-shading-course/hoffman/s2015_pbs_physics_math_slides.pdf
 // http://graphics.stanford.edu/courses/cs348b-10/lectures/reflection_i/reflection_i.pdf
-func schlick(incident, normal Vector3, r0, n1, n2 float64) float64 {
-	cosX := -normal.Dot(incident)
+func schlick(incident, normal Direction, r0, n1, n2 float64) float64 {
+	cosX := -normal.Cos(incident)
 	if r0 == 0 {
 		r0 = (n1 - n2) / (n1 + n2)
 		r0 *= r0

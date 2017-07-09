@@ -2,11 +2,7 @@ package pbr
 
 import "math"
 
-var yAxis Vector3
-
-func init() {
-	yAxis = Vector3{0, 1, 0}
-}
+var yAxis = Direction{0, 1, 0}
 
 // Matrix4 handles matrix data and operations
 // Column-major (as in math and Direct3D)
@@ -45,9 +41,9 @@ func Ident() *Matrix4 {
 // http://www.codinglabs.net/article_world_view_projection_matrix.aspx
 // https://fgiesen.wordpress.com/2012/02/12/row-major-vs-column-major-row-vectors-vs-column-vectors/
 func LookMatrix(o Vector3, to Vector3) *Matrix4 {
-	f := o.Minus(to).Unit()    // forward
-	r := yAxis.Cross(f).Unit() // right
-	u := f.Cross(r).Unit()     // up
+	f := o.Minus(to).Unit() // forward
+	r := yAxis.Cross(f)     // right
+	u := f.Cross(r)         // up
 	orient := NewMatrix4(
 		r.X, u.X, f.X, 0,
 		r.Y, u.Y, f.Y, 0,
@@ -125,7 +121,7 @@ func (a *Matrix4) Mult(b *Matrix4) *Matrix4 {
 }
 
 // Equals tests whether two Matrices have equal values
-func (a *Matrix4) Equals(b Matrix4) bool {
+func (a *Matrix4) Equals(b *Matrix4) bool {
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
 			if a.el[i][j] != b.el[i][j] {
@@ -145,8 +141,8 @@ func (a *Matrix4) MultPoint(v Vector3) (result Vector3) {
 	return
 }
 
-// MultDir multiplies this matrix4 by a vector, excluding translation
-func (a *Matrix4) MultDir(v Vector3) (result Vector3) {
+// MultDist multiplies this matrix4 by a vector, excluding translation
+func (a *Matrix4) MultDist(v Vector3) (result Vector3) {
 	result.X = v.X*a.el[0][0] + v.Y*a.el[1][0] + v.Z*a.el[2][0]
 	result.Y = v.X*a.el[0][1] + v.Y*a.el[1][1] + v.Z*a.el[2][1]
 	result.Z = v.X*a.el[0][2] + v.Y*a.el[1][2] + v.Z*a.el[2][2]
@@ -154,8 +150,8 @@ func (a *Matrix4) MultDir(v Vector3) (result Vector3) {
 }
 
 // MultNormal multiplies this matrix4 by a normal vector, renormalizing the result
-func (a *Matrix4) MultNormal(v Vector3) (result Vector3) {
-	return a.MultDir(v).Unit()
+func (a *Matrix4) MultNormal(v Direction) (result Direction) {
+	return a.MultDist(Vector3(v)).Unit()
 }
 
 // MultRay multiplies this matrix by a ray
