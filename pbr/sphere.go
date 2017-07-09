@@ -49,5 +49,5 @@ func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64) {
 func (s *Sphere) At(point Vector3) (Direction, *Material) {
 	i := s.Pos.Inverse()
 	p := i.MultPoint(point)
-	return s.Pos.MultNormal(p.Unit()), s.Mat
+	return s.Pos.MultDir(p.Unit()), s.Mat
 }
