@@ -84,5 +84,5 @@ func (c *Cube) At(p Vector3) (normal Direction, mat *Material) {
 			mat = c.Grid
 		}
 	}
-	return c.Pos.MultNormal(normal), mat
+	return c.Pos.MultDir(normal), mat
 }
