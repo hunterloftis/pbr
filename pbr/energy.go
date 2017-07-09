@@ -17,10 +17,18 @@ func (a Energy) Scaled(n float64) Energy {
 	return Energy{a.X * n, a.Y * n, a.Z * n}
 }
 
-// Destroy randomly destroys energy
-func (a Energy) Destroy(rnd *rand.Rand) (Energy, bool) {
+// Amplify randomly amplifies or destroys a signal.
+// Strong signals get less amplification and are less likely to be destroyed.
+// Weak signals are more likely to be destroyed but get more amplification.
+// This creates greater overall system throughput (higher energy per signal, fewer signals).
+func (a Energy) Amplify(rnd *rand.Rand) Energy {
 	if rnd.Float64() > Vector3(a).Max() {
-		return a, true
+		return Energy{}
 	}
-	return a.Scaled(1 / Vector3(a).Max()), false
+	return a.Scaled(1 / Vector3(a).Max())
+}
+
+// Strength multiplies one energy by another
+func (a Energy) Strength(b Energy) Energy {
+	return Energy{a.X * b.X, a.Y * b.Y, a.Z * b.Z}
 }

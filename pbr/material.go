@@ -8,15 +8,15 @@ import (
 // Material describes the properties of a physically-based material
 // Zero-value is a black, opaque, diffuse, non-metallic surface
 type Material struct {
-	Color    Vector3 // Diffuse color for opaque surfaces, transmission coefficients for transparent surfaces
-	Fresnel  Vector3 // Fresnel coefficients, used for fresnel reflectivity and computing the refractive index
+	Color    Energy  // Diffuse color for opaque surfaces, transmission coefficients for transparent surfaces
+	Fresnel  Energy  // Fresnel coefficients, used for fresnel reflectivity and computing the refractive index
 	Light    Energy  // Light emittance, used if this Material is a light source
 	Transmit float64 // 0 = opaque, 1 = transparent, (0-1) = tinted thin surface
 	Gloss    float64 // Microsurface roughness (Material "polish")
 	Metal    float64 // The metallic range of electric (1) or dielectric (0), controls energy absorption
 	Grid     bool
 
-	absorbance Vector3 // Initd absorbance
+	absorbance Energy  // Initd absorbance
 	refract    float64 // Initd index of refraction
 	fresnel    float64 // Initd average Fresnel value
 }
@@ -35,8 +35,8 @@ func Light(r, g, b float64) *Material {
 // gloss (0-1) controls the microfacet roughness (how polished the surface looks)
 func Plastic(r, g, b float64, gloss float64) *Material {
 	m := Material{
-		Color:   Vector3{r, g, b},
-		Fresnel: Vector3{0.04, 0.04, 0.04},
+		Color:   Energy{r, g, b},
+		Fresnel: Energy{0.04, 0.04, 0.04},
 		Gloss:   gloss,
 	}
 	return m.Init()
@@ -46,8 +46,8 @@ func Plastic(r, g, b float64, gloss float64) *Material {
 // r, g, b (0-1) controls the color
 func Lambert(r, g, b float64) *Material {
 	m := Material{
-		Color:   Vector3{r, g, b},
-		Fresnel: Vector3{0.02, 0.02, 0.02},
+		Color:   Energy{r, g, b},
+		Fresnel: Energy{0.02, 0.02, 0.02},
 	}
 	return m.Init()
 }
@@ -57,7 +57,7 @@ func Lambert(r, g, b float64) *Material {
 // gloss (0-1) controls the microfacet roughness (how polished the surface looks)
 func Metal(r, g, b float64, gloss float64) *Material {
 	m := Material{
-		Fresnel: Vector3{r, g, b},
+		Fresnel: Energy{r, g, b},
 		Gloss:   gloss,
 		Metal:   1,
 	}
@@ -69,8 +69,8 @@ func Metal(r, g, b float64, gloss float64) *Material {
 // gloss (0-1) controls the microfacet roughness (how polished the surface looks)
 func Glass(r, g, b, gloss float64) *Material {
 	m := Material{
-		Color:    Vector3{r, g, b},
-		Fresnel:  Vector3{0.042, 0.042, 0.042},
+		Color:    Energy{r, g, b},
+		Fresnel:  Energy{0.042, 0.042, 0.042},
 		Transmit: 1,
 		Gloss:    gloss,
 	}
@@ -79,8 +79,8 @@ func Glass(r, g, b, gloss float64) *Material {
 
 // Init assigns several properties for optimization
 func (m *Material) Init() *Material {
-	m.fresnel = math.Max(m.Fresnel.Ave(), 0.02)
-	m.absorbance = Vector3{
+	m.fresnel = math.Max(Vector3(m.Fresnel).Ave(), 0.02)
+	m.absorbance = Energy{
 		X: 2 - math.Log10(m.Color.X*100),
 		Y: 2 - math.Log10(m.Color.Y*100),
 		Z: 2 - math.Log10(m.Color.Z*100),
@@ -90,7 +90,7 @@ func (m *Material) Init() *Material {
 }
 
 // Bsdf is an attempt at a new bsdf
-func (m *Material) Bsdf(norm, inc Direction, dist float64, rnd *rand.Rand) (bool, Direction, Vector3) {
+func (m *Material) Bsdf(norm, inc Direction, dist float64, rnd *rand.Rand) (bool, Direction, Energy) {
 	if inc.Enters(norm) {
 		reflect := schlick(norm, inc, m.fresnel, 0, 0)
 		switch {
@@ -118,27 +118,28 @@ func (m *Material) Emit(normal, dir Direction) Energy {
 	return m.Light.Scaled(cos)
 }
 
-func (m *Material) reflect(norm, inc Direction, rnd *rand.Rand) (bool, Direction, Vector3) {
+func (m *Material) reflect(norm, inc Direction, rnd *rand.Rand) (bool, Direction, Energy) {
 	// TODO: if reflection enters the normal, invert the reflection about the normal
 	if refl := inc.Reflected(norm).Cone(1-m.Gloss, rnd); !refl.Enters(norm) {
-		return true, refl, Vector3{1, 1, 1}.Lerp(m.Fresnel, m.Metal)
+		// TODO: clean up all this casting
+		return true, refl, Energy(Vector3{1, 1, 1}.Lerp(Vector3(m.Fresnel), m.Metal))
 	}
 	return m.diffuse(norm, inc, rnd)
 }
 
-func (m *Material) transmit(norm, inc Direction, rnd *rand.Rand) (bool, Direction, Vector3) {
+func (m *Material) transmit(norm, inc Direction, rnd *rand.Rand) (bool, Direction, Energy) {
 	if entered, refr := inc.Refracted(norm, 1, m.refract); entered {
 		if spread := refr.Cone(1-m.Gloss, rnd); spread.Enters(norm) {
-			return true, spread, Vector3{1, 1, 1}
+			return true, spread, Energy{1, 1, 1}
 		}
-		return true, refr, Vector3{1, 1, 1}
+		return true, refr, Energy{1, 1, 1}
 	}
 	return m.diffuse(norm, inc, rnd)
 }
 
-func (m *Material) exit(norm, inc Direction, dist float64, rnd *rand.Rand) (bool, Direction, Vector3) {
+func (m *Material) exit(norm, inc Direction, dist float64, rnd *rand.Rand) (bool, Direction, Energy) {
 	if m.Transmit == 0 {
-		return false, inc, Vector3{}
+		return false, inc, Energy{}
 	}
 	if rnd.Float64() >= schlick(norm, inc, 0, m.refract, 1.0) {
 		if exited, refr := inc.Refracted(norm.Inv(), m.refract, 1); exited {
@@ -151,12 +152,12 @@ func (m *Material) exit(norm, inc Direction, dist float64, rnd *rand.Rand) (bool
 	return true, inc.Reflected(norm.Inv()), beers(dist, m.absorbance)
 }
 
-func (m *Material) diffuse(norm, inc Direction, rnd *rand.Rand) (bool, Direction, Vector3) {
+func (m *Material) diffuse(norm, inc Direction, rnd *rand.Rand) (bool, Direction, Energy) {
 	return true, norm.RandHemiCos(rnd), m.Color.Scaled(1 / math.Pi)
 }
 
-func (m *Material) absorb(norm, inc Direction) (bool, Direction, Vector3) {
-	return false, inc, Vector3{}
+func (m *Material) absorb(norm, inc Direction) (bool, Direction, Energy) {
+	return false, inc, Energy{}
 }
 
 // Schlick's approximation.
@@ -185,9 +186,9 @@ func schlick(incident, normal Direction, r0, n1, n2 float64) float64 {
 
 // Beer's Law.
 // http://www.epolin.com/converting-absorbance-transmittance
-func beers(dist float64, absorb Vector3) Vector3 {
+func beers(dist float64, absorb Energy) Energy {
 	red := math.Exp(-absorb.X * dist)
 	green := math.Exp(-absorb.Y * dist)
 	blue := math.Exp(-absorb.Z * dist)
-	return Vector3{red, green, blue}
+	return Energy{red, green, blue}
 }

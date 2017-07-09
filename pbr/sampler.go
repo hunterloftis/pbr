@@ -106,16 +106,12 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Energy {
 		point := ray.Moved(dist)
 		normal, mat := surface.At(point)
 		energy = energy.Gained(mat.Emit(normal, ray.Dir), signal)
-
-		foo, lost := signal.Destroy(rnd) // works
-		signal = foo
-		// signal, lost := signal.Destroy(rnd) // doesn't
-
-		if lost {
+		signal = signal.Amplify(rnd) // "Russian Roulette"
+		if signal == (Energy{}) {
 			break
 		}
-		if next, dir, strength := mat.Bsdf(normal, ray.Dir, dist, rnd); next {
-			signal = Energy(Vector3(signal).By(strength))
+		if next, dir, str := mat.Bsdf(normal, ray.Dir, dist, rnd); next {
+			signal = signal.Strength(str)
 			ray = Ray3{point, dir}
 		} else {
 			break
