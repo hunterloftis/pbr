@@ -102,7 +102,7 @@ func (m *Material) Bsdf(norm, inc Direction, dist float64, rnd *rand.Rand) (bool
 			return m.transmit(norm, inc, rnd)
 		// absorb
 		case rnd.Float64() < m.Metal:
-			return m.absorb(norm, inc)
+			return m.absorb(inc)
 		// diffuse
 		default:
 			return m.diffuse(norm, inc, rnd)
@@ -138,7 +138,7 @@ func (m *Material) transmit(norm, inc Direction, rnd *rand.Rand) (bool, Directio
 
 func (m *Material) exit(norm, inc Direction, dist float64, rnd *rand.Rand) (bool, Direction, Energy) {
 	if m.Transmit == 0 {
-		return false, inc, Energy{}
+		return true, inc, Energy{10, 0, 0}
 	}
 	if rnd.Float64() >= schlick(norm, inc, 0, m.refract, 1.0) {
 		if exited, refr := inc.Refracted(norm.Inv(), m.refract, 1); exited {
@@ -155,7 +155,7 @@ func (m *Material) diffuse(norm, inc Direction, rnd *rand.Rand) (bool, Direction
 	return true, norm.RandHemiCos(rnd), m.Color.Amplified(1 / math.Pi)
 }
 
-func (m *Material) absorb(norm, inc Direction) (bool, Direction, Energy) {
+func (m *Material) absorb(inc Direction) (bool, Direction, Energy) {
 	return false, inc, Energy{}
 }
 
