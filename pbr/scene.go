@@ -42,7 +42,7 @@ func (s *Scene) Intersect(ray Ray3) (hit bool, surf Surface, dist float64) {
 
 // Env returns the light value from the environment map.
 // http://gl.ict.usc.edu/Data/HighResProbes/
-func (s *Scene) Env(ray Ray3) Vector3 {
+func (s *Scene) Env(ray Ray3) Energy {
 	if s.pano != nil {
 		u := 1 + math.Atan2(ray.Dir.X, -ray.Dir.Z)/math.Pi
 		v := math.Acos(ray.Dir.Y) / math.Pi
@@ -52,10 +52,10 @@ func (s *Scene) Env(ray Ray3) Vector3 {
 		r := float64(s.pano.Data[index])
 		g := float64(s.pano.Data[index+1])
 		b := float64(s.pano.Data[index+2])
-		return Vector3{r, g, b}.Scaled(s.pano.Expose)
+		return Energy(Vector3{r, g, b}.Scaled(s.pano.Expose))
 	}
 	vertical := math.Max((ray.Dir.Cos(Up)+0.5)/1.5, 0)
-	return s.skyDown.Lerp(s.skyUp, vertical)
+	return Energy(s.skyDown.Lerp(s.skyUp, vertical))
 }
 
 // Add adds new Surfaces to the scene.
