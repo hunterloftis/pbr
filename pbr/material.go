@@ -138,7 +138,9 @@ func (m *Material) transmit(norm, inc Direction, rnd *rand.Rand) (bool, Directio
 
 func (m *Material) exit(norm, inc Direction, dist float64, rnd *rand.Rand) (bool, Direction, Energy) {
 	if m.Transmit == 0 {
-		return true, inc, Energy{10, 0, 0}
+		// shallow bounce within margin of error
+		// isn't really an intersection, so just keep the ray moving
+		return true, inc, Energy{1, 1, 1}
 	}
 	if rnd.Float64() >= schlick(norm, inc, 0, m.refract, 1.0) {
 		if exited, refr := inc.Refracted(norm.Inv(), m.refract, 1); exited {
