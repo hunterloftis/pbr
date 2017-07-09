@@ -30,6 +30,7 @@ func (a Direction) Cos(b Direction) float64 {
 }
 
 // Refracted refracts a vector through the plane represented by a normal, based on the ratio of refraction indices.
+// https://www.bramz.net/data/writings/reflection_transmission.pdf
 func (a Direction) Refracted(normal Direction, indexA, indexB float64) (bool, Direction) {
 	ratio := indexA / indexB
 	cos := normal.Cos(a)
@@ -41,24 +42,25 @@ func (a Direction) Refracted(normal Direction, indexA, indexB float64) (bool, Di
 	return true, a.Scaled(ratio).Minus(offset).Unit()
 }
 
-// Reflected reflects the vector about a normal (b)
-func (a Direction) Reflected(b Direction) Direction {
-	cos := b.Cos(a)
-	return Vector3(a).Minus(b.Scaled(2 * cos)).Unit()
+// Reflected reflects the vector about a normal.
+// https://www.bramz.net/data/writings/reflection_transmission.pdf
+func (a Direction) Reflected(normal Direction) Direction {
+	cos := normal.Cos(a)
+	return Vector3(a).Minus(normal.Scaled(2 * cos)).Unit()
 }
 
-// Scaled multiplies by a scalar
+// Scaled multiplies a Direction by a scalar to produce a Vector3.
 func (a Direction) Scaled(n float64) Vector3 {
 	return Vector3(a).Scaled(n)
 }
 
-// Cross returns the cross product of vectors a and b
+// Cross returns the cross product of unit vectors a and b.
 func (a Direction) Cross(b Direction) Direction {
 	return Direction{a.Y*b.Z - a.Z*b.Y, a.Z*b.X - a.X*b.Z, a.X*b.Y - a.Y*b.X}
 }
 
-// Cone returns a random vector within a Cone of the original vector
-// size is 0-1, where 0 is the original vector and 1 is anything within the original hemisphere
+// Cone returns a random vector within a cone about Direction a.
+// size is 0-1, where 0 is the original vector and 1 is anything within the original hemisphere.
 // https://github.com/fogleman/pt/blob/69e74a07b0af72f1601c64120a866d9a5f432e2f/pt/util.go#L24
 func (a Direction) Cone(size float64, rnd *rand.Rand) Direction {
 	u := rnd.Float64()
@@ -77,17 +79,18 @@ func (a Direction) Cone(size float64, rnd *rand.Rand) Direction {
 	return d.Unit()
 }
 
-// RandDirection returns a random unit vector (some point on the edge of a unit sphere)
+// RandDirection returns a random unit vector (a point on the edge of a unit sphere).
 func RandDirection(rnd *rand.Rand) Direction {
 	return AngleDirection(rnd.Float64()*math.Pi*2, math.Asin(rnd.Float64()*2-1))
 }
 
-// AngleDirection creates a vector based on theta and phi
+// AngleDirection creates a unit vector based on theta and phi.
 func AngleDirection(theta, phi float64) Direction {
 	return Direction{math.Cos(theta) * math.Cos(phi), math.Sin(phi), math.Sin(theta) * math.Cos(phi)}
 }
 
-// RandHemiCos returns a random unit vector sharing a hemisphere with this Vector with a cosine weighted distribution
+// RandHemiCos returns a random unit vector within the hemisphere of the normal direction a.
+// It distributes these random vectors with a cosine weight.
 // https://github.com/fogleman/pt/blob/69e74a07b0af72f1601c64120a866d9a5f432e2f/pt/ray.go#L28
 func (a Direction) RandHemiCos(rnd *rand.Rand) Direction {
 	u := rnd.Float64()
