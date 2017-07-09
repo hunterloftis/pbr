@@ -8,7 +8,7 @@ import (
 
 func main() {
 	scene := pbr.EmptyScene()
-	camera := pbr.Camera35mm(960, 540, 0.050)
+	camera := pbr.Camera35mm(1280, 720, 0.050)
 	renderer := pbr.CamRenderer(camera, 1)
 	cli := pbr.CliRunner(scene, camera, renderer)
 
@@ -37,7 +37,7 @@ func main() {
 		pbr.UnitSphere(pbr.Ident().Trans(0.45, 0.05, -0.4).Scale(0.2, 0.2, 0.2), silver),
 	)
 
-	camera.MoveTo(-0.6, 0.3, 0.8)
+	camera.MoveTo(-0.7, 0.3, 0.9)
 	camera.LookAt(-0.1, 0.001, 0.1)
 	camera.Focus(-0.1, 0.001, 0.1, 4)
 
