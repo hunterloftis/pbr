@@ -1,6 +1,8 @@
 package pbr
 
-import "math/rand"
+import (
+	"math/rand"
+)
 
 // Energy is a way to store RGB light energy
 type Energy Vector3
@@ -17,9 +19,8 @@ func (a Energy) Scaled(n float64) Energy {
 
 // Destroy randomly destroys energy
 func (a Energy) Destroy(rnd *rand.Rand) (Energy, bool) {
-	risk := Vector3(a).Max()
-	if rnd.Float64() >= risk {
+	if rnd.Float64() > Vector3(a).Max() {
 		return a, true
 	}
-	return Energy{a.X / risk, a.Y / risk, a.Z / risk}, false
+	return a.Scaled(1 / Vector3(a).Max()), false
 }
