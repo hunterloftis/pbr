@@ -6,15 +6,17 @@ import (
 
 // Cube describes a unit cube scaled, rotated, and translated by Pos.
 type Cube struct {
-	Pos *Matrix4
-	Mat *Material
+	Pos  *Matrix4
+	Mat  *Material
+	Grid *Material
 }
 
 // UnitCube returns a pointer to a new 1x1x1 Cube Surface with position pos and material mat.
-func UnitCube(pos *Matrix4, mat *Material) *Cube {
+func UnitCube(pos *Matrix4, mat *Material, grid *Material) *Cube {
 	return &Cube{
-		Pos: pos,
-		Mat: mat,
+		Pos:  pos,
+		Mat:  mat,
+		Grid: grid,
 	}
 }
 
@@ -47,36 +49,40 @@ func (c *Cube) Intersect(ray Ray3) (bool, float64) {
 		}
 	}
 	if t0 > 0 {
-		if dist := c.Pos.MultDir(r.Dir.Scaled(t0)).Len(); dist >= Bias {
+		if dist := c.Pos.MultDist(r.Dir.Scaled(t0)).Len(); dist >= Bias {
 			return true, dist
 		}
 	}
 	if t1 > 0 {
-		if dist := c.Pos.MultDir(r.Dir.Scaled(t1)).Len(); dist >= Bias {
+		if dist := c.Pos.MultDist(r.Dir.Scaled(t1)).Len(); dist >= Bias {
 			return true, dist
 		}
 	}
 	return false, 0
 }
 
-// NormalAt returns the normal Vector3 at this point on the Surface
-func (c *Cube) NormalAt(p Vector3) Vector3 {
+// At returns the normal Vector3 at this point on the Surface
+func (c *Cube) At(p Vector3) (normal Direction, mat *Material) {
 	i := c.Pos.Inverse() // global to local transform
 	p1 := i.MultPoint(p) // translate point into local space
 	abs := p1.Abs()
-	var normal Vector3
 	switch {
 	case abs.X > abs.Y && abs.X > abs.Z:
-		normal = Vector3{math.Copysign(1, p1.X), 0, 0}
+		normal = Direction{math.Copysign(1, p1.X), 0, 0}
 	case abs.Y > abs.Z:
-		normal = Vector3{0, math.Copysign(1, p1.Y), 0}
+		normal = Direction{0, math.Copysign(1, p1.Y), 0}
 	default:
-		normal = Vector3{0, 0, math.Copysign(1, p1.Z)}
+		normal = Direction{0, 0, math.Copysign(1, p1.Z)}
 	}
-	return c.Pos.MultNormal(normal) // translate normal from local to global space
-}
-
-// MaterialAt returns the Material at this point on the Surface
-func (c *Cube) MaterialAt(v Vector3) *Material {
-	return c.Mat
+	// translate normal from local to global space
+	mat = c.Mat
+	if c.Grid != nil {
+		x, z := p.X*20, p.Z*20
+		if dx := math.Abs(x - math.Floor(x)); dx < 0.03 {
+			mat = c.Grid
+		} else if dz := math.Abs(z - math.Floor(z)); dz < 0.03 {
+			mat = c.Grid
+		}
+	}
+	return c.Pos.MultNormal(normal), mat
 }
