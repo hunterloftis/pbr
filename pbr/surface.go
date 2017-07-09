@@ -4,5 +4,5 @@ package pbr
 // A surface is anything that can be intersected by a Ray.
 type Surface interface {
 	Intersect(Ray3) (bool, float64)
-	At(Vector3) (normal Vector3, material *Material)
+	At(Vector3) (normal Direction, material *Material)
 }

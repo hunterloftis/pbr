@@ -55,7 +55,7 @@ func (c *Camera) ray(x, y float64, rnd *rand.Rand) Ray3 {
 	py := ry / float64(c.Height)
 	sensorPt := c.sensorPoint(px, py)
 	straight := Vector3{}.Minus(sensorPt).Unit()
-	focalPt := straight.Scaled(c.focus)
+	focalPt := Vector3(straight).Scaled(c.focus)
 	lensPt := c.aperturePoint(rnd)
 	refracted := focalPt.Minus(lensPt).Unit()
 	ray := Ray3{Origin: lensPt, Dir: refracted}
