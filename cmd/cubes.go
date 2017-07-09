@@ -8,7 +8,7 @@ import (
 
 func main() {
 	scene := pbr.EmptyScene()
-	camera := pbr.Camera35mm(640, 360, 0.050)
+	camera := pbr.Camera35mm(1280, 720, 0.050)
 	renderer := pbr.CamRenderer(camera, 1)
 	cli := pbr.CliRunner(scene, camera, renderer)
 
