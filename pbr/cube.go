@@ -6,18 +6,25 @@ import (
 
 // Cube describes a unit cube scaled, rotated, and translated by Pos.
 type Cube struct {
-	Pos  *Matrix4
-	Mat  *Material
-	Grid *Material
+	Pos      *Matrix4
+	Mat      *Material
+	GridMat  *Material
+	GridSize float64
 }
 
 // UnitCube returns a pointer to a new 1x1x1 Cube Surface with position pos and material mat.
-func UnitCube(pos *Matrix4, mat *Material, grid *Material) *Cube {
+func UnitCube(pos *Matrix4, mat *Material) *Cube {
 	return &Cube{
-		Pos:  pos,
-		Mat:  mat,
-		Grid: grid,
+		Pos: pos,
+		Mat: mat,
 	}
+}
+
+// SetGrid configures a cube grid
+func (c *Cube) SetGrid(mat *Material, size float64) *Cube {
+	c.GridMat = mat
+	c.GridSize = size
+	return c
 }
 
 // Intersect tests for an intersection between a Ray3 and this Cube
@@ -76,12 +83,12 @@ func (c *Cube) At(p Vector3) (normal Direction, mat *Material) {
 	}
 	// translate normal from local to global space
 	mat = c.Mat
-	if c.Grid != nil {
-		x, z := p.X*20, p.Z*20
+	if c.GridMat != nil && c.GridSize > 0 {
+		x, z := p.X/c.GridSize, p.Z/c.GridSize
 		if dx := math.Abs(x - math.Floor(x)); dx < 0.03 {
-			mat = c.Grid
+			mat = c.GridMat
 		} else if dz := math.Abs(z - math.Floor(z)); dz < 0.03 {
-			mat = c.Grid
+			mat = c.GridMat
 		}
 	}
 	return c.Pos.MultDir(normal), mat
