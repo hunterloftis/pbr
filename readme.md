@@ -10,6 +10,7 @@ Package pbr implements Physically-Based Rendering with a Monte Carlo path tracer
 - Adaptive [sampling](https://renderman.pixar.com/resources/RenderMan_20/risSampling.html)
 - [Russian roulette](https://computergraphics.stackexchange.com/questions/2316/is-russian-roulette-really-the-answer)
 - Parametric shapes (spheres, cubes)
+- Transformation matrices (translate, rotate, scale)
 - Physically-based [materials](https://www.marmoset.co/posts/basic-theory-of-physically-based-rendering/)
   - Fresnel reflection, transmission, absorption, diffusion
   - Color, refractive indices, gloss, transparency, separate fresnel channels, metals
