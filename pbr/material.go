@@ -14,7 +14,6 @@ type Material struct {
 	Transmit float64 // 0 = opaque, 1 = transparent, (0-1) = tinted thin surface
 	Gloss    float64 // Microsurface roughness (Material "polish")
 	Metal    float64 // The metallic range of electric (1) or dielectric (0), controls energy absorption
-	Grid     bool
 
 	absorbance Energy  // Initd absorbance
 	refract    float64 // Initd index of refraction
