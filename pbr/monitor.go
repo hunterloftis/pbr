@@ -16,10 +16,19 @@ func (m *Monitor) Start(workers int) (update chan []float64, done chan []interfa
 	}
 	update = make(chan []float64)
 	done = make(chan []interface{})
+
+	for i := 0; i < workers; i++ {
+		go m.worker(m.Sampler.Clone(), update, done)
+	}
+
 	m.samplers = []*Sampler{}
 	for len(m.samplers) < workers {
 		m.samplers = append(m.samplers, m.Sampler.Clone())
 	}
 
 	return
+}
+
+func (m *Monitor) worker(sampler *Sampler, update chan []float64, done chan []interface{}) {
+
 }

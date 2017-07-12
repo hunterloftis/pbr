@@ -53,15 +53,9 @@ func main() {
 		Focus:    focus,
 		FStop:    *fStop,
 	})
-	sampler := pbr.NewSampler(camera, scene, pbr.SamplerConfig{
-		Bounces: *bounces,
-		Samples: *samples,
-		Adapt:   *adapt,
-	})
 	renderer := pbr.CamRenderer(camera, pbr.RenderConfig{
 		Exposure: *exposure,
 	})
-	monitor := pbr.Monitor{Sampler: sampler, Renderer: renderer}
 
 	scene.SetSky(sky, pbr.Vector3{})
 	if len(*pano) > 0 {
@@ -70,21 +64,53 @@ func main() {
 		scene.SetPano(hdr, 100) // TODO: read radiosity info or allow it from the command line
 	}
 
-	interrupt := make(chan os.Signal)
+	total := float64(renderer.Width*renderer.Height) * (*samples)
+	interrupt := make(chan os.Signal, 2)
+	update := make(chan float64)
+	done := make(chan []interface{})
+	results := make(chan []float64)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-	update, complete := monitor.Start(*workers)
 
-	for {
+	for i := 0; i < *workers; i++ {
+		go func(i int) {
+			fmt.Println("creating worker:", i)
+			s := pbr.NewSampler(camera, scene, pbr.SamplerConfig{
+				Bounces: *bounces,
+				Adapt:   *adapt,
+			})
+			for i := 0.0; i < total; i += float64(s.SampleFrame()) {
+				select {
+				case <-done:
+					fmt.Println("worker got done signal:", i)
+					break
+				default:
+					update <- i
+				}
+			}
+			results <- s.Pixels()
+		}(i)
+	}
+
+	pending := *workers
+workerLoop:
+	for pending > 0 {
 		select {
-		case pp := <-update:
-			fmt.Printf("%v samples / pixel\n", pp)
-		case <-complete:
-			break
+		case s := <-update:
+			fmt.Printf("%v samples\n", s)
+		case r := <-results:
+			fmt.Println("merging...")
+			renderer.Merge(r)
+			pending--
 		case <-interrupt:
-			break
+			fmt.Println("interrupting")
+			break workerLoop
+		case <-done:
+			break workerLoop
 		default:
 		}
 	}
+	fmt.Println("closing done")
+	close(done)
 
 	writePNG(*out, renderer.Rgb())
 	fmt.Printf("-> %v\n", *out)
