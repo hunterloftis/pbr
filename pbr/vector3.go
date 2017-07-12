@@ -75,7 +75,7 @@ func (a Vector3) Abs() Vector3 {
 }
 
 // String returns a string representation of this vector
-func (a Vector3) String() string {
+func (a *Vector3) String() string {
 	x := strconv.FormatFloat(a.X, 'f', -1, 64)
 	y := strconv.FormatFloat(a.Y, 'f', -1, 64)
 	z := strconv.FormatFloat(a.Z, 'f', -1, 64)
@@ -86,7 +86,7 @@ func (a Vector3) String() string {
 func (a *Vector3) Set(val string) error {
 	xyz := strings.Split(val, ",")
 	if len(xyz) != 3 {
-		return fmt.Errorf("pbr: 3 values required for Vector3, received %g", len(xyz))
+		return fmt.Errorf("pbr: 3 values required for Vector3, received %v", len(xyz))
 	}
 	x, err := strconv.ParseFloat(xyz[0], 64)
 	if err != nil {
