@@ -1,6 +1,7 @@
 package pbr
 
 import (
+	"fmt"
 	"io"
 	"math"
 
@@ -26,6 +27,13 @@ type Scene struct {
 // EmptyScene creates and returns a pointer to an empty Scene.
 func EmptyScene() *Scene {
 	return &Scene{}
+}
+
+// ColladaScene creates a Scene from collada xml data
+func ColladaScene(xml []byte) *Scene {
+	fmt.Println("xml:", xml)
+	s := Scene{}
+	return &s
 }
 
 // Intersect tests whether a ray hits any objects in the scene

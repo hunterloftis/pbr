@@ -8,30 +8,56 @@ import (
 
 // Sampler samples pixels for a Scene by tracing Rays from a Camera.
 type Sampler struct {
-	Width   int
-	Height  int
-	pixels  []float64 // stored in a flat array of Elements
-	cam     *Camera
-	scene   *Scene
-	bounces int
-	count   int
-	noise   float64
-	adapt   int
+	Width  int
+	Height int
+	SamplerConfig
+	pixels []float64 // stored in a flat array of Elements
+	cam    *Camera
+	scene  *Scene
+	count  int
+	noise  float64
+}
+
+// SamplerConfig configures a Sampler
+type SamplerConfig struct {
+	Bounces int
+	Samples float64
+	Adapt   int
 }
 
 // NewSampler constructs a new Sampler instance.
 // The Sampler samples Rays from the Camera into the Scene.
 // bounces specifies the maximum number of times a Ray can bounce around the scene (eg, 10).
 // adapt specifies how adaptive sampling should be to noise (0 = none, 3 = medium, 4 = high).
-func NewSampler(cam *Camera, scene *Scene, bounces int, adapt int) *Sampler {
+func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
+	conf := config[0]
+	if conf.Bounces == 0 {
+		conf.Bounces = 10 // Reasonable default
+	}
+	if conf.Samples == 0 {
+		conf.Samples = math.Inf(1) // Sample forever by default
+	}
 	return &Sampler{
-		Width:   cam.Width,
-		Height:  cam.Height,
-		pixels:  make([]float64, cam.Width*cam.Height*Elements),
-		cam:     cam,
-		scene:   scene,
-		bounces: bounces,
-		adapt:   adapt,
+		Width:         cam.Width,
+		Height:        cam.Height,
+		SamplerConfig: conf,
+		pixels:        make([]float64, cam.Width*cam.Height*Elements),
+		cam:           cam,
+		scene:         scene,
+	}
+}
+
+// Clone clones a concurrency-safe copy of this Sampler
+func (s *Sampler) Clone() *Sampler {
+	return &Sampler{
+		Width:         s.Width,
+		Height:        s.Height,
+		SamplerConfig: s.SamplerConfig,
+		pixels:        s.pixels,
+		cam:           s.cam,
+		scene:         s.scene,
+		count:         s.count,
+		noise:         s.noise,
 	}
 }
 
@@ -42,7 +68,7 @@ func (s *Sampler) SampleFrame() (total int) {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	noise := 0.0
 	mean := s.noise + Bias
-	max := s.adapt * 3
+	max := s.Adapt * 3
 	length := len(s.pixels)
 	for p := 0; p < length; p += Elements {
 		samples := s.Adaptive(s.pixels[p+Noise], mean, max)
@@ -56,7 +82,7 @@ func (s *Sampler) SampleFrame() (total int) {
 // Adaptive returns the number of samples to take given specific and average noise values.
 func (s *Sampler) Adaptive(noise float64, mean float64, max int) int {
 	ratio := noise/mean + Bias
-	return int(math.Min(math.Ceil(math.Pow(ratio, float64(s.adapt))), float64(max)))
+	return int(math.Min(math.Ceil(math.Pow(ratio, float64(s.Adapt))), float64(max)))
 }
 
 // Sample samples a single pixel `samples` times.
@@ -97,7 +123,7 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Energy {
 	signal := Energy{1, 1, 1}
 	energy := Energy{0, 0, 0}
 
-	for bounce := 0; bounce < s.bounces; bounce++ {
+	for bounce := 0; bounce < s.Bounces; bounce++ {
 		hit, surface, dist := s.scene.Intersect(ray)
 		if !hit {
 			energy = energy.Merged(s.scene.Env(ray), signal)

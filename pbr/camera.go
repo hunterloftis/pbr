@@ -11,43 +11,51 @@ import (
 type Camera struct {
 	Width  int
 	Height int
-	Lens   float64
-	Sensor float64
-	origin Vector3
-	target Vector3
-	focus  float64
-	fStop  float64
-	pos    *Matrix4
+	CameraConfig
+
+	focus float64
+	pos   *Matrix4
 }
 
-// Camera35mm makes a new Full-frame (35mm) camera.
-func Camera35mm(width, height int, lens float64) *Camera {
+// CameraConfig configures a camera
+type CameraConfig struct {
+	Lens     float64
+	Sensor   float64
+	Position Vector3
+	Target   *Vector3
+	Focus    *Vector3
+	FStop    float64
+}
+
+// NewCamera makes a new Full-frame (35mm) camera.
+func NewCamera(width, height int, config ...CameraConfig) *Camera {
+	conf := config[0]
+	if conf.Lens == 0 {
+		conf.Lens = 0.050 // 50mm focal length
+	}
+	if conf.Sensor == 0 {
+		conf.Sensor = 0.024 // height (36mm x 24mm, 35mm full frame standard)
+	}
+	if conf.Target == nil {
+		target := conf.Position.Plus(Vector3{0, 0, -1})
+		conf.Target = &target
+	}
+	if conf.Focus == nil {
+		conf.Focus = conf.Target
+	}
+	if conf.FStop == 0 {
+		conf.FStop = 4
+	}
 	return &Camera{
-		Width:  width,
-		Height: height,
-		Lens:   lens,
-		Sensor: 0.024, // height (36mm x 24mm, 35mm full frame standard)
+		Width:        width,
+		Height:       height,
+		CameraConfig: conf,
+		focus:        conf.Focus.Minus(conf.Position).Len(),
+		pos:          LookMatrix(conf.Position, *conf.Target),
 	}
 }
 
-// LookAt orients the camera
-func (c *Camera) LookAt(x, y, z float64) {
-	c.target = Vector3{x, y, z}
-	c.pos = LookMatrix(c.origin, c.target)
-}
-
-// MoveTo positions the camera
-func (c *Camera) MoveTo(x, y, z float64) {
-	c.origin = Vector3{x, y, z}
-	c.pos = LookMatrix(c.origin, c.target)
-}
-
-// Focus on a point
-func (c *Camera) Focus(x, y, z, fStop float64) {
-	c.focus = Vector3{x, y, z}.Minus(c.origin).Len()
-	c.fStop = fStop
-}
-
+// TODO: precompute N rays for each x, y pixel & then remove Camera.focus
 func (c *Camera) ray(x, y float64, rnd *rand.Rand) Ray3 {
 	rx := x + rnd.Float64()
 	ry := y + rnd.Float64()
@@ -74,7 +82,7 @@ func (c *Camera) sensorPoint(u, v float64) Vector3 {
 
 // https://stackoverflow.com/questions/5837572/generate-a-random-point-within-a-circle-uniformly
 func (c *Camera) aperturePoint(rnd *rand.Rand) Vector3 {
-	d := c.Lens / c.fStop
+	d := c.Lens / c.FStop
 	t := 2 * math.Pi * rnd.Float64()
 	r := math.Sqrt(rnd.Float64()) * d * 0.5
 	x := r * math.Cos(t)

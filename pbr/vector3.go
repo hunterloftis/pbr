@@ -1,7 +1,10 @@
 package pbr
 
 import (
+	"fmt"
 	"math"
+	"strconv"
+	"strings"
 )
 
 // Vector3 holds x, y, z
@@ -69,4 +72,34 @@ func (a Vector3) Equals(b Vector3) bool {
 // Abs converts X, Y, and Z to absolute values
 func (a Vector3) Abs() Vector3 {
 	return Vector3{math.Abs(a.X), math.Abs(a.Y), math.Abs(a.Z)}
+}
+
+// String returns a string representation of this vector
+func (a Vector3) String() string {
+	x := strconv.FormatFloat(a.X, 'f', -1, 64)
+	y := strconv.FormatFloat(a.Y, 'f', -1, 64)
+	z := strconv.FormatFloat(a.Z, 'f', -1, 64)
+	return strings.Join([]string{x, y, z}, ",")
+}
+
+// Set sets the vector from a string value
+func (a *Vector3) Set(val string) error {
+	xyz := strings.Split(val, ",")
+	if len(xyz) != 3 {
+		return fmt.Errorf("pbr: 3 values required for Vector3, received %g", len(xyz))
+	}
+	x, err := strconv.ParseFloat(xyz[0], 64)
+	if err != nil {
+		return err
+	}
+	y, err := strconv.ParseFloat(xyz[1], 64)
+	if err != nil {
+		return err
+	}
+	z, err := strconv.ParseFloat(xyz[2], 64)
+	if err != nil {
+		return err
+	}
+	a.X, a.Y, a.Z = x, y, z
+	return nil
 }

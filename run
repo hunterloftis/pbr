@@ -1,5 +1,5 @@
 set -o errexit
 mkdir -p out bin
-go build -o bin/cubes ./cmd/cubes.go
+go build -o bin/cubes ./cmd/cubes/cubes.go
 time bin/cubes -out out/render.png -heat out/heat.png
 open out/render.png

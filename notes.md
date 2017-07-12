@@ -2,9 +2,12 @@
 
 - http://renderwonk.com/publications/s2010-shading-course/hoffman/s2010_physically_based_shading_hoffman_a.pdf
 
-# Go concurrency
+# Golang
 
 - https://talks.golang.org/2012/concurrency.slide#25
+- http://peter.bourgon.org/go-best-practices-2016/
+- https://talks.golang.org/2014/names.slide#1
+- https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
 
 # Light probe environment maps
 
@@ -55,6 +58,7 @@
 - http://www.saunalahti.fi/~sevesalm/ssRay/ShowImage.php?img=14
 - http://www.saunalahti.fi/~sevesalm/ssRay/ShowImage.php?img=5
 - https://www.disneyanimation.com/technology/innovations/hyperion
+- http://gizmodo.com/9-of-the-most-photorealistic-renderings-on-the-web-823379988
 
 # sRGB (& fixing in Go)
 
