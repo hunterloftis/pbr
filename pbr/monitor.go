@@ -4,34 +4,22 @@ import "runtime"
 
 // Monitor monitors several goroutines rendering stuff
 type Monitor struct {
-	C <-chan []float64
-	MonitorConfig
+	Sampler  *Sampler
+	Renderer *Renderer
 	samplers []*Sampler
 }
 
-// MonitorConfig configures a Monitor
-type MonitorConfig struct {
-	Workers int
-}
-
-// NewMonitor creates a new monitor
-func NewMonitor(sampler *Sampler, renderer *Renderer, config ...MonitorConfig) *Monitor {
-	c := config[0]
-	if c.Workers == 0 {
-		c.Workers = runtime.NumCPU() // use one worker per CPU by default
-	}
-	m := Monitor{
-		C:             make(<-chan []float64),
-		MonitorConfig: c,
-		samplers:      []*Sampler{sampler},
-	}
-	for len(m.samplers) < m.Workers {
-		m.samplers = append(m.samplers, sampler.Clone())
-	}
-	return &m
-}
-
 // Start creates workers and starts monitoring
-func (m *Monitor) Start() {
+func (m *Monitor) Start(workers int) (update chan []float64, done chan []interface{}) {
+	if workers == 0 {
+		workers = runtime.NumCPU()
+	}
+	update = make(chan []float64)
+	done = make(chan []interface{})
+	m.samplers = []*Sampler{}
+	for len(m.samplers) < workers {
+		m.samplers = append(m.samplers, m.Sampler.Clone())
+	}
 
+	return
 }

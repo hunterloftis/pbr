@@ -1,7 +1,6 @@
 package pbr
 
 import (
-	"fmt"
 	"io"
 	"math"
 
@@ -20,7 +19,7 @@ type RGBAE struct {
 type Scene struct {
 	Surfaces []Surface
 	pano     *RGBAE
-	skyUp    Vector3
+	skyUp    Vector3 // TODO: these should be Energy
 	skyDown  Vector3
 }
 
@@ -31,7 +30,7 @@ func EmptyScene() *Scene {
 
 // ColladaScene creates a Scene from collada xml data
 func ColladaScene(xml []byte) *Scene {
-	fmt.Println("xml:", xml)
+	// fmt.Println("xml:", string(xml))
 	s := Scene{}
 	return &s
 }

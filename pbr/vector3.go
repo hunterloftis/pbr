@@ -76,6 +76,9 @@ func (a Vector3) Abs() Vector3 {
 
 // String returns a string representation of this vector
 func (a *Vector3) String() string {
+	if a == nil {
+		return ""
+	}
 	x := strconv.FormatFloat(a.X, 'f', -1, 64)
 	y := strconv.FormatFloat(a.Y, 'f', -1, 64)
 	z := strconv.FormatFloat(a.Z, 'f', -1, 64)
