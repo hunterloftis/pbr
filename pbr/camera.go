@@ -37,7 +37,7 @@ func NewCamera(width, height int, config ...CameraConfig) *Camera {
 		conf.Sensor = 0.024 // height (36mm x 24mm, 35mm full frame standard)
 	}
 	if conf.Target == nil {
-		target := conf.Position.Plus(Vector3{0, 0, -1})
+		target := conf.Position.Plus(Vector3{0, 0, -3})
 		conf.Target = &target
 	}
 	if conf.Focus == nil {

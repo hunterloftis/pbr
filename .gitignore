@@ -2,3 +2,4 @@ out/*
 bin/*
 .DS_Store
 profile.pprof
+render.png

@@ -64,6 +64,11 @@ func main() {
 		scene.SetPano(hdr, 100) // TODO: read radiosity info or allow it from the command line
 	}
 
+	redPlastic := pbr.Plastic(1, 0, 0, 1)
+	scene.Add(
+		pbr.UnitCube(pbr.Ident().Trans(0, 0, -3).Rot(pbr.Vector3{0, 1, 0}).Scale(0.25, 0.25, 0.25), redPlastic),
+	)
+
 	total := float64(renderer.Width*renderer.Height) * (*samples)
 	interrupt := make(chan os.Signal, 2)
 	update := make(chan float64)
