@@ -6,6 +6,7 @@ import (
 	"image"
 	"image/png"
 	"io/ioutil"
+	"math"
 	"os"
 	"os/signal"
 	"runtime"
@@ -23,7 +24,7 @@ func main() {
 	out := flag.String("out", "render.png", "Output png filename")
 	heat := flag.String("heat", "", "Heatmap png filename")
 	workers := flag.Int("workers", runtime.NumCPU(), "Concurrency level")
-	// samples := flag.Float64("samples", math.Inf(1), "Max samples per pixel")
+	quality := flag.Float64("quality", math.Inf(1), "Minimum samples-per-pixel to reach before exiting")
 	adapt := flag.Int("adapt", 4, "Adaptive sampling; 0=off, 3=medium, 5=high")
 	bounces := flag.Int("bounces", 10, "Maximum light bounces")
 	profile := flag.Bool("profile", false, "Record performance into profile.pprof")
@@ -82,13 +83,12 @@ func main() {
 	for m.Active() > 0 {
 		select {
 		case samples := <-m.Progress:
-			pp := samples / camera.Pixels()
-			note := ""
-			if m.Stopped() {
-				note = " (wrapping up...)"
+			perPixel := samples / camera.Pixels()
+			showProgress(perPixel, m.Stopped())
+			if float64(perPixel) >= *quality {
+				m.Stop()
 			}
-			fmt.Printf("\r%v samples per pixel%v", pp, note) // https://stackoverflow.com/a/15442704/1911432
-		case r := <-m.Results:
+		case r := <-m.Results: // TODO: move responsibility for merging results into Monitor?
 			renderer.Merge(r)
 		case <-interrupt:
 			m.Stop()
@@ -97,10 +97,10 @@ func main() {
 	}
 
 	writePNG(*out, renderer.Rgb())
-	fmt.Printf("\n-> %v\n", *out)
+	showFile(*out)
 	if len(*heat) > 0 {
 		writePNG(*heat, renderer.Heat())
-		fmt.Printf("\n-> %v\n", *heat)
+		showFile(*heat)
 	}
 }
 
@@ -111,4 +111,16 @@ func writePNG(file string, i image.Image) error {
 	}
 	defer f.Close()
 	return png.Encode(f, i)
+}
+
+func showProgress(perPixel int, stopped bool) {
+	note := ""
+	if stopped {
+		note = " (wrapping up...)"
+	}
+	fmt.Printf("\r%v samples per pixel%v", perPixel, note) // https://stackoverflow.com/a/15442704/1911432
+}
+
+func showFile(file string) {
+	fmt.Printf("\n-> %v\n", file)
 }

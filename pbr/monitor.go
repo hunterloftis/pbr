@@ -33,7 +33,12 @@ func (m *Monitor) Active() int {
 
 // Stop stops all workers
 func (m *Monitor) Stop() {
-	close(m.cancel)
+	select {
+	case <-m.cancel:
+		return
+	default:
+		close(m.cancel)
+	}
 }
 
 // Stopped returns whether or not this is stopped

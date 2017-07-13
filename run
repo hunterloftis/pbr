@@ -1,5 +1,5 @@
 set -o errexit
 mkdir -p out bin
-go build cmd/render/render.go
-./render models/simple.dae
-open render.png
+go build -o bin/render cmd/render/render.go
+bin/render -quality 10 -out out/render.png models/simple.dae
+open out/render.png
