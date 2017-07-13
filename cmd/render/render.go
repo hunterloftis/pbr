@@ -25,7 +25,7 @@ func main() {
 	heat := flag.String("heat", "", "Heatmap png filename")
 	workers := flag.Int("workers", runtime.NumCPU(), "Concurrency level")
 	quality := flag.Float64("quality", math.Inf(1), "Minimum samples-per-pixel to reach before exiting")
-	adapt := flag.Int("adapt", 4, "Adaptive sampling; 0=off, 3=medium, 5=high")
+	adapt := flag.Int("adapt", 4, "Adaptive sampling; 0=off, 3=medium, 5=high") // TODO: 0 is broken
 	bounces := flag.Int("bounces", 10, "Maximum light bounces")
 	profile := flag.Bool("profile", false, "Record performance into profile.pprof")
 	pano := flag.String("pano", "", "Panoramic environment map hdr (radiosity) file")
