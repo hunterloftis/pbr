@@ -9,10 +9,10 @@ type Monitor struct {
 
 	cancel  chan interface{}
 	active  int
-	samples *sampleCount
+	samples *safeCount
 }
 
-type sampleCount struct {
+type safeCount struct {
 	sync.Mutex
 	count int
 }
@@ -20,10 +20,10 @@ type sampleCount struct {
 // NewMonitor creates a new Monitor
 func NewMonitor() *Monitor {
 	return &Monitor{
-		Progress: make(chan int, 1),
+		Progress: make(chan int, 10),
 		Results:  make(chan []float64),
 		cancel:   make(chan interface{}),
-		samples:  &sampleCount{},
+		samples:  &safeCount{},
 	}
 }
 
