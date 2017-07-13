@@ -55,6 +55,11 @@ func NewCamera(width, height int, config ...CameraConfig) *Camera {
 	}
 }
 
+// Pixels returns the number of pixels rendered by this camera
+func (c *Camera) Pixels() int {
+	return c.Width * c.Height
+}
+
 // TODO: precompute N rays for each x, y pixel & then remove Camera.focus
 func (c *Camera) ray(x, y float64, rnd *rand.Rand) Ray3 {
 	rx := x + rnd.Float64()

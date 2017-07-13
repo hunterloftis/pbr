@@ -1,19 +1,26 @@
 package pbr
 
+import "sync"
+
 // Monitor monitors several goroutines rendering stuff
 type Monitor struct {
-	Progress chan float64
+	Progress chan int
 	Results  chan []float64
 
-	cancel chan interface{}
-	active int
-	count  int
+	cancel  chan interface{}
+	active  int
+	samples sampleCount
+}
+
+type sampleCount struct {
+	sync.Mutex
+	count int
 }
 
 // NewMonitor creates a new Monitor
 func NewMonitor() *Monitor {
 	return &Monitor{
-		Progress: make(chan float64, 1),
+		Progress: make(chan int, 1),
 		Results:  make(chan []float64),
 		cancel:   make(chan interface{}),
 	}
@@ -32,17 +39,19 @@ func (m *Monitor) Stop() {
 // AddSampler creates a new worker with that sampler
 func (m *Monitor) AddSampler(s *Sampler) {
 	m.active++
-	m.count++
-	i := m.count
 	go func() {
 		for {
-			s.SampleFrame()
+			frame := s.SampleFrame()
+			m.samples.Lock()
+			m.samples.count += frame
+			total := m.samples.count // TODO: do I need to do this or can I safely read after unlocking?
+			m.samples.Unlock()
 			select {
 			case <-m.cancel:
 				m.Results <- s.Pixels()
 				m.active--
 				return
-			case m.Progress <- float64(i):
+			case m.Progress <- total:
 			default:
 			}
 		}

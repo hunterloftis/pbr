@@ -47,36 +47,22 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 	}
 }
 
-// Clone clones a concurrency-safe copy of this Sampler
-func (s *Sampler) Clone() *Sampler {
-	return &Sampler{
-		Width:         s.Width,
-		Height:        s.Height,
-		SamplerConfig: s.SamplerConfig,
-		pixels:        s.pixels,
-		cam:           s.cam,
-		scene:         s.scene,
-		count:         s.count,
-		noise:         s.noise,
-	}
-}
-
 // SampleFrame samples every pixel in the Camera's frame at least once.
 // Depending on the Sampler's `adapt` value, noisy pixels may be sampled several times.
 // It returns the total number of samples taken.
 func (s *Sampler) SampleFrame() (total int) {
-	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano())) // TODO: this should exist in sampler, not sampleframe
 	noise := 0.0
 	mean := s.noise + Bias
 	max := s.Adapt * 3
 	length := len(s.pixels)
+	before := s.count
 	for p := 0; p < length; p += Elements {
 		samples := s.Adaptive(s.pixels[p+Noise], mean, max)
 		noise += s.Sample(p, rnd, samples)
-		total += samples
 	}
 	s.noise = noise / float64(s.Width*s.Height)
-	return
+	return s.count - before
 }
 
 // Adaptive returns the number of samples to take given specific and average noise values.
@@ -102,12 +88,18 @@ func (s *Sampler) Sample(p int, rnd *rand.Rand, samples int) float64 {
 	scale := (before.Len()+after.Len())/2 + 1e-6
 	noise := before.Minus(after).Len() / scale
 	s.pixels[p+Noise] = noise
+	s.count++
 	return noise
 }
 
 // Pixels returns an array of float64 pixel values.
 func (s *Sampler) Pixels() []float64 {
 	return s.pixels
+}
+
+// Count returns the total samples sampled
+func (s *Sampler) Count() int {
+	return s.count
 }
 
 func value(pixels []float64, i int) Vector3 {

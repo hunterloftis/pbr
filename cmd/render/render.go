@@ -81,13 +81,14 @@ func main() {
 
 	for m.Active() > 0 {
 		select {
-		case w := <-m.Progress:
-			fmt.Printf("%v progress, worker:\n", w)
+		case samples := <-m.Progress:
+			pp := samples / camera.Pixels()
+			fmt.Printf("%v samples per pixel\n", pp)
 		case r := <-m.Results:
 			fmt.Println("merging...")
 			renderer.Merge(r)
 		case <-interrupt:
-			fmt.Println("interrupting")
+			fmt.Println("\n(time to wrap it up)")
 			m.Stop()
 		default:
 		}
