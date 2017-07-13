@@ -13,7 +13,7 @@ type Monitor struct {
 // NewMonitor creates a new Monitor
 func NewMonitor() *Monitor {
 	return &Monitor{
-		Progress: make(chan float64),
+		Progress: make(chan float64, 1),
 		Results:  make(chan []float64),
 		cancel:   make(chan interface{}),
 	}
@@ -42,8 +42,8 @@ func (m *Monitor) AddSampler(s *Sampler) {
 				m.Results <- s.Pixels()
 				m.active--
 				return
+			case m.Progress <- float64(i):
 			default:
-				m.Progress <- float64(i)
 			}
 		}
 	}()
