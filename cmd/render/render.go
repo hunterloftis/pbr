@@ -36,6 +36,12 @@ func main() {
 	flag.Var(target, "target", "Camera target location")
 	flag.Var(focus, "focus", "Camera focus location")
 	flag.Var(&sky, "sky", "Ambient sky lighting")
+
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "\nUsage: %s [options] <scene.dae>\n\n", os.Args[0])
+		flag.PrintDefaults()
+		fmt.Println()
+	}
 	flag.Parse()
 
 	if *profile {
