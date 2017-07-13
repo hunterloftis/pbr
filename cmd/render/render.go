@@ -94,7 +94,7 @@ func main() {
 			if float64(perPixel) >= *quality {
 				m.Stop()
 			}
-		case r := <-m.Results: // TODO: move responsibility for merging results into Monitor?
+		case r := <-m.Results:
 			renderer.Merge(r)
 		case <-interrupt:
 			m.Stop()
