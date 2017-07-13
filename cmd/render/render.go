@@ -67,7 +67,7 @@ func main() {
 	total := float64(renderer.Width*renderer.Height) * (*samples)
 	interrupt := make(chan os.Signal, 2)
 	update := make(chan float64)
-	done := make(chan []interface{})
+	cancel := make(chan []interface{})
 	results := make(chan []float64)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
@@ -80,19 +80,18 @@ func main() {
 			})
 			for i := 0.0; i < total; i += float64(s.SampleFrame()) {
 				select {
-				case <-done:
+				case <-cancel:
 					fmt.Println("worker got done signal:", i)
-					break
+					results <- s.Pixels()
+					return
 				default:
 					update <- i
 				}
 			}
-			results <- s.Pixels()
 		}(i)
 	}
 
 	pending := *workers
-workerLoop:
 	for pending > 0 {
 		select {
 		case s := <-update:
@@ -103,14 +102,10 @@ workerLoop:
 			pending--
 		case <-interrupt:
 			fmt.Println("interrupting")
-			break workerLoop
-		case <-done:
-			break workerLoop
+			close(cancel)
 		default:
 		}
 	}
-	fmt.Println("closing done")
-	close(done)
 
 	writePNG(*out, renderer.Rgb())
 	fmt.Printf("-> %v\n", *out)
