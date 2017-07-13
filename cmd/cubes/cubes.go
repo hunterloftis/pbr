@@ -1,16 +1,32 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"image"
+	"image/png"
 	"math"
+	"os"
+	"os/signal"
+	"runtime"
+	"syscall"
 
 	"github.com/hunterloftis/pbr/pbr"
 )
 
 func main() {
+	out := flag.String("out", "render.png", "Output png filename")
+	heat := flag.String("heat", "", "Heatmap png filename")
+	flag.Parse()
+
 	scene := pbr.EmptyScene()
-	camera := pbr.Camera35mm(1280, 720, 0.050)
-	renderer := pbr.CamRenderer(camera, 1.25)
-	cli := pbr.CliRunner(scene, camera, renderer)
+	camera := pbr.NewCamera(1280, 720, pbr.CameraConfig{
+		Position: pbr.Vector3{-0.6, 0.12, 0.8},
+		Target:   &pbr.Vector3{0, 0, 0},
+		Focus:    &pbr.Vector3{0, -0.025, 0.2},
+		FStop:    4,
+	})
+	renderer := pbr.CamRenderer(camera)
 
 	light := pbr.Light(1500, 1500, 1500)
 	redPlastic := pbr.Plastic(1, 0, 0, 1)
@@ -38,9 +54,55 @@ func main() {
 		pbr.UnitSphere(pbr.Ident().Trans(0.45, 0.05, -0.4).Scale(0.2, 0.2, 0.2), gold),
 	)
 
-	camera.MoveTo(-0.6, 0.12, 0.8)
-	camera.LookAt(0, 0, 0)
-	camera.Focus(0, -0.025, 0.2, 4)
+	m := pbr.NewMonitor()
+	for i := 0; i < runtime.NumCPU(); i++ {
+		m.AddSampler(pbr.NewSampler(camera, scene, pbr.SamplerConfig{
+			Bounces: 10,
+			Adapt:   5,
+		}))
+	}
 
-	cli.Render()
+	interrupt := make(chan os.Signal, 2)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+
+	for m.Active() > 0 {
+		select {
+		case samples := <-m.Progress:
+			perPixel := samples / camera.Pixels()
+			showProgress(perPixel, m.Stopped())
+		case r := <-m.Results:
+			renderer.Merge(r)
+		case <-interrupt:
+			m.Stop()
+		default:
+		}
+	}
+
+	writePNG(*out, renderer.Rgb())
+	showFile(*out)
+	if len(*heat) > 0 {
+		writePNG(*heat, renderer.Heat())
+		showFile(*heat)
+	}
+}
+
+func writePNG(file string, i image.Image) error {
+	f, err := os.Create(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return png.Encode(f, i)
+}
+
+func showProgress(perPixel int, stopped bool) {
+	note := ""
+	if stopped {
+		note = " (wrapping up...)"
+	}
+	fmt.Printf("\r%v samples per pixel%v", perPixel, note) // https://stackoverflow.com/a/15442704/1911432
+}
+
+func showFile(file string) {
+	fmt.Printf("\n-> %v\n", file)
 }

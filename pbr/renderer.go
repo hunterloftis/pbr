@@ -20,7 +20,10 @@ type RenderConfig struct {
 
 // CamRenderer sizes a Renderer to match a Camera
 func CamRenderer(c *Camera, config ...RenderConfig) *Renderer {
-	conf := config[0]
+	conf := RenderConfig{}
+	if len(config) > 0 {
+		conf = config[0]
+	}
 	if conf.Exposure == 0 {
 		conf.Exposure = 1
 	}
