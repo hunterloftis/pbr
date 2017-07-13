@@ -6,7 +6,6 @@ import (
 	"image"
 	"image/png"
 	"io/ioutil"
-	"math"
 	"os"
 	"os/signal"
 	"runtime"
@@ -24,7 +23,7 @@ func main() {
 	out := flag.String("out", "render.png", "Output png filename")
 	heat := flag.String("heat", "", "Heatmap png filename")
 	workers := flag.Int("workers", runtime.NumCPU(), "Concurrency level")
-	samples := flag.Float64("samples", math.Inf(1), "Max samples per pixel")
+	// samples := flag.Float64("samples", math.Inf(1), "Max samples per pixel")
 	adapt := flag.Int("adapt", 4, "Adaptive sampling; 0=off, 3=medium, 5=high")
 	bounces := flag.Int("bounces", 10, "Maximum light bounces")
 	profile := flag.Bool("profile", false, "Record performance into profile.pprof")
@@ -71,47 +70,25 @@ func main() {
 
 	interrupt := make(chan os.Signal, 2)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-	
-	progress, results, cancel := pbr.NewMonitor()
+
+	m := pbr.NewMonitor()
 	for i := 0; i < *workers; i++ {
-		m.AddWorker(pbr.NewSampler(camera, scene, pbr.SamplerConfig{
+		m.AddSampler(pbr.NewSampler(camera, scene, pbr.SamplerConfig{
 			Bounces: *bounces,
-			Adapt: *adapt
+			Adapt:   *adapt,
 		}))
 	}
 
-	for i := 0; i < *workers; i++ {
-		go func(i int) {
-			fmt.Println("creating worker:", i)
-			s := pbr.NewSampler(camera, scene, pbr.SamplerConfig{
-				Bounces: *bounces,
-				Adapt:   *adapt,
-			})
-			for i := 0.0; i < total; i += float64(s.SampleFrame()) {
-				select {
-				case <-cancel:
-					fmt.Println("worker got done signal:", i)
-					results <- s.Pixels()
-					return
-				default:
-					update <- i
-				}
-			}
-		}(i)
-	}
-
-	pending := *workers
-	for pending > 0 {
+	for m.Active() > 0 {
 		select {
-		case s := <-update:
-			fmt.Printf("%v samples\n", s)
-		case r := <-results:
+		case w := <-m.Progress:
+			fmt.Printf("%v progress, worker:\n", w)
+		case r := <-m.Results:
 			fmt.Println("merging...")
 			renderer.Merge(r)
-			pending--
 		case <-interrupt:
 			fmt.Println("interrupting")
-			close(cancel)
+			m.Stop()
 		default:
 		}
 	}

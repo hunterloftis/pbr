@@ -1,34 +1,50 @@
 package pbr
 
-import "runtime"
-
 // Monitor monitors several goroutines rendering stuff
 type Monitor struct {
-	Sampler  *Sampler
-	Renderer *Renderer
-	samplers []*Sampler
+	Progress chan float64
+	Results  chan []float64
+
+	cancel chan interface{}
+	active int
+	count  int
 }
 
-// Start creates workers and starts monitoring
-func (m *Monitor) Start(workers int) (update chan []float64, done chan []interface{}) {
-	if workers == 0 {
-		workers = runtime.NumCPU()
+// NewMonitor creates a new Monitor
+func NewMonitor() *Monitor {
+	return &Monitor{
+		Progress: make(chan float64),
+		Results:  make(chan []float64),
+		cancel:   make(chan interface{}),
 	}
-	update = make(chan []float64)
-	done = make(chan []interface{})
-
-	for i := 0; i < workers; i++ {
-		go m.worker(m.Sampler.Clone(), update, done)
-	}
-
-	m.samplers = []*Sampler{}
-	for len(m.samplers) < workers {
-		m.samplers = append(m.samplers, m.Sampler.Clone())
-	}
-
-	return
 }
 
-func (m *Monitor) worker(sampler *Sampler, update chan []float64, done chan []interface{}) {
+// Active returns the number of active samplers/workers
+func (m *Monitor) Active() int {
+	return m.active
+}
 
+// Stop stops all workers
+func (m *Monitor) Stop() {
+	close(m.cancel)
+}
+
+// AddSampler creates a new worker with that sampler
+func (m *Monitor) AddSampler(s *Sampler) {
+	m.active++
+	m.count++
+	i := m.count
+	go func() {
+		for {
+			s.SampleFrame()
+			select {
+			case <-m.cancel:
+				m.Results <- s.Pixels()
+				m.active--
+				return
+			default:
+				m.Progress <- float64(i)
+			}
+		}
+	}()
 }
