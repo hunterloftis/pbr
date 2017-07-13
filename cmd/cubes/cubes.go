@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"runtime/pprof"
 	"syscall"
 
 	"github.com/hunterloftis/pbr/pbr"
@@ -17,7 +18,17 @@ import (
 func main() {
 	out := flag.String("out", "render.png", "Output png filename")
 	heat := flag.String("heat", "", "Heatmap png filename")
+	profile := flag.Bool("profile", false, "Record performance into profile.pprof")
 	flag.Parse()
+
+	// https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs
+	if *profile {
+		f, _ := os.Create("profile.pprof")
+		// runtime.SetBlockProfileRate(1)
+		// defer pprof.Lookup("block").WriteTo(f, 1)
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 
 	scene := pbr.EmptyScene()
 	camera := pbr.NewCamera(1280, 720, pbr.CameraConfig{
@@ -74,7 +85,6 @@ func main() {
 			renderer.Merge(r)
 		case <-interrupt:
 			m.Stop()
-		default:
 		}
 	}
 
