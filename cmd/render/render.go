@@ -83,22 +83,24 @@ func main() {
 		select {
 		case samples := <-m.Progress:
 			pp := samples / camera.Pixels()
-			fmt.Printf("%v samples per pixel\n", pp)
+			note := ""
+			if m.Stopped() {
+				note = " (wrapping up...)"
+			}
+			fmt.Printf("\r%v samples per pixel%v", pp, note) // https://stackoverflow.com/a/15442704/1911432
 		case r := <-m.Results:
-			fmt.Println("merging...")
 			renderer.Merge(r)
 		case <-interrupt:
-			fmt.Println("\n(time to wrap it up)")
 			m.Stop()
 		default:
 		}
 	}
 
 	writePNG(*out, renderer.Rgb())
-	fmt.Printf("-> %v\n", *out)
+	fmt.Printf("\n-> %v\n", *out)
 	if len(*heat) > 0 {
 		writePNG(*heat, renderer.Heat())
-		fmt.Printf("-> %v\n", *heat)
+		fmt.Printf("\n-> %v\n", *heat)
 	}
 }
 

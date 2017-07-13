@@ -36,6 +36,16 @@ func (m *Monitor) Stop() {
 	close(m.cancel)
 }
 
+// Stopped returns whether or not this is stopped
+func (m *Monitor) Stopped() bool {
+	select {
+	case <-m.cancel:
+		return true
+	default:
+		return false
+	}
+}
+
 // AddSampler creates a new worker with that sampler
 func (m *Monitor) AddSampler(s *Sampler) {
 	m.active++
