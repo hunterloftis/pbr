@@ -69,12 +69,16 @@ func main() {
 		pbr.UnitCube(pbr.Ident().Trans(0, 0, -3).Rot(pbr.Vector3{0, 1, 0}).Scale(0.25, 0.25, 0.25), redPlastic),
 	)
 
-	total := float64(renderer.Width*renderer.Height) * (*samples)
 	interrupt := make(chan os.Signal, 2)
-	update := make(chan float64)
-	cancel := make(chan []interface{})
-	results := make(chan []float64)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+	
+	progress, results, cancel := pbr.NewMonitor()
+	for i := 0; i < *workers; i++ {
+		m.AddWorker(pbr.NewSampler(camera, scene, pbr.SamplerConfig{
+			Bounces: *bounces,
+			Adapt: *adapt
+		}))
+	}
 
 	for i := 0; i < *workers; i++ {
 		go func(i int) {
