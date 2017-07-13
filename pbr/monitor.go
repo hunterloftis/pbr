@@ -9,7 +9,7 @@ type Monitor struct {
 
 	cancel  chan interface{}
 	active  int
-	samples sampleCount
+	samples *sampleCount
 }
 
 type sampleCount struct {
@@ -23,6 +23,7 @@ func NewMonitor() *Monitor {
 		Progress: make(chan int, 1),
 		Results:  make(chan []float64),
 		cancel:   make(chan interface{}),
+		samples:  &sampleCount{},
 	}
 }
 
