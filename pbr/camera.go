@@ -21,20 +21,26 @@ type Camera struct {
 type CameraConfig struct {
 	Lens     float64
 	Sensor   float64
-	Position Vector3
+	Position *Vector3
 	Target   *Vector3
 	Focus    *Vector3
 	FStop    float64
 }
 
-// NewCamera makes a new Full-frame (35mm) camera.
+// NewCamera makes a new camera.
 func NewCamera(width, height int, config ...CameraConfig) *Camera {
-	conf := config[0]
+	conf := CameraConfig{}
+	if len(config) > 0 {
+		conf = config[0]
+	}
 	if conf.Lens == 0 {
 		conf.Lens = 0.050 // 50mm focal length
 	}
 	if conf.Sensor == 0 {
 		conf.Sensor = 0.024 // height (36mm x 24mm, 35mm full frame standard)
+	}
+	if conf.Position == nil {
+		conf.Position = &Vector3{0, 0, 3}
 	}
 	if conf.Target == nil {
 		target := conf.Position.Plus(Vector3{0, 0, -3})
@@ -50,14 +56,9 @@ func NewCamera(width, height int, config ...CameraConfig) *Camera {
 		Width:        width,
 		Height:       height,
 		CameraConfig: conf,
-		focus:        conf.Focus.Minus(conf.Position).Len(),
-		pos:          LookMatrix(conf.Position, *conf.Target),
+		focus:        conf.Focus.Minus(*conf.Position).Len(),
+		pos:          LookMatrix(*conf.Position, *conf.Target),
 	}
-}
-
-// Pixels returns the number of pixels rendered by this camera
-func (c *Camera) Pixels() int {
-	return c.Width * c.Height
 }
 
 // TODO: precompute N rays for each x, y pixel & then remove Camera.focus
