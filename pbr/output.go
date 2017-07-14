@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// WritePNG saves an image to a png file
+// WritePNG saves an image to a png file and prints the filename.
 func WritePNG(file string, i image.Image) error {
 	f, err := os.Create(file)
 	if err != nil {
@@ -22,7 +22,7 @@ func WritePNG(file string, i image.Image) error {
 	return err
 }
 
-// ShowProgress shows the current sampling progress
+// ShowProgress shows the current sampling progress (billion samples, samples/pixel, samples/ms, shutting down?).
 // https://stackoverflow.com/a/15442704/1911432
 func ShowProgress(s *Sampler, start time.Time, running bool) {
 	var pp, pms int

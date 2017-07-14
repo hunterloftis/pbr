@@ -13,14 +13,14 @@ type Sampler struct {
 	Height int
 	SamplerConfig
 
-	pixels    []float64 // stored in a flat array of Stride
+	samples   []float64 // stored in a flat array, chunked by Stride
 	cam       *Camera
 	scene     *Scene
 	count     int
 	meanNoise float64
 }
 
-// SamplerConfig configures a Sampler
+// SamplerConfig configures a Sampler.
 type SamplerConfig struct {
 	Bounces int
 	Samples float64
@@ -32,7 +32,7 @@ type sampleStat struct {
 	noise float64
 }
 
-// NewSampler constructs a new Sampler instance.
+// NewSampler constructs a new Sampler for a given Camera and Scene.
 // The Sampler samples Rays from the Camera into the Scene.
 // bounces specifies the maximum number of times a Ray can bounce around the scene (eg, 10).
 // adapt specifies how adaptive sampling should be to noise (0 = none, 3 = medium, 4 = high).
@@ -54,7 +54,7 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 		Width:         cam.Width,
 		Height:        cam.Height,
 		SamplerConfig: conf,
-		pixels:        make([]float64, cam.Width*cam.Height*Stride),
+		samples:       make([]float64, cam.Width*cam.Height*Stride),
 		cam:           cam,
 		scene:         scene,
 	}
@@ -66,7 +66,7 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 // TODO: clean this up a bit
 // https://stackoverflow.com/questions/22517614/golang-concurrent-array-access
 func (s *Sampler) Sample() {
-	length := len(s.pixels)
+	length := len(s.samples)
 	workers := runtime.NumCPU()
 	ch := make(chan sampleStat, workers)
 
@@ -75,7 +75,7 @@ func (s *Sampler) Sample() {
 			var stat sampleStat
 			rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 			for p := i * Stride; p < length; p += Stride * workers {
-				samples := adaptive(s.pixels[p+Noise], adapt, max, mean)
+				samples := adaptive(s.samples[p+Noise], adapt, max, mean)
 				stat.noise += s.samplePixel(p, rnd, samples)
 				stat.count += samples
 			}
@@ -93,14 +93,24 @@ func (s *Sampler) Sample() {
 	s.meanNoise = sample.noise / float64(sample.count)
 }
 
-// Count returns the total sample count
+// Count returns the total sample count.
 func (s *Sampler) Count() int {
 	return s.count
 }
 
-// PerPixel returns the per pixel sample count
+// PerPixel returns the per-pixel sample count.
 func (s *Sampler) PerPixel() float64 {
 	return float64(s.count) / float64(s.Width*s.Height)
+}
+
+// Samples returns an array of float64 pixel values.
+func (s *Sampler) Samples() []float64 {
+	return s.samples
+}
+
+// Pixels returns the number of pixels per sample.
+func (s *Sampler) Pixels() int {
+	return s.Width * s.Height
 }
 
 // adaptive returns the number of samples to take given specific and average noise values.
@@ -114,30 +124,20 @@ func adaptive(noise float64, adapt, max int, mean float64) int {
 // The pixel is specified by the index `p`.
 func (s *Sampler) samplePixel(p int, rnd *rand.Rand, samples int) float64 {
 	x, y := s.pixelAt(p)
-	before := value(s.pixels, p)
+	before := value(s.samples, p)
 	for i := 0; i < samples; i++ {
 		sample := s.trace(x, y, rnd)
 		rgb := [3]float64{sample.X, sample.Y, sample.Z}
-		s.pixels[p+Red] += rgb[0]
-		s.pixels[p+Green] += rgb[1]
-		s.pixels[p+Blue] += rgb[2]
-		s.pixels[p+Count]++
+		s.samples[p+Red] += rgb[0]
+		s.samples[p+Green] += rgb[1]
+		s.samples[p+Blue] += rgb[2]
+		s.samples[p+Count]++
 	}
-	after := value(s.pixels, p)
+	after := value(s.samples, p)
 	scale := (before.Len()+after.Len())/2 + 1e-6
 	noise := before.Minus(after).Len() / scale
-	s.pixels[p+Noise] = noise
+	s.samples[p+Noise] = noise
 	return noise
-}
-
-// Samples returns an array of float64 pixel values.
-func (s *Sampler) Samples() []float64 {
-	return s.pixels
-}
-
-// Pixels returns the number of pixels
-func (s *Sampler) Pixels() int {
-	return s.Width * s.Height
 }
 
 func value(pixels []float64, i int) Vector3 {

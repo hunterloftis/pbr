@@ -6,6 +6,7 @@ const Bias = 1e-6
 
 // Pixel elements are stored in specific offsets.
 // These constants allow easy access, eg `someFloat64Array[i + Blue]`
+// TODO: https://splice.com/blog/iota-elegant-constants-golang/
 const (
 	Red    = 0
 	Green  = 1

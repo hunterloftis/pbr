@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-// Renderer renders the results of a trace to a file
+// Renderer renders the samples in a Sampler to an Image.
 type Renderer struct {
 	Width  int
 	Height int
@@ -14,12 +14,12 @@ type Renderer struct {
 	sampler *Sampler
 }
 
-// RenderConfig configures rendering settings
+// RenderConfig configures rendering settings.
 type RenderConfig struct {
 	Exposure float64
 }
 
-// NewRenderer creates a renderer for a sampler
+// NewRenderer creates a renderer referencing a Sampler.
 func NewRenderer(s *Sampler, config ...RenderConfig) *Renderer {
 	conf := RenderConfig{}
 	if len(config) > 0 {
@@ -37,7 +37,7 @@ func NewRenderer(s *Sampler, config ...RenderConfig) *Renderer {
 	}
 }
 
-// Rgb averages each sample into an rgb value
+// Rgb averages each sample into an rgb value.
 func (r *Renderer) Rgb() image.Image {
 	pixels := r.sampler.Samples()
 	im := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
@@ -52,7 +52,7 @@ func (r *Renderer) Rgb() image.Image {
 	return im
 }
 
-// Heat returns a heatmap of the sample count for each pixel
+// Heat returns a heatmap of the sample count for each pixel.
 func (r *Renderer) Heat() image.Image {
 	pixels := r.sampler.Samples()
 	im := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))

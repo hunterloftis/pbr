@@ -27,7 +27,7 @@ type CameraConfig struct {
 	FStop    float64
 }
 
-// NewCamera makes a new Full-frame (35mm) camera.
+// NewCamera makes a new camera.
 func NewCamera(width, height int, config ...CameraConfig) *Camera {
 	conf := CameraConfig{}
 	if len(config) > 0 {
@@ -59,11 +59,6 @@ func NewCamera(width, height int, config ...CameraConfig) *Camera {
 		focus:        conf.Focus.Minus(*conf.Position).Len(),
 		pos:          LookMatrix(*conf.Position, *conf.Target),
 	}
-}
-
-// Pixels returns the number of pixels rendered by this camera
-func (c *Camera) Pixels() int {
-	return c.Width * c.Height
 }
 
 // TODO: precompute N rays for each x, y pixel & then remove Camera.focus

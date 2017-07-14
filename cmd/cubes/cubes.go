@@ -55,7 +55,7 @@ func main() {
 		pbr.UnitCube(gold, pbr.Trans(0, 0, -0.4), pbr.Rot(pbr.Vector3{0, 0.1 * math.Pi, 0}), pbr.Scale(0.1, 0.1, 0.1)),
 		pbr.UnitCube(greenGlass, pbr.Trans(-0.3, 0, 0.3), pbr.Rot(pbr.Vector3{0, -0.1 * math.Pi, 0}), pbr.Scale(0.1, 0.1, 0.1)),
 		pbr.UnitCube(greenGlass, pbr.Trans(0.175, 0.05, 0.18), pbr.Rot(pbr.Vector3{0, 0.55 * math.Pi, 0}), pbr.Scale(0.02, 0.2, 0.2)),
-		pbr.UnitCube(whitePlastic, pbr.Trans(0, -0.55, 0), pbr.Scale(1000, 1, 1000)), // .SetGrid(bluePlastic, 1.0/20.0)
+		pbr.UnitCube(whitePlastic, pbr.Trans(0, -0.55, 0), pbr.Scale(1000, 1, 1000)).SetGrid(bluePlastic, 1.0/20.0),
 		pbr.UnitSphere(greenGlass, pbr.Trans(-0.2, 0.001, -0.2), pbr.Scale(0.1, 0.1, 0.1)),
 		pbr.UnitSphere(bluePlastic, pbr.Trans(0.3, 0.05, 0), pbr.Scale(0.2, 0.2, 0.2)),
 		pbr.UnitSphere(light, pbr.Trans(7, 30, 6), pbr.Scale(30, 30, 30)),
