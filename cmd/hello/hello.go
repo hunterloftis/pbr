@@ -20,4 +20,5 @@ func main() {
 		fmt.Printf("\r%.1f samples / pixel", sampler.PerPixel())
 	}
 	pbr.WritePNG("hello.png", renderer.Rgb())
+	pbr.WritePNG("heat.png", renderer.Heat())
 }

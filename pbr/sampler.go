@@ -13,11 +13,11 @@ type Sampler struct {
 	Height int
 	SamplerConfig
 
-	pixels []float64 // stored in a flat array of Elements
-	cam    *Camera
-	scene  *Scene
-	noise  float64
-	count  int
+	pixels    []float64 // stored in a flat array of Stride
+	cam       *Camera
+	scene     *Scene
+	count     int
+	meanNoise float64
 }
 
 // SamplerConfig configures a Sampler
@@ -25,6 +25,11 @@ type SamplerConfig struct {
 	Bounces int
 	Samples float64
 	Adapt   int
+}
+
+type sampleStat struct {
+	count int
+	noise float64
 }
 
 // NewSampler constructs a new Sampler instance.
@@ -49,7 +54,7 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 		Width:         cam.Width,
 		Height:        cam.Height,
 		SamplerConfig: conf,
-		pixels:        make([]float64, cam.Width*cam.Height*Elements),
+		pixels:        make([]float64, cam.Width*cam.Height*Stride),
 		cam:           cam,
 		scene:         scene,
 	}
@@ -61,27 +66,29 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 func (s *Sampler) Sample() {
 	length := len(s.pixels)
 	workers := runtime.NumCPU()
-	ch := make(chan int, workers)
+	ch := make(chan sampleStat, workers)
 
 	for i := 0; i < workers; i++ {
-		go func(i int) {
-			var count int
-			// mean := s.noise + Bias
-			// max := s.Adapt * 3
+		go func(i, adapt, max int, mean float64) {
+			var stat sampleStat
 			rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-			for p := i * Elements; p < length; p += Elements {
-				samples := 1 //s.adaptive(s.pixels[p+Noise], mean, max)
-				// noise += s.samplePixel(p, rnd, samples)
-				s.samplePixel(p, rnd, samples)
-				count += samples
+			for p := i * Stride; p < length; p += Stride * workers {
+				samples := adaptive(s.pixels[p+Noise], adapt, max, mean)
+				stat.noise += s.samplePixel(p, rnd, samples)
+				stat.count += samples
 			}
-			ch <- count
-		}(i)
+			ch <- stat
+		}(i, s.Adapt, s.Adapt*3, s.meanNoise+Bias)
 	}
+
+	var sample sampleStat
 	for i := 0; i < workers; i++ {
-		s.count += <-ch
+		stat := <-ch
+		sample.count += stat.count
+		sample.noise += stat.noise
 	}
-	return
+	s.count += sample.count
+	s.meanNoise = sample.noise / float64(sample.count)
 }
 
 // PerPixel returns the per pixel sample count
@@ -90,9 +97,10 @@ func (s *Sampler) PerPixel() float64 {
 }
 
 // adaptive returns the number of samples to take given specific and average noise values.
-func (s *Sampler) adaptive(noise float64, mean float64, max int) int {
+// TODO: this is a pretty slow function (think it's inlined), speed it up
+func adaptive(noise float64, adapt, max int, mean float64) int {
 	ratio := noise/mean + Bias
-	return int(math.Min(math.Ceil(math.Pow(ratio, float64(s.Adapt))), float64(max)))
+	return int(math.Min(math.Ceil(math.Pow(ratio, float64(adapt))), float64(max)))
 }
 
 // samplePixel samples a single pixel `samples` times.
@@ -157,6 +165,6 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Energy {
 }
 
 func (s *Sampler) pixelAt(i int) (x, y float64) {
-	pos := i / Elements
+	pos := i / Stride
 	return float64(pos % s.Width), float64(pos / s.Width)
 }

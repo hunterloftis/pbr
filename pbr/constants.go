@@ -7,12 +7,12 @@ const Bias = 1e-6
 // Pixel elements are stored in specific offsets.
 // These constants allow easy access, eg `someFloat64Array[i + Blue]`
 const (
-	Red      = 0
-	Green    = 1
-	Blue     = 2
-	Count    = 3
-	Noise    = 4
-	Elements = 5
+	Red    = 0
+	Green  = 1
+	Blue   = 2
+	Count  = 3
+	Noise  = 4
+	Stride = 5
 )
 
 // Air is the refractive index of air

@@ -41,8 +41,8 @@ func NewRenderer(s *Sampler, config ...RenderConfig) *Renderer {
 func (r *Renderer) Rgb() image.Image {
 	pixels := r.sampler.Pixels()
 	im := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
-	for i := 0; i < len(pixels); i += Elements {
-		i2 := i / Elements * 4
+	for i := 0; i < len(pixels); i += Stride {
+		i2 := i / Stride * 4
 		count := pixels[i+Count]
 		im.Pix[i2] = r.color(pixels[i+Red] / count)
 		im.Pix[i2+1] = r.color(pixels[i+Green] / count)
@@ -57,11 +57,11 @@ func (r *Renderer) Heat() image.Image {
 	pixels := r.sampler.Pixels()
 	im := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
 	max := 0.0
-	for i := Count; i < len(pixels); i += Elements {
+	for i := Count; i < len(pixels); i += Stride {
 		max = math.Max(max, pixels[i])
 	}
-	for i := 0; i < len(pixels); i += Elements {
-		i2 := i / Elements * 4
+	for i := 0; i < len(pixels); i += Stride {
+		i2 := i / Stride * 4
 		im.Pix[i2] = r.color(pixels[i+Count] / max * 255)
 		im.Pix[i2+1] = r.color(pixels[i+Count] / max * 255)
 		im.Pix[i2+2] = r.color(pixels[i+Count] / max * 255)
