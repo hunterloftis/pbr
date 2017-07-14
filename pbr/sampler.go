@@ -48,7 +48,7 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 		conf.Samples = math.Inf(1) // Sample forever by default
 	}
 	if conf.Adapt == 0 { // TODO: 0 should be a valid value
-		conf.Adapt = 3
+		conf.Adapt = 5
 	}
 	return &Sampler{
 		Width:         cam.Width,

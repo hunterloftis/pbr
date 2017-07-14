@@ -13,9 +13,9 @@ func main() {
 	renderer := pbr.NewRenderer(sampler)
 
 	scene.SetSky(pbr.Vector3{256, 256, 256}, pbr.Vector3{})
-	scene.Add(pbr.UnitSphere(pbr.Plastic(1, 0, 0, 1), pbr.Trans(0, 0, -3))) // TODO: (mat *Material, transforms ...*Matrix)
+	scene.Add(pbr.UnitSphere(pbr.Plastic(1, 0, 0, 1)))
 
-	for sampler.PerPixel() < 16 {
+	for sampler.PerPixel() < 200 {
 		sampler.Sample()
 		fmt.Printf("\r%.1f samples / pixel", sampler.PerPixel())
 	}
