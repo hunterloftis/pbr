@@ -1,4 +1,5 @@
 out/*
 bin/*
 .DS_Store
-profile.pprof
+profile.*
+*.png

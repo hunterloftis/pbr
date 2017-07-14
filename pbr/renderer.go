@@ -7,19 +7,31 @@ import (
 
 // Renderer renders the results of a trace to a file
 type Renderer struct {
-	Width    int
-	Height   int
+	Width  int
+	Height int
+	RenderConfig
+	pixels []float64
+}
+
+// RenderConfig configures rendering settings
+type RenderConfig struct {
 	Exposure float64
-	pixels   []float64
 }
 
 // CamRenderer sizes a Renderer to match a Camera
-func CamRenderer(cam *Camera, exp float64) *Renderer {
+func CamRenderer(c *Camera, config ...RenderConfig) *Renderer {
+	conf := RenderConfig{}
+	if len(config) > 0 {
+		conf = config[0]
+	}
+	if conf.Exposure == 0 {
+		conf.Exposure = 1
+	}
 	return &Renderer{
-		Width:    cam.Width,
-		Height:   cam.Height,
-		Exposure: exp,
-		pixels:   make([]float64, 0),
+		Width:        c.Width,
+		Height:       c.Height,
+		RenderConfig: conf,
+		pixels:       make([]float64, 0),
 	}
 }
 

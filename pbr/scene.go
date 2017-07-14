@@ -19,13 +19,20 @@ type RGBAE struct {
 type Scene struct {
 	Surfaces []Surface
 	pano     *RGBAE
-	skyUp    Vector3
+	skyUp    Vector3 // TODO: these should be Energy
 	skyDown  Vector3
 }
 
 // EmptyScene creates and returns a pointer to an empty Scene.
 func EmptyScene() *Scene {
 	return &Scene{}
+}
+
+// ColladaScene creates a Scene from collada xml data
+func ColladaScene(xml []byte) *Scene {
+	// fmt.Println("xml:", string(xml))
+	s := Scene{}
+	return &s
 }
 
 // Intersect tests whether a ray hits any objects in the scene
