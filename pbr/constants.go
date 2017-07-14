@@ -4,16 +4,18 @@ package pbr
 // Applying bias provides more robust processing of geometry.
 const Bias = 1e-6
 
+type index int // TODO: should this single-line type go in its own file? Or something?
+
 // Pixel elements are stored in specific offsets.
 // These constants allow easy access, eg `someFloat64Array[i + Blue]`
 // TODO: https://splice.com/blog/iota-elegant-constants-golang/
 const (
-	Red    = 0
-	Green  = 1
-	Blue   = 2
-	Count  = 3
-	Noise  = 4
-	Stride = 5
+	Red index = iota
+	Green
+	Blue
+	Count
+	Noise
+	Stride
 )
 
 // Air is the refractive index of air
