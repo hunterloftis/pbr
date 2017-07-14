@@ -28,11 +28,11 @@ type safeCount struct {
 // NewMonitor creates a new Monitor
 func NewMonitor() *Monitor {
 	return &Monitor{
-		Progress: make(chan int),
+		Progress: make(chan int, 16),
 		Results:  make(chan []float64),
 		cancel:   make(chan interface{}),
 		samples:  &safeCount{},
-		start:    time.Now().UnixNano(),
+		start:    time.Now().UnixNano(), // TODO: just use time.*, no need for ns conversion?
 	}
 }
 
@@ -63,10 +63,16 @@ func (m *Monitor) Stop() {
 }
 
 // SetInterrupt stops on interrupt or term signals
-func (m *Monitor) SetInterrupt(f func()) {
+func (m *Monitor) SetInterrupt(callbacks ...func()) {
 	interrupt := make(chan os.Signal, 2)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-	go func() { <-interrupt; m.Stop(); f() }()
+	go func() {
+		<-interrupt
+		m.Stop()
+		for _, f := range callbacks {
+			f()
+		}
+	}()
 }
 
 // Stopped returns whether or not this is stopped

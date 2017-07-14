@@ -14,8 +14,7 @@ type Sampler struct {
 	pixels []float64 // stored in a flat array of Elements
 	cam    *Camera
 	scene  *Scene
-	// count  int
-	noise float64
+	noise  float64
 }
 
 // SamplerConfig configures a Sampler
@@ -56,14 +55,12 @@ func (s *Sampler) SampleFrame() (total int) {
 	mean := s.noise + Bias
 	max := s.Adapt * 3
 	length := len(s.pixels)
-	// before := s.count
 	for p := 0; p < length; p += Elements {
 		samples := s.Adaptive(s.pixels[p+Noise], mean, max)
-		noise += s.Sample(p, rnd, samples)
+		noise += s.sample(p, rnd, samples)
 		total += samples
 	}
 	s.noise = noise / float64(s.Width*s.Height)
-	// return s.count - before
 	return
 }
 
@@ -73,9 +70,9 @@ func (s *Sampler) Adaptive(noise float64, mean float64, max int) int {
 	return int(math.Min(math.Ceil(math.Pow(ratio, float64(s.Adapt))), float64(max)))
 }
 
-// Sample samples a single pixel `samples` times.
+// sample samples a single pixel `samples` times.
 // The pixel is specified by the index `p`.
-func (s *Sampler) Sample(p int, rnd *rand.Rand, samples int) float64 {
+func (s *Sampler) sample(p int, rnd *rand.Rand, samples int) float64 {
 	x, y := s.pixelAt(p)
 	before := value(s.pixels, p)
 	for i := 0; i < samples; i++ {
@@ -90,7 +87,6 @@ func (s *Sampler) Sample(p int, rnd *rand.Rand, samples int) float64 {
 	scale := (before.Len()+after.Len())/2 + 1e-6
 	noise := before.Minus(after).Len() / scale
 	s.pixels[p+Noise] = noise
-	// s.count++
 	return noise
 }
 
@@ -98,11 +94,6 @@ func (s *Sampler) Sample(p int, rnd *rand.Rand, samples int) float64 {
 func (s *Sampler) Pixels() []float64 {
 	return s.pixels
 }
-
-// Count returns the total samples sampled
-// func (s *Sampler) Count() int {
-// 	return s.count
-// }
 
 func value(pixels []float64, i int) Vector3 {
 	if pixels[i+Count] == 0 {

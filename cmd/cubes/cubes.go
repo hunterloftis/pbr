@@ -68,6 +68,7 @@ func main() {
 		showProgress(m.Samples(), camera.Pixels(), m.Nano(), m.Stopped())
 	})
 
+	showProgress(m.Samples(), camera.Pixels(), m.Nano(), m.Stopped())
 	for i := 0; i < workers; i++ {
 		m.AddSampler(pbr.NewSampler(camera, scene, pbr.SamplerConfig{
 			Bounces: 10,
@@ -106,11 +107,15 @@ func writePNG(file string, i image.Image) error {
 }
 
 func showProgress(samples, pixels, ns int, stopped bool) {
-	note := ""
+	var pp, pms int
+	var note string
+	var ms = ns / 1e6
 	if stopped {
 		note = " (wrapping up...)"
 	}
-	pp := samples / pixels
-	pms := samples / (ns / 1e6)
+	if pixels > 0 && ms > 0 {
+		pp = samples / pixels
+		pms = samples / ms
+	}
 	fmt.Printf("\r%v samples/pixel, %v samples/ms%v", pp, pms, note) // https://stackoverflow.com/a/15442704/1911432
 }
