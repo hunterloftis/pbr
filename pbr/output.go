@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/png"
 	"os"
+	"time"
 )
 
 // WritePNG saves an image to a png file
@@ -22,18 +23,21 @@ func WritePNG(file string, i image.Image) error {
 }
 
 // ShowProgress shows the current sampling progress
-func ShowProgress(samples, pixels, ns int, stopped bool) {
+// https://stackoverflow.com/a/15442704/1911432
+func ShowProgress(s *Sampler, start time.Time, running bool) {
 	var pp, pms int
 	var note string
 	var bil float64
-	var ms = ns / 1e6
-	if stopped {
+	if !running {
 		note = " (wrapping up...)"
 	}
-	if pixels > 0 && ms > 0 {
+	samples := s.Count()
+	pixels := s.Pixels()
+	ms := int(time.Now().Sub(start).Nanoseconds() / 1e6)
+	if s.Pixels() > 0 && ms > 0 {
 		bil = float64(samples) / 1e9
 		pp = samples / pixels
 		pms = samples / ms
 	}
-	fmt.Printf("\rsamples: %.3f billion - %v/pixel - %v/ms%v", bil, pp, pms, note) // https://stackoverflow.com/a/15442704/1911432
+	fmt.Printf("\rsamples: %.3f billion - %v/pixel - %v/ms%v", bil, pp, pms, note)
 }

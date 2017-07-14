@@ -13,10 +13,14 @@ type Cube struct {
 }
 
 // UnitCube returns a pointer to a new 1x1x1 Cube Surface with position pos and material mat.
-func UnitCube(pos *Matrix4, mat *Material) *Cube {
+func UnitCube(m *Material, transforms ...*Matrix4) *Cube {
+	pos := Identity()
+	for _, t := range transforms { // TODO: factor this so all surfaces can share it
+		pos = pos.Mult(t)
+	}
 	return &Cube{
 		Pos: pos,
-		Mat: mat,
+		Mat: m,
 	}
 }
 

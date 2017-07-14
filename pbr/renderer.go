@@ -39,7 +39,7 @@ func NewRenderer(s *Sampler, config ...RenderConfig) *Renderer {
 
 // Rgb averages each sample into an rgb value
 func (r *Renderer) Rgb() image.Image {
-	pixels := r.sampler.Pixels()
+	pixels := r.sampler.Samples()
 	im := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
 	for i := 0; i < len(pixels); i += Stride {
 		i2 := i / Stride * 4
@@ -54,7 +54,7 @@ func (r *Renderer) Rgb() image.Image {
 
 // Heat returns a heatmap of the sample count for each pixel
 func (r *Renderer) Heat() image.Image {
-	pixels := r.sampler.Pixels()
+	pixels := r.sampler.Samples()
 	im := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
 	max := 0.0
 	for i := Count; i < len(pixels); i += Stride {

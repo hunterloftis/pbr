@@ -4,8 +4,11 @@ import (
 	"flag"
 	"math"
 	"os"
+	"os/signal"
 	"runtime"
 	"runtime/pprof"
+	"syscall"
+	"time"
 
 	"github.com/hunterloftis/pbr/pbr"
 )
@@ -14,7 +17,6 @@ func main() {
 	out := flag.String("out", "render.png", "Output png filename")
 	heat := flag.String("heat", "heat.png", "Heatmap png filename")
 	profile := flag.String("profile", "", "Record performance into profile.pprof")
-	workers := runtime.NumCPU()
 	flag.Parse()
 
 	// https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs
@@ -31,12 +33,13 @@ func main() {
 
 	scene := pbr.EmptyScene()
 	camera := pbr.NewCamera(1280, 720, pbr.CameraConfig{
-		Position: pbr.Vector3{-0.6, 0.12, 0.8},
+		Position: &pbr.Vector3{-0.6, 0.12, 0.8},
 		Target:   &pbr.Vector3{0, 0, 0},
 		Focus:    &pbr.Vector3{0, -0.025, 0.2},
 		FStop:    4,
 	})
-	renderer := pbr.CamRenderer(camera)
+	sampler := pbr.NewSampler(camera, scene)
+	renderer := pbr.NewRenderer(sampler)
 
 	light := pbr.Light(1500, 1500, 1500)
 	redPlastic := pbr.Plastic(1, 0, 0, 1)
@@ -48,36 +51,33 @@ func main() {
 
 	scene.SetSky(pbr.Vector3{40, 50, 60}, pbr.Vector3{})
 	scene.Add(
-		pbr.UnitCube(pbr.Ident().Rot(pbr.Vector3{0, -0.25 * math.Pi, 0}).Scale(0.1, 0.1, 0.1), redPlastic),
-		pbr.UnitCube(pbr.Ident().Trans(0, 0, -0.4).Rot(pbr.Vector3{0, 0.1 * math.Pi, 0}).Scale(0.1, 0.1, 0.1), gold),
-		pbr.UnitCube(pbr.Ident().Trans(-0.3, 0, 0.3).Rot(pbr.Vector3{0, -0.1 * math.Pi, 0}).Scale(0.1, 0.1, 0.1), greenGlass),
-		pbr.UnitCube(pbr.Ident().Trans(0.175, 0.05, 0.18).Rot(pbr.Vector3{0, 0.55 * math.Pi, 0}).Scale(0.02, 0.2, 0.2), greenGlass),
-		pbr.UnitCube(pbr.Ident().Trans(0, -0.55, 0).Scale(1000, 1, 1000), whitePlastic).SetGrid(bluePlastic, 1.0/20.0),
-		pbr.UnitSphere(pbr.Ident().Trans(-0.2, 0.001, -0.2).Scale(0.1, 0.1, 0.1), greenGlass),
-		pbr.UnitSphere(pbr.Ident().Trans(0.3, 0.05, 0).Scale(0.2, 0.2, 0.2), bluePlastic),
-		pbr.UnitSphere(pbr.Ident().Trans(7, 30, 6).Scale(30, 30, 30), light),
-		pbr.UnitSphere(pbr.Ident().Trans(0, -0.025, 0.2).Scale(0.1, 0.05, 0.1), greenPlastic),
-		pbr.UnitSphere(pbr.Ident().Trans(0.45, 0.05, -0.4).Scale(0.2, 0.2, 0.2), gold),
+		pbr.UnitCube(redPlastic, pbr.Rot(pbr.Vector3{0, -0.25 * math.Pi, 0}), pbr.Scale(0.1, 0.1, 0.1)),
+		pbr.UnitCube(gold, pbr.Trans(0, 0, -0.4), pbr.Rot(pbr.Vector3{0, 0.1 * math.Pi, 0}), pbr.Scale(0.1, 0.1, 0.1)),
+		pbr.UnitCube(greenGlass, pbr.Trans(-0.3, 0, 0.3), pbr.Rot(pbr.Vector3{0, -0.1 * math.Pi, 0}), pbr.Scale(0.1, 0.1, 0.1)),
+		pbr.UnitCube(greenGlass, pbr.Trans(0.175, 0.05, 0.18), pbr.Rot(pbr.Vector3{0, 0.55 * math.Pi, 0}), pbr.Scale(0.02, 0.2, 0.2)),
+		pbr.UnitCube(whitePlastic, pbr.Trans(0, -0.55, 0), pbr.Scale(1000, 1, 1000)), // .SetGrid(bluePlastic, 1.0/20.0)
+		pbr.UnitSphere(greenGlass, pbr.Trans(-0.2, 0.001, -0.2), pbr.Scale(0.1, 0.1, 0.1)),
+		pbr.UnitSphere(bluePlastic, pbr.Trans(0.3, 0.05, 0), pbr.Scale(0.2, 0.2, 0.2)),
+		pbr.UnitSphere(light, pbr.Trans(7, 30, 6), pbr.Scale(30, 30, 30)),
+		pbr.UnitSphere(greenPlastic, pbr.Trans(0, -0.025, 0.2), pbr.Scale(0.1, 0.05, 0.1)),
+		pbr.UnitSphere(gold, pbr.Trans(0.45, 0.05, -0.4), pbr.Scale(0.2, 0.2, 0.2)),
 	)
 
-	m := pbr.NewMonitor()
-	m.SetInterrupt(func() {
-		pbr.ShowProgress(m.Samples(), camera.Pixels(), m.Nano(), m.Stopped())
-	})
+	start := time.Now()
+	running := true
+	interrupt := make(chan os.Signal, 2)
 
-	pbr.ShowProgress(m.Samples(), camera.Pixels(), m.Nano(), m.Stopped())
-	for i := 0; i < workers; i++ {
-		m.AddSampler(pbr.NewSampler(camera, scene, pbr.SamplerConfig{
-			Bounces: 10,
-			Adapt:   5,
-		}))
-	}
-	for m.Active() > 0 {
-		samples := <-m.Progress
-		pbr.ShowProgress(samples, camera.Pixels(), m.Nano(), m.Stopped())
-	}
-	for i := 0; i < workers; i++ {
-		renderer.Merge(<-m.Results)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-interrupt
+		running = false
+		pbr.ShowProgress(sampler, start, running)
+	}()
+
+	pbr.ShowProgress(sampler, start, running)
+	for running {
+		sampler.Sample()
+		pbr.ShowProgress(sampler, start, running)
 	}
 
 	pbr.WritePNG(*out, renderer.Rgb())

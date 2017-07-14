@@ -48,7 +48,7 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 		conf.Samples = math.Inf(1) // Sample forever by default
 	}
 	if conf.Adapt == 0 { // TODO: 0 should be a valid value
-		conf.Adapt = 5
+		conf.Adapt = 4
 	}
 	return &Sampler{
 		Width:         cam.Width,
@@ -64,6 +64,7 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 // Depending on the Sampler's `adapt` value, noisy pixels may be sampled several times.
 // It returns the total number of samples taken.
 // TODO: clean this up a bit
+// https://stackoverflow.com/questions/22517614/golang-concurrent-array-access
 func (s *Sampler) Sample() {
 	length := len(s.pixels)
 	workers := runtime.NumCPU()
@@ -129,9 +130,14 @@ func (s *Sampler) samplePixel(p int, rnd *rand.Rand, samples int) float64 {
 	return noise
 }
 
-// Pixels returns an array of float64 pixel values.
-func (s *Sampler) Pixels() []float64 {
+// Samples returns an array of float64 pixel values.
+func (s *Sampler) Samples() []float64 {
 	return s.pixels
+}
+
+// Pixels returns the number of pixels
+func (s *Sampler) Pixels() int {
+	return s.Width * s.Height
 }
 
 func value(pixels []float64, i int) Vector3 {
