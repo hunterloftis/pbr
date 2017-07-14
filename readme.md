@@ -29,7 +29,7 @@ $ cd $GOPATH/src/github.com/hunterloftis/pbr
 $ ./hello
 ```
 
-![Hello, world render](https://user-images.githubusercontent.com/364501/28223346-111a1944-6899-11e7-946b-8ea5c90c3888.png)
+![Hello, world render](https://user-images.githubusercontent.com/364501/28226629-e0d9c6e2-68a4-11e7-9ab5-fd611187f389.png)
 
 ```go
 func main() {
