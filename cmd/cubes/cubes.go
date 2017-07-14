@@ -20,7 +20,7 @@ func main() {
 	out := flag.String("out", "render.png", "Output png filename")
 	heat := flag.String("heat", "", "Heatmap png filename")
 	profile := flag.String("profile", "", "Record performance into profile.pprof")
-	workers := 1 //runtime.NumCPU()
+	workers := runtime.NumCPU()
 	flag.Parse()
 
 	// https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs

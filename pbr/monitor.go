@@ -59,29 +59,30 @@ func (m *Monitor) Stopped() bool {
 // AddSampler creates a new worker with that sampler
 func (m *Monitor) AddSampler(s *Sampler) {
 	m.active++
+	i := m.active
 	go func() {
 		for {
-			fmt.Println("Start SampleFrame()")
-			start := time.Now().UnixNano()
-			frame := s.SampleFrame()
-			secs := float64(time.Now().UnixNano()-start) * 1e-9
-			fmt.Println("End SampleFrame(), seconds taken:", secs)
-			m.samples.Lock()
-			m.samples.count += frame
-			total := m.samples.count // TODO: do I need to do this or can I safely read after unlocking?
-			m.samples.Unlock()
-			fmt.Println("<- send progress")
-			m.Progress <- total
-			fmt.Println("progress sent")
+			fmt.Println(i, "Restart sampling loop")
 			select {
 			case <-m.cancel:
-				fmt.Println("<- Send pixels to m.Results")
+				fmt.Println(i, "<- Send pixels to m.Results")
 				m.Results <- s.Pixels()
-				fmt.Println("pixels sent")
+				fmt.Println(i, "pixels sent")
 				m.active--
 				return
 			default:
-				fmt.Println("Restart sampling")
+				fmt.Println(i, "Start SampleFrame()")
+				start := time.Now().UnixNano()
+				frame := s.SampleFrame()
+				secs := float64(time.Now().UnixNano()-start) * 1e-9
+				fmt.Println(i, "End SampleFrame(), seconds taken:", secs)
+				m.samples.Lock()
+				m.samples.count += frame
+				total := m.samples.count // TODO: do I need to do this or can I safely read after unlocking?
+				m.samples.Unlock()
+				fmt.Println(i, "<- send progress")
+				m.Progress <- total
+				fmt.Println(i, "progress sent")
 			}
 		}
 	}()
