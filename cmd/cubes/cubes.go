@@ -19,16 +19,20 @@ import (
 func main() {
 	out := flag.String("out", "render.png", "Output png filename")
 	heat := flag.String("heat", "", "Heatmap png filename")
-	profile := flag.Bool("profile", false, "Record performance into profile.pprof")
+	profile := flag.String("profile", "", "Record performance into profile.pprof")
+	workers := 1 //runtime.NumCPU()
 	flag.Parse()
 
 	// https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs
-	if *profile {
+	switch *profile {
+	case "block":
 		f, _ := os.Create("profile.pprof")
 		runtime.SetBlockProfileRate(1)
-		defer pprof.Lookup("block").WriteTo(f, 1)
-		// pprof.StartCPUProfile(f)
-		// defer pprof.StopCPUProfile()
+		defer pprof.Lookup("block").WriteTo(f, 10)
+	case "cpu":
+		f, _ := os.Create("profile.pprof")
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
 	}
 
 	scene := pbr.EmptyScene()
@@ -71,7 +75,7 @@ func main() {
 
 	start := time.Now().UnixNano()
 	m := pbr.NewMonitor()
-	for i := 0; i < runtime.NumCPU(); i++ {
+	for i := 0; i < workers; i++ {
 		m.AddSampler(pbr.NewSampler(camera, scene, pbr.SamplerConfig{
 			Bounces: 10,
 			Adapt:   5,
@@ -81,12 +85,17 @@ func main() {
 	for m.Active() > 0 {
 		select {
 		case samples := <-m.Progress:
+			fmt.Println("main loop - Progress")
+			fmt.Println("total samples:", samples)
 			perPX := samples / camera.Pixels()
 			ms := float64(time.Now().UnixNano()-start) * 1e-6
 			showProgress(perPX, int(float64(samples)/ms), m.Stopped())
 		case r := <-m.Results:
+			fmt.Println("main loop - merge results")
 			renderer.Merge(r)
+			fmt.Println("done merging")
 		case <-interrupt:
+			fmt.Println("main loop - interrupt")
 			m.Stop()
 		}
 	}
@@ -113,7 +122,9 @@ func showProgress(perPX, perMS int, stopped bool) {
 	if stopped {
 		note = " (wrapping up...)"
 	}
-	fmt.Printf("\r%v samples/pixel, %v samples/ms%v", perPX, perMS, note) // https://stackoverflow.com/a/15442704/1911432
+	_ = note
+	// fmt.Printf("\r%v samples/pixel, %v samples/ms%v", perPX, perMS, note) // https://stackoverflow.com/a/15442704/1911432
+	fmt.Printf("%v samples/pixel, %v samples/ms%v\n", perPX, perMS, note) // https://stackoverflow.com/a/15442704/1911432
 }
 
 func showFile(file string) {
