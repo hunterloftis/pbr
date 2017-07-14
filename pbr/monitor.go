@@ -20,7 +20,7 @@ type safeCount struct {
 // NewMonitor creates a new Monitor
 func NewMonitor() *Monitor {
 	return &Monitor{
-		Progress: make(chan int, 10),
+		Progress: make(chan int, 1),
 		Results:  make(chan []float64),
 		cancel:   make(chan interface{}),
 		samples:  &safeCount{},
@@ -60,12 +60,12 @@ func (m *Monitor) AddSampler(s *Sampler) {
 			m.samples.count += frame
 			total := m.samples.count // TODO: do I need to do this or can I safely read after unlocking?
 			m.samples.Unlock()
+			m.Progress <- total
 			select {
 			case <-m.cancel:
 				m.Results <- s.Pixels()
 				m.active--
 				return
-			case m.Progress <- total:
 			default:
 			}
 		}

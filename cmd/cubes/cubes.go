@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"syscall"
+	"time"
 
 	"github.com/hunterloftis/pbr/pbr"
 )
@@ -24,10 +25,10 @@ func main() {
 	// https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs
 	if *profile {
 		f, _ := os.Create("profile.pprof")
-		// runtime.SetBlockProfileRate(1)
-		// defer pprof.Lookup("block").WriteTo(f, 1)
-		pprof.StartCPUProfile(f)
-		defer pprof.StopCPUProfile()
+		runtime.SetBlockProfileRate(1)
+		defer pprof.Lookup("block").WriteTo(f, 1)
+		// pprof.StartCPUProfile(f)
+		// defer pprof.StopCPUProfile()
 	}
 
 	scene := pbr.EmptyScene()
@@ -65,6 +66,10 @@ func main() {
 		pbr.UnitSphere(pbr.Ident().Trans(0.45, 0.05, -0.4).Scale(0.2, 0.2, 0.2), gold),
 	)
 
+	interrupt := make(chan os.Signal, 2)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+
+	start := time.Now().UnixNano()
 	m := pbr.NewMonitor()
 	for i := 0; i < runtime.NumCPU(); i++ {
 		m.AddSampler(pbr.NewSampler(camera, scene, pbr.SamplerConfig{
@@ -73,14 +78,12 @@ func main() {
 		}))
 	}
 
-	interrupt := make(chan os.Signal, 2)
-	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-
 	for m.Active() > 0 {
 		select {
 		case samples := <-m.Progress:
-			perPixel := samples / camera.Pixels()
-			showProgress(perPixel, m.Stopped())
+			perPX := samples / camera.Pixels()
+			ms := float64(time.Now().UnixNano()-start) * 1e-6
+			showProgress(perPX, int(float64(samples)/ms), m.Stopped())
 		case r := <-m.Results:
 			renderer.Merge(r)
 		case <-interrupt:
@@ -105,12 +108,12 @@ func writePNG(file string, i image.Image) error {
 	return png.Encode(f, i)
 }
 
-func showProgress(perPixel int, stopped bool) {
+func showProgress(perPX, perMS int, stopped bool) {
 	note := ""
 	if stopped {
 		note = " (wrapping up...)"
 	}
-	fmt.Printf("\r%v samples per pixel%v", perPixel, note) // https://stackoverflow.com/a/15442704/1911432
+	fmt.Printf("\r%v samples/pixel, %v samples/ms%v", perPX, perMS, note) // https://stackoverflow.com/a/15442704/1911432
 }
 
 func showFile(file string) {
