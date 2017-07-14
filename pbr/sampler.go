@@ -3,6 +3,7 @@ package pbr
 import (
 	"math"
 	"math/rand"
+	"runtime"
 	"time"
 )
 
@@ -16,7 +17,6 @@ type Sampler struct {
 	cam    *Camera
 	scene  *Scene
 	noise  float64
-	rnd    *rand.Rand
 	count  int
 }
 
@@ -52,25 +52,35 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 		pixels:        make([]float64, cam.Width*cam.Height*Elements),
 		cam:           cam,
 		scene:         scene,
-		rnd:           rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
 // Sample samples every pixel in the Camera's frame at least once.
 // Depending on the Sampler's `adapt` value, noisy pixels may be sampled several times.
 // It returns the total number of samples taken.
-func (s *Sampler) Sample() (total int) {
-	noise := 0.0
-	mean := s.noise + Bias
-	max := s.Adapt * 3
+func (s *Sampler) Sample() {
 	length := len(s.pixels)
-	for p := 0; p < length; p += Elements {
-		samples := s.adaptive(s.pixels[p+Noise], mean, max)
-		noise += s.samplePixel(p, s.rnd, samples)
-		total += samples
+	workers := runtime.NumCPU()
+	ch := make(chan int, workers)
+
+	for i := 0; i < workers; i++ {
+		go func(i int) {
+			var count int
+			// mean := s.noise + Bias
+			// max := s.Adapt * 3
+			rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+			for p := i * Elements; p < length; p += Elements {
+				samples := 1 //s.adaptive(s.pixels[p+Noise], mean, max)
+				// noise += s.samplePixel(p, rnd, samples)
+				s.samplePixel(p, rnd, samples)
+				count += samples
+			}
+			ch <- count
+		}(i)
 	}
-	s.noise = noise / float64(s.Width*s.Height)
-	s.count += total
+	for i := 0; i < workers; i++ {
+		s.count += <-ch
+	}
 	return
 }
 
