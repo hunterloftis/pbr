@@ -8,17 +8,16 @@ import (
 
 func main() {
 	scene := pbr.EmptyScene()
-	camera := pbr.NewCamera(1280, 720)
+	camera := pbr.NewCamera(960, 540)
 	sampler := pbr.NewSampler(camera, scene)
 	renderer := pbr.NewRenderer(sampler)
 
-	scene.SetSky(pbr.Vector3{40, 50, 60}, pbr.Vector3{})
-	scene.Add(pbr.UnitSphere(pbr.Plastic(1, 1, 1, 0.8), pbr.Trans(0, 0, -3))) // TODO: (mat *Material, transforms ...*Matrix)
+	scene.SetSky(pbr.Vector3{256, 256, 256}, pbr.Vector3{})
+	scene.Add(pbr.UnitSphere(pbr.Plastic(1, 0, 0, 1), pbr.Trans(0, 0, -3))) // TODO: (mat *Material, transforms ...*Matrix)
 
 	for sampler.PerPixel() < 16 {
 		sampler.Sample()
 		fmt.Printf("\r%.1f samples / pixel", sampler.PerPixel())
 	}
 	pbr.WritePNG("hello.png", renderer.Rgb())
-	pbr.WritePNG("heat.png", renderer.Heat())
 }

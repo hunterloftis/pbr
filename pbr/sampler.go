@@ -63,6 +63,7 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 // Sample samples every pixel in the Camera's frame at least once.
 // Depending on the Sampler's `adapt` value, noisy pixels may be sampled several times.
 // It returns the total number of samples taken.
+// TODO: clean this up a bit
 func (s *Sampler) Sample() {
 	length := len(s.pixels)
 	workers := runtime.NumCPU()
@@ -89,6 +90,11 @@ func (s *Sampler) Sample() {
 	}
 	s.count += sample.count
 	s.meanNoise = sample.noise / float64(sample.count)
+}
+
+// Count returns the total sample count
+func (s *Sampler) Count() int {
+	return s.count
 }
 
 // PerPixel returns the per pixel sample count
