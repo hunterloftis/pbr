@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-// Cube describes a unit cube scaled, rotated, and translated by Pos.
+// Cube describes the orientation and material of a unit cube
 type Cube struct {
 	Pos      *Matrix4
 	Mat      *Material
@@ -12,15 +12,19 @@ type Cube struct {
 	GridSize float64
 }
 
-// UnitCube returns a pointer to a new 1x1x1 Cube Surface with position pos and material mat.
-func UnitCube(pos *Matrix4, mat *Material) *Cube {
+// UnitCube returns a pointer to a new 1x1x1 Cube Surface with material and optional transforms.
+func UnitCube(m *Material, transforms ...*Matrix4) *Cube {
+	pos := Identity()
+	for _, t := range transforms { // TODO: factor this so all surfaces can share it
+		pos = pos.Mult(t)
+	}
 	return &Cube{
 		Pos: pos,
-		Mat: mat,
+		Mat: m,
 	}
 }
 
-// SetGrid configures a cube grid
+// SetGrid adds a second material to the cube which is applied as a grid across its surface
 func (c *Cube) SetGrid(mat *Material, size float64) *Cube {
 	c.GridMat = mat
 	c.GridSize = size

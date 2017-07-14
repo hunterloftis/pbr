@@ -25,8 +25,8 @@ func NewMatrix4(a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4 f
 	return &m
 }
 
-// Ident creates a new identity matrix
-func Ident() *Matrix4 {
+// Identity creates a new identity matrix
+func Identity() *Matrix4 {
 	return NewMatrix4(
 		1, 0, 0, 0,
 		0, 1, 0, 0,
@@ -50,11 +50,11 @@ func LookMatrix(o Vector3, to Vector3) *Matrix4 {
 		r.Z, u.Z, f.Z, 0,
 		0, 0, 0, 1,
 	)
-	return Translation(o.X, o.Y, o.Z).Mult(orient)
+	return Trans(o.X, o.Y, o.Z).Mult(orient)
 }
 
-// Translation creates a new translation matrix
-func Translation(x, y, z float64) *Matrix4 {
+// Trans creates a new translation matrix
+func Trans(x, y, z float64) *Matrix4 {
 	return NewMatrix4(
 		1, 0, 0, x,
 		0, 1, 0, y,
@@ -73,9 +73,9 @@ func Scale(x, y, z float64) *Matrix4 {
 	)
 }
 
-// Rotation creates a rotation matrix from an angle-axis Vector representation
+// Rot creates a rotation matrix from an angle-axis Vector representation
 // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToMatrix/
-func Rotation(v Vector3) *Matrix4 {
+func Rot(v Vector3) *Matrix4 {
 	a := v.Len()
 	c := math.Cos(a)
 	s := math.Sin(a)
@@ -88,22 +88,6 @@ func Rotation(v Vector3) *Matrix4 {
 		t*x*z-y*s, t*y*z+x*s, t*z*z+c, 0,
 		0, 0, 0, 1,
 	)
-}
-
-// Trans is a chaining translation
-func (a *Matrix4) Trans(x, y, z float64) *Matrix4 {
-	// t := Translation(x, y, z)
-	return a.Mult(Translation(x, y, z))
-}
-
-// Scale is a chaining scale
-func (a *Matrix4) Scale(x, y, z float64) *Matrix4 {
-	return a.Mult(Scale(x, y, z))
-}
-
-// Rot is a chaining rotation
-func (a *Matrix4) Rot(v Vector3) *Matrix4 {
-	return a.Mult(Rotation(v))
 }
 
 // Mult multiplies by another matrix4
@@ -169,7 +153,7 @@ func (a *Matrix4) Inverse() *Matrix4 {
 	if a.inv != nil {
 		return a.inv
 	}
-	i := Ident()
+	i := Identity()
 	e := a.el
 	i.el[0][0] = e[1][1]*e[2][2]*e[3][3] - e[1][1]*e[2][3]*e[3][2] - e[2][1]*e[1][2]*e[3][3] + e[2][1]*e[1][3]*e[3][2] + e[3][1]*e[1][2]*e[2][3] - e[3][1]*e[1][3]*e[2][2]
 	i.el[1][0] = e[1][0]*e[2][3]*e[3][2] - e[1][0]*e[2][2]*e[3][3] + e[2][0]*e[1][2]*e[3][3] - e[2][0]*e[1][3]*e[3][2] - e[3][0]*e[1][2]*e[2][3] + e[3][0]*e[1][3]*e[2][2]

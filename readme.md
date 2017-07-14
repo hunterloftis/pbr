@@ -19,39 +19,41 @@ Package pbr implements Physically-Based Rendering with a Monte Carlo path tracer
 - Physically-based cameras
   - Sensor, aperture, focus, depth-of-field
 - [Supersampled anti-aliasing](https://en.wikipedia.org/wiki/Supersampling)
+- Fully concurrent with a sequential API
 
-## Quick start
+## Hello, world
 
 ```
 $ go get -u github.com/hunterloftis/pbr/pbr
 $ cd $GOPATH/src/github.com/hunterloftis/pbr
-$ ./run
+$ ./hello
 ```
 
-By default, the renderer runs until it receives a signal (like Ctrl + C)
+![Hello, world render](https://user-images.githubusercontent.com/364501/28223346-111a1944-6899-11e7-946b-8ea5c90c3888.png)
 
-## Scene bins
+```go
+func main() {
+	scene := pbr.EmptyScene()
+	camera := pbr.NewCamera(960, 540)
+	sampler := pbr.NewSampler(camera, scene)
+	renderer := pbr.NewRenderer(sampler)
 
-Scenes (like the example `cmd/cubes.go` scene) are built into binaries:
+	scene.SetSky(pbr.Vector3{256, 256, 256}, pbr.Vector3{})
+	scene.Add(pbr.UnitSphere(pbr.Plastic(1, 0, 0, 1)))
+
+	for sampler.PerPixel() < 200 {
+		sampler.Sample()
+		fmt.Printf("\r%.1f samples / pixel", sampler.PerPixel())
+	}
+	pbr.WritePNG("hello.png", renderer.Rgb())
+}
+```
+
+## Other examples
 
 ```
-$ go build -o bin/cubes ./cmd/cubes.go
-$ bin/cubes -help
-Usage of bin/cubes:
-  -adapt int
-    	Adaptive sampling; 0=off, 3=medium, 5=high (default 4)
-  -bounces int
-    	Maximum light bounces (default 10)
-  -heat string
-    	Heatmap png filename
-  -out string
-    	Output png filename (default "render.png")
-  -profile
-    	Record performance into profile.pprof
-  -samples float
-    	Max samples per pixel (default +Inf)
-  -workers int
-    	Concurrency level (default 4)
+$ ./cubes
+$ ./render
 ```
 
 ## Testing

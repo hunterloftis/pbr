@@ -5,21 +5,22 @@ import (
 	"math"
 )
 
-// Renderer renders the results of a trace to a file
+// Renderer renders the samples in a Sampler to an Image.
 type Renderer struct {
 	Width  int
 	Height int
 	RenderConfig
-	pixels []float64
+
+	sampler *Sampler
 }
 
-// RenderConfig configures rendering settings
+// RenderConfig configures rendering settings.
 type RenderConfig struct {
 	Exposure float64
 }
 
-// CamRenderer sizes a Renderer to match a Camera
-func CamRenderer(c *Camera, config ...RenderConfig) *Renderer {
+// NewRenderer creates a renderer referencing a Sampler.
+func NewRenderer(s *Sampler, config ...RenderConfig) *Renderer {
 	conf := RenderConfig{}
 	if len(config) > 0 {
 		conf = config[0]
@@ -28,49 +29,42 @@ func CamRenderer(c *Camera, config ...RenderConfig) *Renderer {
 		conf.Exposure = 1
 	}
 	return &Renderer{
-		Width:        c.Width,
-		Height:       c.Height,
+		Width:        s.Width,
+		Height:       s.Height,
 		RenderConfig: conf,
-		pixels:       make([]float64, 0),
+
+		sampler: s,
 	}
 }
 
-// Merge merges pixel arrays
-func (r *Renderer) Merge(pixels []float64) {
-	if len(r.pixels) < len(pixels) {
-		r.pixels = make([]float64, len(pixels))
-	}
-	for i, val := range pixels {
-		r.pixels[i] += val
-	}
-}
-
-// Rgb averages each sample into an rgb value
+// Rgb averages each sample into an rgb value.
 func (r *Renderer) Rgb() image.Image {
+	pixels := r.sampler.Samples()
 	im := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
-	for i := 0; i < len(r.pixels); i += Elements {
-		i2 := i / Elements * 4
-		count := r.pixels[i+Count]
-		im.Pix[i2] = r.color(r.pixels[i+Red] / count)
-		im.Pix[i2+1] = r.color(r.pixels[i+Green] / count)
-		im.Pix[i2+2] = r.color(r.pixels[i+Blue] / count)
+	for i := 0; i < len(pixels); i += Stride {
+		i2 := i / Stride * 4
+		count := pixels[i+Count]
+		im.Pix[i2] = r.color(pixels[i+Red] / count)
+		im.Pix[i2+1] = r.color(pixels[i+Green] / count)
+		im.Pix[i2+2] = r.color(pixels[i+Blue] / count)
 		im.Pix[i2+3] = 255
 	}
 	return im
 }
 
-// Heat returns a heatmap of the sample count for each pixel
+// Heat returns a heatmap of the sample count for each pixel.
 func (r *Renderer) Heat() image.Image {
+	pixels := r.sampler.Samples()
 	im := image.NewRGBA(image.Rect(0, 0, r.Width, r.Height))
 	max := 0.0
-	for i := Count; i < len(r.pixels); i += Elements {
-		max = math.Max(max, r.pixels[i])
+	for i := Count; i < len(pixels); i += Stride {
+		max = math.Max(max, pixels[i])
 	}
-	for i := 0; i < len(r.pixels); i += Elements {
-		i2 := i / Elements * 4
-		im.Pix[i2] = r.color(r.pixels[i+Count] / max * 255)
-		im.Pix[i2+1] = r.color(r.pixels[i+Count] / max * 255)
-		im.Pix[i2+2] = r.color(r.pixels[i+Count] / max * 255)
+	for i := 0; i < len(pixels); i += Stride {
+		i2 := i / Stride * 4
+		im.Pix[i2] = r.color(pixels[i+Count] / max * 255)
+		im.Pix[i2+1] = r.color(pixels[i+Count] / max * 255)
+		im.Pix[i2+2] = r.color(pixels[i+Count] / max * 255)
 		im.Pix[i2+3] = 255
 	}
 	return im

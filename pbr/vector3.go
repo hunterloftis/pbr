@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Vector3 holds x, y, z
+// Vector3 holds x, y, z values.
 type Vector3 struct {
 	X, Y, Z float64
 }
