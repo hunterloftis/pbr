@@ -17,6 +17,7 @@ type Sampler struct {
 	scene  *Scene
 	noise  float64
 	rnd    *rand.Rand
+	count  int
 }
 
 // SamplerConfig configures a Sampler
@@ -31,12 +32,18 @@ type SamplerConfig struct {
 // bounces specifies the maximum number of times a Ray can bounce around the scene (eg, 10).
 // adapt specifies how adaptive sampling should be to noise (0 = none, 3 = medium, 4 = high).
 func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
-	conf := config[0]
+	conf := SamplerConfig{}
+	if len(config) > 0 {
+		conf = config[0]
+	}
 	if conf.Bounces == 0 {
 		conf.Bounces = 10 // Reasonable default
 	}
 	if conf.Samples == 0 {
 		conf.Samples = math.Inf(1) // Sample forever by default
+	}
+	if conf.Adapt == 0 { // TODO: 0 should be a valid value
+		conf.Adapt = 3
 	}
 	return &Sampler{
 		Width:         cam.Width,
@@ -63,7 +70,13 @@ func (s *Sampler) SampleFrame() (total int) {
 		total += samples
 	}
 	s.noise = noise / float64(s.Width*s.Height)
+	s.count += total
 	return
+}
+
+// PerPixel returns the per pixel sample count
+func (s *Sampler) PerPixel() float64 {
+	return float64(s.count) / float64(s.Width*s.Height)
 }
 
 // Adaptive returns the number of samples to take given specific and average noise values.

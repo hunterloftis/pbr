@@ -29,7 +29,10 @@ type CameraConfig struct {
 
 // NewCamera makes a new Full-frame (35mm) camera.
 func NewCamera(width, height int, config ...CameraConfig) *Camera {
-	conf := config[0]
+	conf := CameraConfig{}
+	if len(config) > 0 {
+		conf = config[0]
+	}
 	if conf.Lens == 0 {
 		conf.Lens = 0.050 // 50mm focal length
 	}
