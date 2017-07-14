@@ -16,7 +16,7 @@ func main() {
 	scene.Add(pbr.UnitSphere(pbr.Plastic(1, 1, 1, 0.8), pbr.Trans(0, 0, -3))) // TODO: (mat *Material, transforms ...*Matrix)
 
 	for sampler.PerPixel() < 16 {
-		sampler.SampleFrame()
+		sampler.Sample()
 		fmt.Printf("\r%.1f samples / pixel", sampler.PerPixel())
 	}
 	pbr.WritePNG("hello.png", renderer.Rgb())

@@ -56,17 +56,17 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 	}
 }
 
-// SampleFrame samples every pixel in the Camera's frame at least once.
+// Sample samples every pixel in the Camera's frame at least once.
 // Depending on the Sampler's `adapt` value, noisy pixels may be sampled several times.
 // It returns the total number of samples taken.
-func (s *Sampler) SampleFrame() (total int) {
+func (s *Sampler) Sample() (total int) {
 	noise := 0.0
 	mean := s.noise + Bias
 	max := s.Adapt * 3
 	length := len(s.pixels)
 	for p := 0; p < length; p += Elements {
-		samples := s.Adaptive(s.pixels[p+Noise], mean, max)
-		noise += s.sample(p, s.rnd, samples)
+		samples := s.adaptive(s.pixels[p+Noise], mean, max)
+		noise += s.samplePixel(p, s.rnd, samples)
 		total += samples
 	}
 	s.noise = noise / float64(s.Width*s.Height)
@@ -79,15 +79,15 @@ func (s *Sampler) PerPixel() float64 {
 	return float64(s.count) / float64(s.Width*s.Height)
 }
 
-// Adaptive returns the number of samples to take given specific and average noise values.
-func (s *Sampler) Adaptive(noise float64, mean float64, max int) int {
+// adaptive returns the number of samples to take given specific and average noise values.
+func (s *Sampler) adaptive(noise float64, mean float64, max int) int {
 	ratio := noise/mean + Bias
 	return int(math.Min(math.Ceil(math.Pow(ratio, float64(s.Adapt))), float64(max)))
 }
 
-// sample samples a single pixel `samples` times.
+// samplePixel samples a single pixel `samples` times.
 // The pixel is specified by the index `p`.
-func (s *Sampler) sample(p int, rnd *rand.Rand, samples int) float64 {
+func (s *Sampler) samplePixel(p int, rnd *rand.Rand, samples int) float64 {
 	x, y := s.pixelAt(p)
 	before := value(s.pixels, p)
 	for i := 0; i < samples; i++ {
