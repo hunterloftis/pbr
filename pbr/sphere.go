@@ -8,15 +8,19 @@ type Sphere struct {
 	Mat *Material
 }
 
-// UnitSphere returns a pointer to a new 1x1x1 Sphere Surface with position pos and material mat.
-func UnitSphere(pos *Matrix4, mat *Material) *Sphere {
+// UnitSphere returns a pointer to a new 1x1x1 Sphere Surface with a given material and optional transforms.
+func UnitSphere(m *Material, transforms ...*Matrix4) *Sphere {
+	pos := Identity()
+	for _, t := range transforms {
+		pos = pos.Mult(t)
+	}
 	return &Sphere{
 		Pos: pos,
-		Mat: mat,
+		Mat: m,
 	}
 }
 
-// Intersect tests whether the sphere intersects a given ray
+// Intersect tests whether the sphere intersects a given ray.
 // http://tfpsly.free.fr/english/index.html?url=http://tfpsly.free.fr/english/3d/Raytracing.html
 func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64) {
 	i := s.Pos.Inverse()
@@ -45,7 +49,7 @@ func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64) {
 	return false, 0
 }
 
-// At returns the surface normal given a point on the surface
+// At returns the surface normal given a point on the surface.
 func (s *Sphere) At(point Vector3) (Direction, *Material) {
 	i := s.Pos.Inverse()
 	p := i.MultPoint(point)
