@@ -70,34 +70,31 @@ func main() {
 		pbr.UnitSphere(pbr.Ident().Trans(0.45, 0.05, -0.4).Scale(0.2, 0.2, 0.2), gold),
 	)
 
+	m := pbr.NewMonitor()
+	start := time.Now().UnixNano()
 	interrupt := make(chan os.Signal, 2)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+	go func() { <-interrupt; m.Stop() }()
 
-	start := time.Now().UnixNano()
-	m := pbr.NewMonitor()
 	for i := 0; i < workers; i++ {
 		m.AddSampler(pbr.NewSampler(camera, scene, pbr.SamplerConfig{
 			Bounces: 10,
 			Adapt:   5,
 		}))
 	}
-
-	for m.Active() > 0 {
-		select {
-		case samples := <-m.Progress:
+	go func() {
+		for m.Active() > 0 {
+			samples := <-m.Progress
 			fmt.Println("main loop - Progress")
 			fmt.Println("total samples:", samples)
 			perPX := samples / camera.Pixels()
 			ms := float64(time.Now().UnixNano()-start) * 1e-6
 			showProgress(perPX, int(float64(samples)/ms), m.Stopped())
-		case r := <-m.Results:
-			fmt.Println("main loop - merge results")
-			renderer.Merge(r)
-			fmt.Println("done merging")
-		case <-interrupt:
-			fmt.Println("main loop - interrupt")
-			m.Stop()
 		}
+	}()
+	for i := 0; i < workers; i++ {
+		r := <-m.Results
+		renderer.Merge(r)
 	}
 
 	writePNG(*out, renderer.Rgb())
