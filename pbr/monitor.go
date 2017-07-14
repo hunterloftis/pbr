@@ -1,9 +1,10 @@
 package pbr
 
 import (
-	"fmt"
+	"os"
+	"os/signal"
 	"sync"
-	"time"
+	"syscall"
 )
 
 // Monitor monitors several goroutines rendering stuff
@@ -44,14 +45,19 @@ func (m *Monitor) Stop() {
 	close(m.cancel)
 }
 
+// Interrupt stops on interrupts
+func (m *Monitor) Interrupt() {
+	interrupt := make(chan os.Signal, 2)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+	go func() { <-interrupt; m.Stop() }()
+}
+
 // Stopped returns whether or not this is stopped
 func (m *Monitor) Stopped() bool {
 	select {
 	case <-m.cancel:
-		fmt.Println("Stopped - true")
 		return true
 	default:
-		fmt.Println("Stopped - false")
 		return false
 	}
 }
@@ -59,30 +65,20 @@ func (m *Monitor) Stopped() bool {
 // AddSampler creates a new worker with that sampler
 func (m *Monitor) AddSampler(s *Sampler) {
 	m.active++
-	i := m.active
 	go func() {
 		for {
-			fmt.Println(i, "Restart sampling loop")
+			frame := s.SampleFrame()
+			m.samples.Lock()
+			m.samples.count += frame
+			total := m.samples.count // TODO: do I need to do this or can I safely read after unlocking?
+			m.samples.Unlock()
+			m.Progress <- total
 			select {
 			case <-m.cancel:
-				fmt.Println(i, "<- Send pixels to m.Results")
 				m.Results <- s.Pixels()
-				fmt.Println(i, "pixels sent")
 				m.active--
 				return
 			default:
-				fmt.Println(i, "Start SampleFrame()")
-				start := time.Now().UnixNano()
-				frame := s.SampleFrame()
-				secs := float64(time.Now().UnixNano()-start) * 1e-9
-				fmt.Println(i, "End SampleFrame(), seconds taken:", secs)
-				m.samples.Lock()
-				m.samples.count += frame
-				total := m.samples.count // TODO: do I need to do this or can I safely read after unlocking?
-				m.samples.Unlock()
-				fmt.Println(i, "<- send progress")
-				m.Progress <- total
-				fmt.Println(i, "progress sent")
 			}
 		}
 	}()

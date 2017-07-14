@@ -7,10 +7,8 @@ import (
 	"image/png"
 	"math"
 	"os"
-	"os/signal"
 	"runtime"
 	"runtime/pprof"
-	"syscall"
 	"time"
 
 	"github.com/hunterloftis/pbr/pbr"
@@ -70,11 +68,9 @@ func main() {
 		pbr.UnitSphere(pbr.Ident().Trans(0.45, 0.05, -0.4).Scale(0.2, 0.2, 0.2), gold),
 	)
 
-	m := pbr.NewMonitor()
 	start := time.Now().UnixNano()
-	interrupt := make(chan os.Signal, 2)
-	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-	go func() { <-interrupt; m.Stop() }()
+	m := pbr.NewMonitor()
+	m.Interrupt()
 
 	for i := 0; i < workers; i++ {
 		m.AddSampler(pbr.NewSampler(camera, scene, pbr.SamplerConfig{
@@ -82,19 +78,17 @@ func main() {
 			Adapt:   5,
 		}))
 	}
+
 	go func() {
 		for m.Active() > 0 {
 			samples := <-m.Progress
-			fmt.Println("main loop - Progress")
-			fmt.Println("total samples:", samples)
-			perPX := samples / camera.Pixels()
-			ms := float64(time.Now().UnixNano()-start) * 1e-6
-			showProgress(perPX, int(float64(samples)/ms), m.Stopped())
+			ns := int(time.Now().UnixNano() - start)
+			showProgress(samples, camera.Pixels(), ns, m.Stopped())
 		}
 	}()
+
 	for i := 0; i < workers; i++ {
-		r := <-m.Results
-		renderer.Merge(r)
+		renderer.Merge(<-m.Results)
 	}
 
 	writePNG(*out, renderer.Rgb())
@@ -114,14 +108,14 @@ func writePNG(file string, i image.Image) error {
 	return png.Encode(f, i)
 }
 
-func showProgress(perPX, perMS int, stopped bool) {
+func showProgress(samples, pixels, ns int, stopped bool) {
 	note := ""
 	if stopped {
 		note = " (wrapping up...)"
 	}
-	_ = note
-	// fmt.Printf("\r%v samples/pixel, %v samples/ms%v", perPX, perMS, note) // https://stackoverflow.com/a/15442704/1911432
-	fmt.Printf("%v samples/pixel, %v samples/ms%v\n", perPX, perMS, note) // https://stackoverflow.com/a/15442704/1911432
+	pp := samples / pixels
+	pms := samples / (ns / 1e6)
+	fmt.Printf("\r%v samples/pixel, %v samples/ms%v", pp, pms, note) // https://stackoverflow.com/a/15442704/1911432
 }
 
 func showFile(file string) {
