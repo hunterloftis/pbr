@@ -13,7 +13,7 @@ func main() {
 	renderer := pbr.NewRenderer(sampler)
 
 	scene.SetSky(pbr.Vector3{40, 50, 60}, pbr.Vector3{})
-	scene.Add(pbr.UnitSphere(pbr.Ident().Trans(0, 0, -3), pbr.Plastic(1, 1, 1, 0.8))) // TODO: (mat *Material, transforms ...*Matrix)
+	scene.Add(pbr.UnitSphere(pbr.Plastic(1, 1, 1, 0.8), pbr.Translation(0, 0, -3))) // TODO: (mat *Material, transforms ...*Matrix)
 
 	for sampler.PerPixel() < 16 {
 		sampler.SampleFrame()

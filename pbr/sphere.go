@@ -9,10 +9,14 @@ type Sphere struct {
 }
 
 // UnitSphere returns a pointer to a new 1x1x1 Sphere Surface with position pos and material mat.
-func UnitSphere(pos *Matrix4, mat *Material) *Sphere {
+func UnitSphere(m *Material, transforms ...*Matrix4) *Sphere {
+	pos := Ident()
+	for _, t := range transforms {
+		pos = pos.Mult(t)
+	}
 	return &Sphere{
 		Pos: pos,
-		Mat: mat,
+		Mat: m,
 	}
 }
 
