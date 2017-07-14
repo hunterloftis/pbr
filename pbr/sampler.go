@@ -54,7 +54,7 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 		Width:         cam.Width,
 		Height:        cam.Height,
 		SamplerConfig: conf,
-		samples:       make([]float64, cam.Width*cam.Height*Stride),
+		samples:       make([]float64, index(cam.Width*cam.Height)*Stride),
 		cam:           cam,
 		scene:         scene,
 	}
@@ -66,12 +66,12 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 // TODO: clean this up a bit
 // https://stackoverflow.com/questions/22517614/golang-concurrent-array-access
 func (s *Sampler) Sample() {
-	length := len(s.samples)
-	workers := runtime.NumCPU()
+	length := index(len(s.samples))
+	workers := index(runtime.NumCPU())
 	ch := make(chan sampleStat, workers)
 
-	for i := 0; i < workers; i++ {
-		go func(i, adapt, max int, mean float64) {
+	for i := index(0); i < workers; i++ {
+		go func(i index, adapt, max int, mean float64) {
 			var stat sampleStat
 			rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 			for p := i * Stride; p < length; p += Stride * workers {
@@ -84,7 +84,7 @@ func (s *Sampler) Sample() {
 	}
 
 	var sample sampleStat
-	for i := 0; i < workers; i++ {
+	for i := index(0); i < workers; i++ {
 		stat := <-ch
 		sample.count += stat.count
 		sample.noise += stat.noise
@@ -122,7 +122,7 @@ func adaptive(noise float64, adapt, max int, mean float64) int {
 
 // samplePixel samples a single pixel `samples` times.
 // The pixel is specified by the index `p`.
-func (s *Sampler) samplePixel(p int, rnd *rand.Rand, samples int) float64 {
+func (s *Sampler) samplePixel(p index, rnd *rand.Rand, samples int) float64 {
 	x, y := s.pixelAt(p)
 	before := value(s.samples, p)
 	for i := 0; i < samples; i++ {
@@ -140,7 +140,7 @@ func (s *Sampler) samplePixel(p int, rnd *rand.Rand, samples int) float64 {
 	return noise
 }
 
-func value(pixels []float64, i int) Vector3 {
+func value(pixels []float64, i index) Vector3 {
 	if pixels[i+Count] == 0 {
 		return Vector3{}
 	}
@@ -176,7 +176,7 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Energy {
 	return energy
 }
 
-func (s *Sampler) pixelAt(i int) (x, y float64) {
-	pos := i / Stride
+func (s *Sampler) pixelAt(i index) (x, y float64) {
+	pos := int(i / Stride)
 	return float64(pos % s.Width), float64(pos / s.Width)
 }
