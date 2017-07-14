@@ -5,6 +5,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 )
 
 // Monitor monitors several goroutines rendering stuff
@@ -15,6 +16,8 @@ type Monitor struct {
 	cancel  chan interface{}
 	active  int
 	samples *safeCount
+	nanos   int
+	start   int64
 }
 
 type safeCount struct {
@@ -29,7 +32,21 @@ func NewMonitor() *Monitor {
 		Results:  make(chan []float64),
 		cancel:   make(chan interface{}),
 		samples:  &safeCount{},
+		start:    time.Now().UnixNano(),
 	}
+}
+
+// Samples returns the total number of samples
+// TODO: reader lock?
+func (m *Monitor) Samples() int {
+	m.samples.Lock()
+	defer m.samples.Unlock()
+	return m.samples.count
+}
+
+// Nano returns the nanoseconds since Monitoring started
+func (m *Monitor) Nano() int {
+	return int(time.Now().UnixNano() - m.start)
 }
 
 // Active returns the number of active samplers/workers
@@ -45,11 +62,11 @@ func (m *Monitor) Stop() {
 	close(m.cancel)
 }
 
-// Interrupt stops on interrupts
-func (m *Monitor) Interrupt() {
+// SetInterrupt stops on interrupt or term signals
+func (m *Monitor) SetInterrupt(f func()) {
 	interrupt := make(chan os.Signal, 2)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-	go func() { <-interrupt; m.Stop() }()
+	go func() { <-interrupt; m.Stop(); f() }()
 }
 
 // Stopped returns whether or not this is stopped
