@@ -76,7 +76,7 @@ func (s *Scene) SetPano(r io.Reader, expose float64) {
 	s.pano = &RGBAE{Width: width, Height: height, Data: data, Expose: expose}
 }
 
-// SetSky sets the sky color
+// SetSky sets the top (up) and bottom (down) sky color.
 func (s *Scene) SetSky(up, down Vector3) {
 	s.skyUp = up
 	s.skyDown = down
