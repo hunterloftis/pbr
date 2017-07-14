@@ -6,20 +6,20 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
-	"runtime"
+	"os/signal"
 	"runtime/pprof"
+	"syscall"
+	"time"
 
 	"github.com/hunterloftis/pbr/pbr"
 )
 
 func main() {
-	var target, focus *pbr.Vector3
-	position := pbr.Vector3{0, 0, 0}
+	var position, target, focus *pbr.Vector3
 	sky := pbr.Vector3{40, 50, 60}
 	in := os.Args[1]
 	out := flag.String("out", "render.png", "Output png filename")
 	heat := flag.String("heat", "", "Heatmap png filename")
-	workers := flag.Int("workers", runtime.NumCPU(), "Concurrency level")
 	quality := flag.Float64("quality", math.Inf(1), "Minimum samples-per-pixel to reach before exiting")
 	adapt := flag.Int("adapt", 4, "Adaptive sampling; 0=off, 3=medium, 5=high") // TODO: 0 is broken
 	bounces := flag.Int("bounces", 10, "Maximum light bounces")
@@ -28,7 +28,7 @@ func main() {
 	lens := flag.Float64("lens", 50, "Camera focal length in mm")
 	exposure := flag.Float64("exposure", 1, "Exposure multiplier")
 	fStop := flag.Float64("fstop", 4, "Camera f-stop")
-	flag.Var(&position, "position", "Camera position")
+	flag.Var(position, "position", "Camera position")
 	flag.Var(target, "target", "Camera target location")
 	flag.Var(focus, "focus", "Camera focus location")
 	flag.Var(&sky, "sky", "Ambient sky lighting")
@@ -55,7 +55,11 @@ func main() {
 		Focus:    focus,
 		FStop:    *fStop,
 	})
-	renderer := pbr.CamRenderer(camera, pbr.RenderConfig{
+	sampler := pbr.NewSampler(camera, scene, pbr.SamplerConfig{
+		Bounces: *bounces,
+		Adapt:   *adapt,
+	})
+	renderer := pbr.NewRenderer(sampler, pbr.RenderConfig{
 		Exposure: *exposure,
 	})
 
@@ -66,31 +70,24 @@ func main() {
 		scene.SetPano(hdr, 100) // TODO: read radiosity info or allow it from the command line
 	}
 
-	redPlastic := pbr.Plastic(1, 0, 0, 1)
-	scene.Add(
-		pbr.UnitCube(pbr.Ident().Trans(0, 0, -3).Rot(pbr.Vector3{0, 1, 0}).Scale(0.25, 0.25, 0.25), redPlastic),
-	)
+	// For debugging until we're actually parsing collada files
+	scene.Add(pbr.UnitCube(pbr.Plastic(1, 0, 0, 1), pbr.Rot(pbr.Vector3{0, 1, 0}), pbr.Scale(0.5, 0.5, 0.5)))
 
-	m := pbr.NewMonitor()
-	m.SetInterrupt(func() {
-		pbr.ShowProgress(m.Samples(), camera.Pixels(), m.Nano(), m.Stopped())
-	})
+	start := time.Now()
+	running := true
+	interrupt := make(chan os.Signal, 2)
 
-	for i := 0; i < *workers; i++ {
-		m.AddSampler(pbr.NewSampler(camera, scene, pbr.SamplerConfig{
-			Bounces: *bounces,
-			Adapt:   *adapt,
-		}))
-	}
-	for m.Active() > 0 {
-		samples := <-m.Progress
-		if float64(samples/camera.Pixels()) >= *quality {
-			m.Stop()
-		}
-		pbr.ShowProgress(samples, camera.Pixels(), m.Nano(), m.Stopped())
-	}
-	for i := 0; i < *workers; i++ {
-		renderer.Merge(<-m.Results)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM) // TODO: abstract this?
+	go func() {
+		<-interrupt
+		running = false
+		pbr.ShowProgress(sampler, start, running)
+	}()
+
+	pbr.ShowProgress(sampler, start, running)
+	for running && sampler.PerPixel() < *quality {
+		sampler.Sample()
+		pbr.ShowProgress(sampler, start, running)
 	}
 
 	pbr.WritePNG(*out, renderer.Rgb())
