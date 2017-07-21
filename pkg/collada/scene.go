@@ -32,10 +32,7 @@ func ReadScene(r io.Reader) (*Scene, error) {
 		for j := 0; j < len(s.Geometry[i].Triangles); j++ {
 			triangles := &s.Geometry[i].Triangles[j]
 			material := m.Material(triangles.Material)
-
-			fmt.Println("geometry", i, "triangles", j, "data:", triangles.Data)
 			indices := StringToInts(triangles.Data)
-			fmt.Println("triangle indices:", indices)
 			inputs := len(triangles.Input)
 			vertexOffset := 0
 			var sourcePos, sourceNorm *XSource
@@ -43,7 +40,6 @@ func ReadScene(r io.Reader) (*Scene, error) {
 				if triangles.Input[k].Semantic == "VERTEX" {
 					vertexOffset = triangles.Input[k].Offset
 					vID := triangles.Input[k].Source[1:]
-					fmt.Println("vertex source id:", vID)
 					v := m.vertices[vID]
 					for l := 0; l < len(v.Input); l++ {
 						sID := v.Input[l].Source[1:]
@@ -56,7 +52,6 @@ func ReadScene(r io.Reader) (*Scene, error) {
 					}
 				}
 			}
-			fmt.Println("source.floats:", sourcePos.floats)
 			if sourcePos == nil {
 				return nil, fmt.Errorf("collada: no position source found")
 			}
@@ -70,48 +65,24 @@ func ReadScene(r io.Reader) (*Scene, error) {
 				return nil, fmt.Errorf("collada: expected params XYZ, got %v", sourceNorm.params)
 			}
 			stride := inputs * 3
-			fmt.Println("stride:", stride)
-			fmt.Println("all normals:", sourceNorm.floats)
 			for k := 0; k < triangles.Count; k++ {
 				triangle := &Triangle{Mat: material}
 				start := k * stride
 				for l := 0; l < 3; l++ {
 					position := start + l + vertexOffset
-					fmt.Println("Index stored at position", position)
 					index := indices[position] * 3
-					fmt.Println("Triangle", k, "point", l, "index:", index)
 					triangle.Pos[l].X = sourcePos.floats[index+offX]
 					triangle.Pos[l].Y = sourcePos.floats[index+offY]
 					triangle.Pos[l].Z = sourcePos.floats[index+offZ]
-					fmt.Println("Triangle", k, "normal", l, "index:", index, "values:", sourceNorm.floats[index:index+3])
 					triangle.Norm[l].X = sourceNorm.floats[index+offX]
 					triangle.Norm[l].Y = sourceNorm.floats[index+offY]
 					triangle.Norm[l].Z = sourceNorm.floats[index+offZ]
 				}
-				fmt.Println("Triangle", k, ":", triangle)
 				t = append(t, triangle)
 			}
 		}
 	}
 	return &Scene{s, t}, nil
-}
-
-// Triangle describes a 3D triangle's position, normal, and material.
-type Triangle struct {
-	Pos  [3]Vector3
-	Norm [3]Vector3
-	Mat  *Material
-}
-
-// Vector3 describes a 3D point in space.
-type Vector3 struct {
-	X, Y, Z float64
-}
-
-// Material describes the name, color, and opacity of a material.
-type Material struct {
-	Name       string
-	R, G, B, A float64
 }
 
 // StringToFloats converts a space-delimited string of floats into a slice of float64.
