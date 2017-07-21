@@ -55,3 +55,18 @@ func NewMap(s *Schema) Map {
 
 	return m
 }
+
+// Material returns a Material instance given a material symbol.
+func (m *Map) Material(symbol string) *Material {
+	instance := m.instances[symbol]
+	material := m.materials[instance.Target[1:]]
+	effect := m.effects[material.InstanceEffect.URL[1:]]
+	color := StringToFloats(effect.Color)
+	return &Material{
+		Name: material.Name,
+		R:    color[0],
+		G:    color[1],
+		B:    color[2],
+		A:    color[3],
+	}
+}

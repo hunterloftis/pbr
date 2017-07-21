@@ -31,17 +31,8 @@ func ReadScene(r io.Reader) (*Scene, error) {
 	for i := 0; i < len(s.Geometry); i++ {
 		for j := 0; j < len(s.Geometry[i].Triangles); j++ {
 			triangles := &s.Geometry[i].Triangles[j]
-			instance := m.instances[triangles.Material]
-			material := m.materials[instance.Target[1:]]
-			effect := m.effects[material.InstanceEffect.URL[1:]]
-			color := StringToFloats(effect.Color)
-			mat := &Material{
-				Name: material.Name,
-				R:    color[0],
-				G:    color[1],
-				B:    color[2],
-				A:    color[3],
-			}
+			material := m.Material(triangles.Material)
+
 			fmt.Println("geometry", i, "triangles", j, "data:", triangles.Data)
 			indices := StringToInts(triangles.Data)
 			fmt.Println("triangle indices:", indices)
@@ -82,9 +73,7 @@ func ReadScene(r io.Reader) (*Scene, error) {
 			fmt.Println("stride:", stride)
 			fmt.Println("all normals:", sourceNorm.floats)
 			for k := 0; k < triangles.Count; k++ {
-				triangle := &Triangle{
-					Mat: mat,
-				}
+				triangle := &Triangle{Mat: material}
 				start := k * stride
 				for l := 0; l < 3; l++ {
 					position := start + l + vertexOffset
