@@ -74,7 +74,7 @@ func ReadScene(r io.Reader) (*Scene, error) {
 			fmt.Println("triangle indices:", indices)
 			inputs := len(triangles.Input)
 			vertexOffset := 0
-			var source *XSource
+			var sourcePos, sourceNorm *XSource
 			for k := 0; k < inputs; k++ {
 				if triangles.Input[k].Semantic == "VERTEX" {
 					vertexOffset = triangles.Input[k].Offset
@@ -82,19 +82,28 @@ func ReadScene(r io.Reader) (*Scene, error) {
 					fmt.Println("vertex source id:", vID)
 					v := vertices[vID]
 					for l := 0; l < len(v.Input); l++ {
-						if v.Input[l].Semantic == "POSITION" {
-							sID := v.Input[l].Source[1:]
-							source = sources[sID]
+						sID := v.Input[l].Source[1:]
+						switch v.Input[l].Semantic {
+						case "POSITION":
+							sourcePos = sources[sID]
+						case "NORMAL":
+							sourceNorm = sources[sID]
 						}
 					}
 				}
 			}
-			fmt.Println("source.floats:", source.floats)
-			if source == nil {
-				return nil, fmt.Errorf("collada: no VERTEX Source found")
+			fmt.Println("source.floats:", sourcePos.floats)
+			if sourcePos == nil {
+				return nil, fmt.Errorf("collada: no position source found")
 			}
-			if source.params != "XYZ" {
-				return nil, fmt.Errorf("collada: expected params XYZ, got %v", source.params)
+			if sourceNorm == nil {
+				return nil, fmt.Errorf("collada: no normal source found")
+			}
+			if sourcePos.params != "XYZ" {
+				return nil, fmt.Errorf("collada: expected params XYZ, got %v", sourcePos.params)
+			}
+			if sourceNorm.params != "XYZ" {
+				return nil, fmt.Errorf("collada: expected params XYZ, got %v", sourceNorm.params)
 			}
 			stride := inputs * 3
 			fmt.Println("stride:", stride)
@@ -106,9 +115,12 @@ func ReadScene(r io.Reader) (*Scene, error) {
 					fmt.Println("Index stored at position", position)
 					index := indices[position]
 					fmt.Println("Triangle", k, "point", l, "index:", index)
-					triangle.Vert[l].X = source.floats[index]
-					triangle.Vert[l].Y = source.floats[index+1]
-					triangle.Vert[l].Z = source.floats[index+2]
+					triangle.Vert[l].X = sourcePos.floats[index] // TODO: sketchup uses Z for vertical and Y for depth?
+					triangle.Vert[l].Y = sourcePos.floats[index+1]
+					triangle.Vert[l].Z = sourcePos.floats[index+2]
+					triangle.Norm[l].X = sourceNorm.floats[index]
+					triangle.Norm[l].Y = sourceNorm.floats[index+1]
+					triangle.Norm[l].Z = sourceNorm.floats[index+2]
 				}
 				fmt.Println("Triangle", k, "verts:", triangle.Vert)
 				scene.Triangles = append(scene.Triangles, triangle)
@@ -120,9 +132,9 @@ func ReadScene(r io.Reader) (*Scene, error) {
 
 // Triangle describes a 3D triangle's position, normal, and material.
 type Triangle struct {
-	Vert     [3]Vector3
-	Normal   Vector3
-	Material Material
+	Vert [3]Vector3
+	Norm [3]Vector3
+	Mat  Material
 }
 
 // Vector3 describes a 3D point in space.
@@ -132,7 +144,6 @@ type Vector3 struct {
 
 // Material describes the name, color, and opacity of a material.
 type Material struct {
-	Name         string
-	R, G, B      float64
-	Transparency float64
+	Name       string
+	R, G, B, A float64
 }
