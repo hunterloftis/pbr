@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/hunterloftis/pbr/pbr"
+	"github.com/hunterloftis/pbr/pkg/pbr"
 )
 
 func main() {
@@ -51,7 +51,11 @@ func main() {
 		panic(err)
 	}
 	defer f.Close()
-	scene := pbr.ColladaScene(f)
+
+	scene, err := pbr.ColladaScene(f)
+	if err != nil {
+		panic(err)
+	}
 	camera := pbr.NewCamera(1280, 720, pbr.CameraConfig{
 		Lens:     (*lens) / 1000.0,
 		Position: position,

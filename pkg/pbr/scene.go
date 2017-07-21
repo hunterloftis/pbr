@@ -1,12 +1,12 @@
 package pbr
 
 import (
-	"encoding/xml"
 	"fmt"
 	"io"
 	"math"
 
 	"github.com/Opioid/rgbe"
+	"github.com/hunterloftis/pbr/pkg/collada"
 )
 
 // RGBAE Describes an rgbae (hdr) image
@@ -30,15 +30,15 @@ func EmptyScene() *Scene {
 	return &Scene{}
 }
 
-// ColladaScene creates a Scene from collada xml data
-func ColladaScene(r io.Reader) *Scene {
-	// fmt.Println("xml:", string(xml))
-	d := xml.NewDecoder(r)
-	collada := &Collada{}
-	_ = d.Decode(collada)
-	fmt.Println(collada)
-	s := Scene{}
-	return &s
+// ColladaScene reads geometry from collada xml data and returns a new Scene with that geometry.
+func ColladaScene(r io.Reader) (*Scene, error) {
+	s, err := collada.ReadScene(r)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(s.XML)
+	// TODO: use the collada.Scene (s) to populate the pbr.Scene with Surface geometry
+	return &Scene{}, nil
 }
 
 // Intersect tests whether a ray hits any objects in the scene

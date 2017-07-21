@@ -6,3 +6,5 @@
 // Sampler samples light energy in a Scene from a particular Camera.
 // Renderer renders sampled light onto Image pixels.
 package pbr
+
+// TODO: reduce public API to only what's really necessary

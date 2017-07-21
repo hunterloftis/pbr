@@ -6,6 +6,7 @@ import (
 )
 
 // Renderer renders the samples in a Sampler to an Image.
+// TODO: https://www.reddit.com/r/golang/comments/6lfjcx/beginnerfeedback_this_path_tracer_is_my_first_go/dk49kxz/
 type Renderer struct {
 	Width  int
 	Height int
