@@ -14,6 +14,13 @@ type Scene struct {
 	Triangles []*Triangle
 }
 
+// XZY because sketchup uses Z for up (flipping Y and Z)
+const (
+	offX int = iota
+	offZ
+	offY
+)
+
 // StringToFloats converts a space-delimited string of floats into a slice of float64.
 func StringToFloats(s string) []float64 {
 	fields := strings.Fields(s)
@@ -116,13 +123,13 @@ func ReadScene(r io.Reader) (*Scene, error) {
 					fmt.Println("Index stored at position", position)
 					index := indices[position] * 3
 					fmt.Println("Triangle", k, "point", l, "index:", index)
-					triangle.Vert[l].X = sourcePos.floats[index] // TODO: sketchup uses Z for vertical and Y for depth?
-					triangle.Vert[l].Y = sourcePos.floats[index+1]
-					triangle.Vert[l].Z = sourcePos.floats[index+2]
+					triangle.Vert[l].X = sourcePos.floats[index+offX]
+					triangle.Vert[l].Y = sourcePos.floats[index+offY]
+					triangle.Vert[l].Z = sourcePos.floats[index+offZ]
 					fmt.Println("Triangle", k, "normal", l, "index:", index, "values:", sourceNorm.floats[index:index+3])
-					triangle.Norm[l].X = sourceNorm.floats[index]
-					triangle.Norm[l].Y = sourceNorm.floats[index+1]
-					triangle.Norm[l].Z = sourceNorm.floats[index+2]
+					triangle.Norm[l].X = sourceNorm.floats[index+offX]
+					triangle.Norm[l].Y = sourceNorm.floats[index+offY]
+					triangle.Norm[l].Z = sourceNorm.floats[index+offZ]
 				}
 				fmt.Println("Triangle", k, ":", triangle)
 				scene.Triangles = append(scene.Triangles, triangle)
