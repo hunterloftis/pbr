@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+// TODO: make this nice instead of terrible.
+
 // Scene describes a set of geometry and materials.
 type Scene struct {
 	XML       *Schema
@@ -56,6 +58,8 @@ func ReadScene(r io.Reader) (*Scene, error) {
 		Triangles: make([]*Triangle, 0),
 	}
 
+	fmt.Println("xml:", scene.XML)
+
 	sources := make(map[string]*XSource)
 	vertices := make(map[string]*XVertices)
 	for i := 0; i < len(s.Geometry); i++ {
@@ -73,9 +77,42 @@ func ReadScene(r io.Reader) (*Scene, error) {
 		}
 	}
 
+	materials := make(map[string]*XMaterial)
+	for i := 0; i < len(s.Material); i++ {
+		id := s.Material[i].ID
+		materials[id] = &s.Material[i]
+	}
+
+	effects := make(map[string]*XEffect)
+	for i := 0; i < len(s.Effect); i++ {
+		id := s.Effect[i].ID
+		effects[id] = &s.Effect[i]
+	}
+
+	instances := make(map[string]*XInstanceMaterial)
+	for i := 0; i < len(s.VisualScene); i++ {
+		for j := 0; j < len(s.VisualScene[i].InstanceGeometry); j++ {
+			for k := 0; k < len(s.VisualScene[i].InstanceGeometry[j].InstanceMaterial); k++ {
+				mat := &s.VisualScene[i].InstanceGeometry[j].InstanceMaterial[k]
+				instances[mat.Symbol] = mat
+			}
+		}
+	}
+
 	for i := 0; i < len(s.Geometry); i++ {
 		for j := 0; j < len(s.Geometry[i].Triangles); j++ {
 			triangles := &s.Geometry[i].Triangles[j]
+			instance := instances[triangles.Material]
+			material := materials[instance.Target[1:]]
+			effect := effects[material.InstanceEffect.URL[1:]]
+			color := StringToFloats(effect.Color)
+			mat := &Material{
+				Name: material.Name,
+				R:    color[0],
+				G:    color[1],
+				B:    color[2],
+				A:    color[3],
+			}
 			fmt.Println("geometry", i, "triangles", j, "data:", triangles.Data)
 			indices := StringToInts(triangles.Data)
 			fmt.Println("triangle indices:", indices)
@@ -116,16 +153,18 @@ func ReadScene(r io.Reader) (*Scene, error) {
 			fmt.Println("stride:", stride)
 			fmt.Println("all normals:", sourceNorm.floats)
 			for k := 0; k < triangles.Count; k++ {
-				triangle := &Triangle{}
+				triangle := &Triangle{
+					Mat: mat,
+				}
 				start := k * stride
 				for l := 0; l < 3; l++ {
 					position := start + l + vertexOffset
 					fmt.Println("Index stored at position", position)
 					index := indices[position] * 3
 					fmt.Println("Triangle", k, "point", l, "index:", index)
-					triangle.Vert[l].X = sourcePos.floats[index+offX]
-					triangle.Vert[l].Y = sourcePos.floats[index+offY]
-					triangle.Vert[l].Z = sourcePos.floats[index+offZ]
+					triangle.Pos[l].X = sourcePos.floats[index+offX]
+					triangle.Pos[l].Y = sourcePos.floats[index+offY]
+					triangle.Pos[l].Z = sourcePos.floats[index+offZ]
 					fmt.Println("Triangle", k, "normal", l, "index:", index, "values:", sourceNorm.floats[index:index+3])
 					triangle.Norm[l].X = sourceNorm.floats[index+offX]
 					triangle.Norm[l].Y = sourceNorm.floats[index+offY]
@@ -141,9 +180,9 @@ func ReadScene(r io.Reader) (*Scene, error) {
 
 // Triangle describes a 3D triangle's position, normal, and material.
 type Triangle struct {
-	Vert [3]Vector3
+	Pos  [3]Vector3
 	Norm [3]Vector3
-	Mat  Material
+	Mat  *Material
 }
 
 // Vector3 describes a 3D point in space.

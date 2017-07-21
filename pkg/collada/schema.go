@@ -7,10 +7,27 @@ package collada
 // http://htmlpreview.github.io/?https://github.com/utensil/lol-model-format/blob/master/references/Collada_Tutorial_1.htm
 // https://www.khronos.org/files/collada_reference_card_1_4.pdf
 type Schema struct {
-	Version  string      `xml:"version,attr"`
-	Geometry []XGeometry `xml:"library_geometries>geometry"`
-	Material []XMaterial `xml:"library_materials>material"`
-	Effect   []XEffect   `xml:"library_effects>effect"`
+	Version     string         `xml:"version,attr"`
+	Geometry    []XGeometry    `xml:"library_geometries>geometry"`
+	Material    []XMaterial    `xml:"library_materials>material"`
+	Effect      []XEffect      `xml:"library_effects>effect"`
+	VisualScene []XVisualScene `xml:"library_visual_scenes>visual_scene"`
+}
+
+// XVisualScene does something.
+type XVisualScene struct {
+	InstanceGeometry []XInstanceGeometry `xml:"node>instance_geometry"`
+}
+
+// XInstanceGeometry does something.
+type XInstanceGeometry struct {
+	InstanceMaterial []XInstanceMaterial `xml:"bind_material>technique_common>instance_material"`
+}
+
+// XInstanceMaterial maps material symbol names to material ids
+type XInstanceMaterial struct {
+	Symbol string `xml:"symbol,attr"`
+	Target string `xml:"target,attr"`
 }
 
 // XGeometry holds scene geometry information.
@@ -22,6 +39,7 @@ type XGeometry struct {
 
 // XMaterial links named materials to the InstanceEffects that describe them.
 type XMaterial struct {
+	ID             string          `xml:"id,attr"`
 	Name           string          `xml:"name,attr"`
 	InstanceEffect XInstanceEffect `xml:"instance_effect"`
 }
