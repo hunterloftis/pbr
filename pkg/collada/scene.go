@@ -107,22 +107,24 @@ func ReadScene(r io.Reader) (*Scene, error) {
 			}
 			stride := inputs * 3
 			fmt.Println("stride:", stride)
+			fmt.Println("all normals:", sourceNorm.floats)
 			for k := 0; k < triangles.Count; k++ {
 				triangle := &Triangle{}
 				start := k * stride
 				for l := 0; l < 3; l++ {
 					position := start + l + vertexOffset
 					fmt.Println("Index stored at position", position)
-					index := indices[position]
+					index := indices[position] * 3
 					fmt.Println("Triangle", k, "point", l, "index:", index)
 					triangle.Vert[l].X = sourcePos.floats[index] // TODO: sketchup uses Z for vertical and Y for depth?
 					triangle.Vert[l].Y = sourcePos.floats[index+1]
 					triangle.Vert[l].Z = sourcePos.floats[index+2]
+					fmt.Println("Triangle", k, "normal", l, "index:", index, "values:", sourceNorm.floats[index:index+3])
 					triangle.Norm[l].X = sourceNorm.floats[index]
 					triangle.Norm[l].Y = sourceNorm.floats[index+1]
 					triangle.Norm[l].Z = sourceNorm.floats[index+2]
 				}
-				fmt.Println("Triangle", k, "verts:", triangle.Vert)
+				fmt.Println("Triangle", k, ":", triangle)
 				scene.Triangles = append(scene.Triangles, triangle)
 			}
 		}
