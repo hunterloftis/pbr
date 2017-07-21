@@ -19,8 +19,7 @@ func StringToFloats(s string) []float64 {
 	fields := strings.Fields(s)
 	floats := make([]float64, len(fields))
 	for i := 0; i < len(fields); i++ {
-		f, _ := strconv.ParseFloat(fields[i], 64)
-		floats = append(floats, f)
+		floats[i], _ = strconv.ParseFloat(fields[i], 64)
 	}
 	return floats
 }
@@ -90,13 +89,13 @@ func ReadScene(r io.Reader) (*Scene, error) {
 					}
 				}
 			}
-			fmt.Println("source:", source)
-			// if source == nil {
-			// 	return nil, fmt.Errorf("collada: no VERTEX Source found")
-			// }
-			// if source.params != "XYZ" {
-			// 	return nil, fmt.Errorf("collada: expected params XYZ, got %v", source.params)
-			// }
+			fmt.Println("source.floats:", source.floats)
+			if source == nil {
+				return nil, fmt.Errorf("collada: no VERTEX Source found")
+			}
+			if source.params != "XYZ" {
+				return nil, fmt.Errorf("collada: expected params XYZ, got %v", source.params)
+			}
 			stride := inputs * 3
 			fmt.Println("stride:", stride)
 			for k := 0; k < triangles.Count; k++ {
@@ -107,10 +106,11 @@ func ReadScene(r io.Reader) (*Scene, error) {
 					fmt.Println("Index stored at position", position)
 					index := indices[position]
 					fmt.Println("Triangle", k, "point", l, "index:", index)
-					// triangle.Vert[l].X = source.floats[index]
-					// triangle.Vert[l].Y = source.floats[index+1]
-					// triangle.Vert[l].Z = source.floats[index+2]
+					triangle.Vert[l].X = source.floats[index]
+					triangle.Vert[l].Y = source.floats[index+1]
+					triangle.Vert[l].Z = source.floats[index+2]
 				}
+				fmt.Println("Triangle", k, "verts:", triangle.Vert)
 				scene.Triangles = append(scene.Triangles, triangle)
 			}
 		}

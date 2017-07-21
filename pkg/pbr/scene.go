@@ -36,7 +36,9 @@ func ColladaScene(r io.Reader) (*Scene, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(s.Triangles)
+	for i := 0; i < len(s.Triangles); i++ {
+		fmt.Println("Triangle", i, "-", *s.Triangles[i])
+	}
 	// TODO: use the collada.Scene (s) to populate the pbr.Scene with Surface geometry
 	return &Scene{}, nil
 }
