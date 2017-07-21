@@ -3,4 +3,4 @@ set -x
 mkdir -p out bin
 go build -o bin/render cmd/render/render.go
 bin/render -quality 10 -out out/render.png models/simple.dae
-open out/render.png
+#open out/render.png

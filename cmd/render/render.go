@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"os"
 	"os/signal"
@@ -17,7 +16,6 @@ import (
 func main() {
 	var position, target, focus *pbr.Vector3
 	sky := pbr.Vector3{40, 50, 60}
-	in := os.Args[1]
 	out := flag.String("out", "render.png", "Output png filename")
 	heat := flag.String("heat", "", "Heatmap png filename")
 	quality := flag.Float64("quality", math.Inf(1), "Minimum samples-per-pixel to reach before exiting")
@@ -38,7 +36,9 @@ func main() {
 		flag.PrintDefaults()
 		fmt.Println()
 	}
+
 	flag.Parse()
+	in := flag.Args()[0]
 
 	if *profile {
 		f, _ := os.Create("profile.pprof")
@@ -46,8 +46,12 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	xml, _ := ioutil.ReadFile(in)
-	scene := pbr.ColladaScene(xml)
+	f, err := os.Open(in)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	scene := pbr.ColladaScene(f)
 	camera := pbr.NewCamera(1280, 720, pbr.CameraConfig{
 		Lens:     (*lens) / 1000.0,
 		Position: position,

@@ -1,6 +1,8 @@
 package pbr
 
 import (
+	"encoding/xml"
+	"fmt"
 	"io"
 	"math"
 
@@ -29,8 +31,12 @@ func EmptyScene() *Scene {
 }
 
 // ColladaScene creates a Scene from collada xml data
-func ColladaScene(xml []byte) *Scene {
+func ColladaScene(r io.Reader) *Scene {
 	// fmt.Println("xml:", string(xml))
+	d := xml.NewDecoder(r)
+	collada := &Collada{}
+	_ = d.Decode(collada)
+	fmt.Println(collada)
 	s := Scene{}
 	return &s
 }
