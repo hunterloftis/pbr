@@ -17,7 +17,7 @@ type Schema struct {
 type XGeometry struct {
 	Source    []XSource    `xml:"mesh>source"`
 	Triangles []XTriangles `xml:"mesh>triangles"`
-	Input     []XInput     `xml:"mesh>vertices>input"`
+	Vertices  []XVertices  `xml:"mesh>vertices"`
 }
 
 // XMaterial links named materials to the InstanceEffects that describe them.
@@ -30,6 +30,12 @@ type XMaterial struct {
 type XEffect struct {
 	ID    string `xml:"id,attr"`
 	Color string `xml:"profile_COMMON>technique>lambert>diffuse>color"`
+}
+
+// XVertices holds vertex information (like position and normal) in XInput children.
+type XVertices struct {
+	ID    string   `xml:"id,attr"`
+	Input []XInput `xml:"input"`
 }
 
 // XSource stores a flattened array of floats which map to sets of parameters (like X, Y, and Z).

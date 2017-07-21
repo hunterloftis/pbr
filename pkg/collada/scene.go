@@ -51,6 +51,7 @@ func ReadScene(r io.Reader) (*Scene, error) {
 	}
 
 	sources := make(map[string]*XSource)
+	vertices := make(map[string]*XVertices)
 	for i := 0; i < len(s.Geometry); i++ {
 		for j := 0; j < len(s.Geometry[i].Source); j++ {
 			id := s.Geometry[i].Source[j].ID
@@ -59,6 +60,10 @@ func ReadScene(r io.Reader) (*Scene, error) {
 			for l := 0; l < len(sources[id].Param); l++ {
 				sources[id].params += sources[id].Param[l].Name
 			}
+		}
+		for j := 0; j < len(s.Geometry[i].Vertices); j++ {
+			id := s.Geometry[i].Vertices[j].ID
+			vertices[id] = &s.Geometry[i].Vertices[j]
 		}
 	}
 
@@ -74,12 +79,18 @@ func ReadScene(r io.Reader) (*Scene, error) {
 			for k := 0; k < inputs; k++ {
 				if triangles.Input[k].Semantic == "VERTEX" {
 					vertexOffset = triangles.Input[k].Offset
-					id := triangles.Input[k].Source[1:]
-					fmt.Println("vertex source id:", id)
-					source = sources[id]
+					vID := triangles.Input[k].Source[1:]
+					fmt.Println("vertex source id:", vID)
+					v := vertices[vID]
+					for l := 0; l < len(v.Input); l++ {
+						if v.Input[l].Semantic == "POSITION" {
+							sID := v.Input[l].Source[1:]
+							source = sources[sID]
+						}
+					}
 				}
 			}
-			_ = source
+			fmt.Println("source:", source)
 			// if source == nil {
 			// 	return nil, fmt.Errorf("collada: no VERTEX Source found")
 			// }
