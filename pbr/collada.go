@@ -17,13 +17,14 @@ type Geometry struct {
 
 type Source struct {
 	FloatArray FloatArray `xml:"float_array"`
+	Param      []Param    `xml:"technique_common>accessor>param"` // Order (usually X,Y,Z)
 }
 
 type Triangles struct {
 	Count    int     `xml:"count,attr"`
 	Material string  `xml:"material,attr"`
 	Input    []Input `xml:"input"`
-	Data     string  `xml:"p"`
+	Data     string  `xml:"p"` // Indices => corresponding Sources
 }
 
 type Input struct {
@@ -36,4 +37,8 @@ type FloatArray struct {
 	ID    string `xml:"id,attr"`
 	Count int    `xml:"count,attr"`
 	Data  string `xml:",chardata"`
+}
+
+type Param struct {
+	Name string `xml:"name,attr"`
 }
