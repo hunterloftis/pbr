@@ -16,34 +16,6 @@ type Scene struct {
 	Triangles []*Triangle
 }
 
-// XZY because sketchup uses Z for up (flipping Y and Z)
-const (
-	offX int = iota
-	offZ
-	offY
-)
-
-// StringToFloats converts a space-delimited string of floats into a slice of float64.
-func StringToFloats(s string) []float64 {
-	fields := strings.Fields(s)
-	floats := make([]float64, len(fields))
-	for i := 0; i < len(fields); i++ {
-		floats[i], _ = strconv.ParseFloat(fields[i], 64)
-	}
-	return floats
-}
-
-// StringToInts converts a space-delimited string of floats into a slice of float64.
-// TODO: abstract StringTo_ with a callback conversion function?
-func StringToInts(s string) []int {
-	fields := strings.Fields(s)
-	ints := make([]int, len(fields))
-	for i := 0; i < len(fields); i++ {
-		ints[i], _ = strconv.Atoi(fields[i])
-	}
-	return ints
-}
-
 // ReadScene creates a Scene from the Collada XML read from a given Reader.
 func ReadScene(r io.Reader) (*Scene, error) {
 	d := xml.NewDecoder(r)
@@ -53,58 +25,15 @@ func ReadScene(r io.Reader) (*Scene, error) {
 		return nil, err
 	}
 
-	scene := &Scene{
-		XML:       s,
-		Triangles: make([]*Triangle, 0),
-	}
-
-	fmt.Println("xml:", scene.XML)
-
-	sources := make(map[string]*XSource)
-	vertices := make(map[string]*XVertices)
-	for i := 0; i < len(s.Geometry); i++ {
-		for j := 0; j < len(s.Geometry[i].Source); j++ {
-			id := s.Geometry[i].Source[j].ID
-			sources[id] = &s.Geometry[i].Source[j]
-			sources[id].floats = StringToFloats(sources[id].FloatArray.Data)
-			for l := 0; l < len(sources[id].Param); l++ {
-				sources[id].params += sources[id].Param[l].Name
-			}
-		}
-		for j := 0; j < len(s.Geometry[i].Vertices); j++ {
-			id := s.Geometry[i].Vertices[j].ID
-			vertices[id] = &s.Geometry[i].Vertices[j]
-		}
-	}
-
-	materials := make(map[string]*XMaterial)
-	for i := 0; i < len(s.Material); i++ {
-		id := s.Material[i].ID
-		materials[id] = &s.Material[i]
-	}
-
-	effects := make(map[string]*XEffect)
-	for i := 0; i < len(s.Effect); i++ {
-		id := s.Effect[i].ID
-		effects[id] = &s.Effect[i]
-	}
-
-	instances := make(map[string]*XInstanceMaterial)
-	for i := 0; i < len(s.VisualScene); i++ {
-		for j := 0; j < len(s.VisualScene[i].InstanceGeometry); j++ {
-			for k := 0; k < len(s.VisualScene[i].InstanceGeometry[j].InstanceMaterial); k++ {
-				mat := &s.VisualScene[i].InstanceGeometry[j].InstanceMaterial[k]
-				instances[mat.Symbol] = mat
-			}
-		}
-	}
+	m := NewMap(s)
+	t := make([]*Triangle, 0)
 
 	for i := 0; i < len(s.Geometry); i++ {
 		for j := 0; j < len(s.Geometry[i].Triangles); j++ {
 			triangles := &s.Geometry[i].Triangles[j]
-			instance := instances[triangles.Material]
-			material := materials[instance.Target[1:]]
-			effect := effects[material.InstanceEffect.URL[1:]]
+			instance := m.instances[triangles.Material]
+			material := m.materials[instance.Target[1:]]
+			effect := m.effects[material.InstanceEffect.URL[1:]]
 			color := StringToFloats(effect.Color)
 			mat := &Material{
 				Name: material.Name,
@@ -124,14 +53,14 @@ func ReadScene(r io.Reader) (*Scene, error) {
 					vertexOffset = triangles.Input[k].Offset
 					vID := triangles.Input[k].Source[1:]
 					fmt.Println("vertex source id:", vID)
-					v := vertices[vID]
+					v := m.vertices[vID]
 					for l := 0; l < len(v.Input); l++ {
 						sID := v.Input[l].Source[1:]
 						switch v.Input[l].Semantic {
 						case "POSITION":
-							sourcePos = sources[sID]
+							sourcePos = m.sources[sID]
 						case "NORMAL":
-							sourceNorm = sources[sID]
+							sourceNorm = m.sources[sID]
 						}
 					}
 				}
@@ -171,11 +100,11 @@ func ReadScene(r io.Reader) (*Scene, error) {
 					triangle.Norm[l].Z = sourceNorm.floats[index+offZ]
 				}
 				fmt.Println("Triangle", k, ":", triangle)
-				scene.Triangles = append(scene.Triangles, triangle)
+				t = append(t, triangle)
 			}
 		}
 	}
-	return scene, nil
+	return &Scene{s, t}, nil
 }
 
 // Triangle describes a 3D triangle's position, normal, and material.
@@ -194,4 +123,25 @@ type Vector3 struct {
 type Material struct {
 	Name       string
 	R, G, B, A float64
+}
+
+// StringToFloats converts a space-delimited string of floats into a slice of float64.
+func StringToFloats(s string) []float64 {
+	fields := strings.Fields(s)
+	floats := make([]float64, len(fields))
+	for i := 0; i < len(fields); i++ {
+		floats[i], _ = strconv.ParseFloat(fields[i], 64)
+	}
+	return floats
+}
+
+// StringToInts converts a space-delimited string of floats into a slice of float64.
+// TODO: abstract StringTo_ with a callback conversion function?
+func StringToInts(s string) []int {
+	fields := strings.Fields(s)
+	ints := make([]int, len(fields))
+	for i := 0; i < len(fields); i++ {
+		ints[i], _ = strconv.Atoi(fields[i])
+	}
+	return ints
 }
