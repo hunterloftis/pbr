@@ -84,38 +84,6 @@ func (m *mapping) source(in *XInput, s string) (*XSource, bool) {
 	return nil, false
 }
 
-func (t *XTriangles) indices() []int {
-	return stringToInts(t.Data)
-}
-
-func (t *XTriangles) input(s string) (*XInput, bool) {
-	for i := 0; i < len(t.Input); i++ {
-		if t.Input[i].Semantic == s {
-			return &t.Input[i], true
-		}
-	}
-	return nil, false
-}
-
-func (s *XSource) vector3(i int) Vector3 {
-	floats := stringToFloats(s.FloatArray.Data)
-	return Vector3{
-		X: floats[i+offX],
-		Y: floats[i+offY],
-		Z: floats[i+offZ],
-	}
-}
-
-// stringToInts converts a space-delimited string of floats into a slice of float64.
-func stringToInts(s string) []int {
-	fields := strings.Fields(s)
-	ints := make([]int, len(fields))
-	for i := 0; i < len(fields); i++ {
-		ints[i], _ = strconv.Atoi(fields[i])
-	}
-	return ints
-}
-
 // stringToFloats converts a space-delimited string of floats into a slice of float64.
 func stringToFloats(s string) []float64 {
 	fields := strings.Fields(s)

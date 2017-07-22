@@ -1,5 +1,10 @@
 package collada
 
+import (
+	"strconv"
+	"strings"
+)
+
 // Schema is the top-level Collada XML schema.
 // http://planet5.cat-v.org/
 // https://github.com/GlenKelley/go-collada/blob/master/import.go
@@ -12,6 +17,40 @@ type Schema struct {
 	Material    []XMaterial    `xml:"library_materials>material"`
 	Effect      []XEffect      `xml:"library_effects>effect"`
 	VisualScene []XVisualScene `xml:"library_visual_scenes>visual_scene"`
+}
+
+// func (m *mapping) source(in *XInput, s string) (*XSource, bool) {
+// 	vID := in.Source[1:]
+// 	v := m.vertices[vID]
+// 	for i := 0; i < len(v.Input); i++ {
+// 		if v.Input[i].Semantic == s {
+// 			id := v.Input[i].Source[1:]
+// 			return m.sources[id], true
+// 		}
+// 	}
+// 	return nil, false
+// }
+
+func (s *Schema) vertices(id string) (*XVertices, bool) {
+	for i := 0; i < len(s.Geometry); i++ {
+		for j := 0; j < len(s.Geometry[i].Vertices); j++ {
+			if s.Geometry[i].Vertices[j].ID == id {
+				return &s.Geometry[i].Vertices[j], true
+			}
+		}
+	}
+	return nil, false
+}
+
+func (s *Schema) source(id string) (*XSource, bool) {
+	for i := 0; i < len(s.Geometry); i++ {
+		for j := 0; j < len(s.Geometry[i].Source); j++ {
+			if s.Geometry[i].Source[j].ID == id {
+				return &s.Geometry[i].Source[j], true
+			}
+		}
+	}
+	return nil, false
 }
 
 // XVisualScene does something.
@@ -56,11 +95,29 @@ type XVertices struct {
 	Input []XInput `xml:"input"`
 }
 
+func (v *XVertices) input(semantic string) (*XInput, bool) {
+	for _, in := range v.Input {
+		if in.Semantic == semantic {
+			return &in, true
+		}
+	}
+	return nil, false
+}
+
 // XSource stores a flattened array of floats which map to sets of parameters (like X, Y, and Z).
 type XSource struct {
 	ID         string      `xml:"id,attr"`
 	FloatArray XFloatArray `xml:"float_array"`
 	Param      []XParam    `xml:"technique_common>accessor>param"`
+}
+
+func (s *XSource) vector3(i int) Vector3 {
+	floats := stringToFloats(s.FloatArray.Data) // TODO: this is probably run a ton
+	return Vector3{
+		X: floats[i+offX],
+		Y: floats[i+offY],
+		Z: floats[i+offZ],
+	}
 }
 
 // XTriangles references the named material of a triangle and the indices of the sources that describe its three points.
@@ -69,6 +126,85 @@ type XTriangles struct {
 	Material string   `xml:"material,attr"`
 	Input    []XInput `xml:"input"`
 	Data     string   `xml:"p"`
+}
+
+// TrianglesLookup answers queries about triangles.
+type TrianglesLookup struct {
+	el       *XTriangles
+	root     *Schema
+	indices  []int
+	inputs   map[string]*XInput
+	material *Material
+}
+
+func (t *XTriangles) lookup(root *Schema) *TrianglesLookup {
+	l := &TrianglesLookup{
+		el:      t,
+		root:    root,
+		indices: stringToInts(t.Data),
+		inputs:  make(map[string]*XInput), // TODO: necessary?
+	}
+	for i := 0; i < len(t.Input); i++ {
+		l.inputs[t.Input[i].Semantic] = &t.Input[i]
+	}
+	symbol := l.el.Material
+	var instance *XInstanceMaterial
+	for i := 0; i < len(root.VisualScene); i++ {
+		for j := 0; j < len(root.VisualScene[i].InstanceGeometry); j++ {
+			for k := 0; k < len(root.VisualScene[i].InstanceGeometry[j].InstanceMaterial); k++ {
+				mat := &root.VisualScene[i].InstanceGeometry[j].InstanceMaterial[k]
+				if mat.Symbol == symbol {
+					instance = mat
+				}
+			}
+		}
+	}
+	var material *XMaterial
+	for i := 0; i < len(root.Material); i++ {
+		if root.Material[i].ID == instance.Target[1:] {
+			material = &root.Material[i]
+		}
+	}
+	var effect *XEffect
+	for i := 0; i < len(root.Effect); i++ {
+		if root.Effect[i].ID == material.InstanceEffect.URL[1:] {
+			effect = &root.Effect[i]
+		}
+	}
+	color := stringToFloats(effect.Color)
+	l.material = &Material{
+		Name: material.Name,
+		R:    color[0],
+		G:    color[1],
+		B:    color[2],
+		A:    color[3],
+	}
+	return l
+}
+
+func (l *TrianglesLookup) vertices(semantic string, triangle int) (v [3]Vector3) {
+	input0 := l.inputs["VERTEX"]
+	verts, _ := l.root.vertices(input0.Source[1:])
+	input1, _ := verts.input(semantic)
+	source, _ := l.root.source(input1.Source[1:])
+	stride := len(l.el.Input) * 3
+	start := triangle*stride + input0.Offset
+	for i := 0; i < 3; i++ {
+		pos := start + i
+		index := l.indices[pos] * 3
+		v[i] = source.vector3(index)
+	}
+	return
+}
+
+// stringToInts converts a space-delimited string of floats into a slice of float64.
+func stringToInts(s string) []int {
+	fields := strings.Fields(s)
+	ints := make([]int, len(fields))
+	for i := 0; i < len(fields); i++ {
+		ints[i], _ = strconv.Atoi(fields[i])
+	}
+	return ints
 }
 
 // XInput links named meanings (like "Position") to XSource IDs (like "#ID5").
