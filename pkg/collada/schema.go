@@ -61,9 +61,6 @@ type XSource struct {
 	ID         string      `xml:"id,attr"`
 	FloatArray XFloatArray `xml:"float_array"`
 	Param      []XParam    `xml:"technique_common>accessor>param"`
-
-	floats []float64
-	params string
 }
 
 // XTriangles references the named material of a triangle and the indices of the sources that describe its three points.

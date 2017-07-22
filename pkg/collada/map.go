@@ -28,10 +28,6 @@ func (s *Schema) mapped() *mapping {
 		for j := 0; j < len(s.Geometry[i].Source); j++ {
 			id := s.Geometry[i].Source[j].ID
 			m.sources[id] = &s.Geometry[i].Source[j]
-			m.sources[id].floats = stringToFloats(m.sources[id].FloatArray.Data)
-			for l := 0; l < len(m.sources[id].Param); l++ {
-				m.sources[id].params += m.sources[id].Param[l].Name
-			}
 		}
 		for j := 0; j < len(s.Geometry[i].Vertices); j++ {
 			id := s.Geometry[i].Vertices[j].ID
@@ -99,6 +95,15 @@ func (t *XTriangles) input(s string) (*XInput, bool) {
 		}
 	}
 	return nil, false
+}
+
+func (s *XSource) vector3(i int) Vector3 {
+	floats := stringToFloats(s.FloatArray.Data)
+	return Vector3{
+		X: floats[i+offX],
+		Y: floats[i+offY],
+		Z: floats[i+offZ],
+	}
 }
 
 // stringToInts converts a space-delimited string of floats into a slice of float64.

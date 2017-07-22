@@ -32,23 +32,17 @@ func ReadScene(r io.Reader) (*Scene, error) {
 			material := m.material(triangles.Material)
 			indices := triangles.indices()
 			input, _ := triangles.input("VERTEX")
-			vertexOffset := input.Offset
 			sourcePos, _ := m.source(input, "POSITION")
 			sourceNorm, _ := m.source(input, "NORMAL")
-
 			stride := len(triangles.Input) * 3
 			for k := 0; k < triangles.Count; k++ {
 				triangle := &Triangle{Mat: material}
 				start := k * stride
 				for l := 0; l < 3; l++ {
-					position := start + l + vertexOffset
+					position := start + l + input.Offset
 					index := indices[position] * 3
-					triangle.Pos[l].X = sourcePos.floats[index+offX]
-					triangle.Pos[l].Y = sourcePos.floats[index+offY]
-					triangle.Pos[l].Z = sourcePos.floats[index+offZ]
-					triangle.Norm[l].X = sourceNorm.floats[index+offX]
-					triangle.Norm[l].Y = sourceNorm.floats[index+offY]
-					triangle.Norm[l].Z = sourceNorm.floats[index+offZ]
+					triangle.Pos[l] = sourcePos.vector3(index)
+					triangle.Norm[l] = sourceNorm.vector3(index)
 				}
 				t = append(t, triangle)
 			}
