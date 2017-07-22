@@ -1,7 +1,12 @@
 package collada
 
-// Map is a map of IDs to Schema objects in a collada Schema.
-type Map struct {
+import (
+	"strconv"
+	"strings"
+)
+
+// mapping is a map of IDs to Schema objects in a collada Schema.
+type mapping struct {
 	sources   map[string]*XSource
 	vertices  map[string]*XVertices
 	materials map[string]*XMaterial
@@ -9,9 +14,9 @@ type Map struct {
 	instances map[string]*XInstanceMaterial
 }
 
-// NewMap maps IDs to schema objects in a Schema.
-func NewMap(s *Schema) Map {
-	m := Map{
+// mapped maps IDs to schema objects in a Schema.
+func (s *Schema) mapped() *mapping {
+	m := &mapping{
 		sources:   make(map[string]*XSource),
 		vertices:  make(map[string]*XVertices),
 		materials: make(map[string]*XMaterial),
@@ -23,7 +28,7 @@ func NewMap(s *Schema) Map {
 		for j := 0; j < len(s.Geometry[i].Source); j++ {
 			id := s.Geometry[i].Source[j].ID
 			m.sources[id] = &s.Geometry[i].Source[j]
-			m.sources[id].floats = StringToFloats(m.sources[id].FloatArray.Data)
+			m.sources[id].floats = stringToFloats(m.sources[id].FloatArray.Data)
 			for l := 0; l < len(m.sources[id].Param); l++ {
 				m.sources[id].params += m.sources[id].Param[l].Name
 			}
@@ -56,12 +61,12 @@ func NewMap(s *Schema) Map {
 	return m
 }
 
-// Material returns a Material instance given a material symbol.
-func (m *Map) Material(symbol string) *Material {
+// material returns a Material instance given a material symbol.
+func (m *mapping) material(symbol string) *Material {
 	instance := m.instances[symbol]
 	material := m.materials[instance.Target[1:]]
 	effect := m.effects[material.InstanceEffect.URL[1:]]
-	color := StringToFloats(effect.Color)
+	color := stringToFloats(effect.Color)
 	return &Material{
 		Name: material.Name,
 		R:    color[0],
@@ -69,4 +74,49 @@ func (m *Map) Material(symbol string) *Material {
 		B:    color[2],
 		A:    color[3],
 	}
+}
+
+func (m *mapping) source(in *XInput, s string) (*XSource, bool) {
+	vID := in.Source[1:]
+	v := m.vertices[vID]
+	for i := 0; i < len(v.Input); i++ {
+		if v.Input[i].Semantic == s {
+			id := v.Input[i].Source[1:]
+			return m.sources[id], true
+		}
+	}
+	return nil, false
+}
+
+func (t *XTriangles) indices() []int {
+	return stringToInts(t.Data)
+}
+
+func (t *XTriangles) input(s string) (*XInput, bool) {
+	for i := 0; i < len(t.Input); i++ {
+		if t.Input[i].Semantic == s {
+			return &t.Input[i], true
+		}
+	}
+	return nil, false
+}
+
+// stringToInts converts a space-delimited string of floats into a slice of float64.
+func stringToInts(s string) []int {
+	fields := strings.Fields(s)
+	ints := make([]int, len(fields))
+	for i := 0; i < len(fields); i++ {
+		ints[i], _ = strconv.Atoi(fields[i])
+	}
+	return ints
+}
+
+// stringToFloats converts a space-delimited string of floats into a slice of float64.
+func stringToFloats(s string) []float64 {
+	fields := strings.Fields(s)
+	floats := make([]float64, len(fields))
+	for i := 0; i < len(fields); i++ {
+		floats[i], _ = strconv.ParseFloat(fields[i], 64)
+	}
+	return floats
 }
