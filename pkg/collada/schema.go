@@ -19,18 +19,6 @@ type Schema struct {
 	VisualScene []XVisualScene `xml:"library_visual_scenes>visual_scene"`
 }
 
-// func (m *mapping) source(in *XInput, s string) (*XSource, bool) {
-// 	vID := in.Source[1:]
-// 	v := m.vertices[vID]
-// 	for i := 0; i < len(v.Input); i++ {
-// 		if v.Input[i].Semantic == s {
-// 			id := v.Input[i].Source[1:]
-// 			return m.sources[id], true
-// 		}
-// 	}
-// 	return nil, false
-// }
-
 func (s *Schema) vertices(id string) (*XVertices, bool) {
 	for i := 0; i < len(s.Geometry); i++ {
 		for j := 0; j < len(s.Geometry[i].Vertices); j++ {
@@ -229,4 +217,14 @@ type XParam struct {
 // XInstanceEffect maps a named material to a given material effect (like Lambert-diffuse) by ID.
 type XInstanceEffect struct {
 	URL string `xml:"url,attr"`
+}
+
+// stringToFloats converts a space-delimited string of floats into a slice of float64.
+func stringToFloats(s string) []float64 {
+	fields := strings.Fields(s)
+	floats := make([]float64, len(fields))
+	for i := 0; i < len(fields); i++ {
+		floats[i], _ = strconv.ParseFloat(fields[i], 64)
+	}
+	return floats
 }
