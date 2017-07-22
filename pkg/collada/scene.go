@@ -21,19 +21,10 @@ func ReadScene(r io.Reader) (*Scene, error) {
 		return nil, err
 	}
 
-	t := make([]*Triangle, 0)
-	for i := 0; i < len(s.Geometry); i++ {
-		for j := 0; j < len(s.Geometry[i].Triangles); j++ {
-			triangles := s.Geometry[i].Triangles[j].lookup(s)
-			for k := 0; k < triangles.el.Count; k++ {
-				triangle := &Triangle{
-					Pos:  triangles.vertices("POSITION", k),
-					Norm: triangles.vertices("NORMAL", k),
-					Mat:  triangles.material,
-				}
-				t = append(t, triangle)
-			}
-		}
+	scene := &Scene{
+		XML:       s,
+		Triangles: s.triangles(),
 	}
-	return &Scene{XML: s, Triangles: t}, nil
+
+	return scene, nil
 }

@@ -6,6 +6,7 @@ import (
 )
 
 // Schema is the top-level Collada XML schema.
+// Collada is an XML format designed to obfuscate simple vertices through indirection.
 // http://planet5.cat-v.org/
 // https://github.com/GlenKelley/go-collada/blob/master/import.go
 // https://larry-price.com/blog/2015/12/04/xml-parsing-in-go
@@ -19,11 +20,29 @@ type Schema struct {
 	VisualScene []XVisualScene `xml:"library_visual_scenes>visual_scene"`
 }
 
+func (s *Schema) triangles() []*Triangle {
+	tris := make([]*Triangle, 0)
+	for _, geo := range s.Geometry {
+		for _, tri := range geo.Triangles {
+			t := tri.lookup(s)
+			for k := 0; k < t.el.Count; k++ {
+				triangle := &Triangle{
+					Pos:  t.vertices("POSITION", k),
+					Norm: t.vertices("NORMAL", k),
+					Mat:  t.material,
+				}
+				tris = append(tris, triangle)
+			}
+		}
+	}
+	return tris
+}
+
 func (s *Schema) vertices(id string) (*XVertices, bool) {
-	for i := 0; i < len(s.Geometry); i++ {
-		for j := 0; j < len(s.Geometry[i].Vertices); j++ {
-			if s.Geometry[i].Vertices[j].ID == id {
-				return &s.Geometry[i].Vertices[j], true
+	for _, geo := range s.Geometry {
+		for _, vert := range geo.Vertices {
+			if vert.ID == id {
+				return &vert, true
 			}
 		}
 	}
@@ -31,10 +50,10 @@ func (s *Schema) vertices(id string) (*XVertices, bool) {
 }
 
 func (s *Schema) source(id string) (*XSource, bool) {
-	for i := 0; i < len(s.Geometry); i++ {
-		for j := 0; j < len(s.Geometry[i].Source); j++ {
-			if s.Geometry[i].Source[j].ID == id {
-				return &s.Geometry[i].Source[j], true
+	for _, geo := range s.Geometry {
+		for _, src := range geo.Source {
+			if src.ID == id {
+				return &src, true
 			}
 		}
 	}
@@ -132,31 +151,30 @@ func (t *XTriangles) lookup(root *Schema) *TrianglesLookup {
 		indices: stringToInts(t.Data),
 		inputs:  make(map[string]*XInput), // TODO: necessary?
 	}
-	for i := 0; i < len(t.Input); i++ {
-		l.inputs[t.Input[i].Semantic] = &t.Input[i]
+	for _, in := range t.Input {
+		l.inputs[in.Semantic] = &in
 	}
 	symbol := l.el.Material
 	var instance *XInstanceMaterial
-	for i := 0; i < len(root.VisualScene); i++ {
-		for j := 0; j < len(root.VisualScene[i].InstanceGeometry); j++ {
-			for k := 0; k < len(root.VisualScene[i].InstanceGeometry[j].InstanceMaterial); k++ {
-				mat := &root.VisualScene[i].InstanceGeometry[j].InstanceMaterial[k]
+	for _, vis := range root.VisualScene {
+		for _, geo := range vis.InstanceGeometry {
+			for _, mat := range geo.InstanceMaterial {
 				if mat.Symbol == symbol {
-					instance = mat
+					instance = &mat
 				}
 			}
 		}
 	}
 	var material *XMaterial
-	for i := 0; i < len(root.Material); i++ {
-		if root.Material[i].ID == instance.Target[1:] {
-			material = &root.Material[i]
+	for _, mat := range root.Material {
+		if mat.ID == instance.Target[1:] {
+			material = &mat
 		}
 	}
 	var effect *XEffect
-	for i := 0; i < len(root.Effect); i++ {
-		if root.Effect[i].ID == material.InstanceEffect.URL[1:] {
-			effect = &root.Effect[i]
+	for _, eff := range root.Effect {
+		if eff.ID == material.InstanceEffect.URL[1:] {
+			effect = &eff
 		}
 	}
 	color := stringToFloats(effect.Color)
@@ -170,6 +188,7 @@ func (t *XTriangles) lookup(root *Schema) *TrianglesLookup {
 	return l
 }
 
+// vertices follows all the indirection collada uses to find the vertices for a triangle.
 func (l *TrianglesLookup) vertices(semantic string, triangle int) (v [3]Vector3) {
 	input0 := l.inputs["VERTEX"]
 	verts, _ := l.root.vertices(input0.Source[1:])
@@ -183,16 +202,6 @@ func (l *TrianglesLookup) vertices(semantic string, triangle int) (v [3]Vector3)
 		v[i] = source.vector3(index)
 	}
 	return
-}
-
-// stringToInts converts a space-delimited string of floats into a slice of float64.
-func stringToInts(s string) []int {
-	fields := strings.Fields(s)
-	ints := make([]int, len(fields))
-	for i := 0; i < len(fields); i++ {
-		ints[i], _ = strconv.Atoi(fields[i])
-	}
-	return ints
 }
 
 // XInput links named meanings (like "Position") to XSource IDs (like "#ID5").
@@ -223,8 +232,18 @@ type XInstanceEffect struct {
 func stringToFloats(s string) []float64 {
 	fields := strings.Fields(s)
 	floats := make([]float64, len(fields))
-	for i := 0; i < len(fields); i++ {
-		floats[i], _ = strconv.ParseFloat(fields[i], 64)
+	for i, field := range fields {
+		floats[i], _ = strconv.ParseFloat(field, 64)
 	}
 	return floats
+}
+
+// stringToInts converts a space-delimited string of floats into a slice of float64.
+func stringToInts(s string) []int {
+	fields := strings.Fields(s)
+	ints := make([]int, len(fields))
+	for i, field := range fields {
+		ints[i], _ = strconv.Atoi(field)
+	}
+	return ints
 }
