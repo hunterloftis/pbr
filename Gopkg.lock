@@ -7,9 +7,21 @@
   packages = ["."]
   revision = "01612e3f14b61fdbe443ba1b1dac0a97698ab81b"
 
+[[projects]]
+  branch = "master"
+  name = "github.com/alexflint/go-arg"
+  packages = ["."]
+  revision = "59fccacb2679dde66e0b20ed65bd26178fcbf54e"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/alexflint/go-scalar"
+  packages = ["."]
+  revision = "e80c3b7ed292b052c7083b6fd7154a8422c33f65"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d567fce3f7a52bd1c690013097f13bdd6862c70ab0ca9c296d6d11a61cae96f2"
+  inputs-digest = "7e71eede0cbc78e2b450744287c2a8b73ae47f9252f211d3e32a2c1936ae96ff"
   solver-name = "gps-cdcl"
   solver-version = 1
