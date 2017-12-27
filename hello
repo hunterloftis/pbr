@@ -1,6 +1,0 @@
-set -o errexit
-set -x
-mkdir -p out bin
-go build -o bin/hello cmd/hello/hello.go
-bin/hello
-open hello.png
