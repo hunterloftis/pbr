@@ -13,8 +13,10 @@ type Options struct {
 	Render  string `arg:"positional,required" help:"output render .png"`
 	Heat    string `help:"output heatmap as .png"`
 	Profile bool   `help:"record performance into profile.pprof"`
+	Width   int    `help:"rendering width in pixels"`
+	Height  int    `help:"rendering height in pixels"`
 
-	Env file        `help:"environment as a panoramic hdr radiosity map"`
+	Env string      `help:"environment as a panoramic hdr radiosity map"`
 	Sky pbr.Vector3 `help:"ambient sky color"`
 
 	Uniform  bool    `help:"disable adaptive sampling"`
@@ -33,6 +35,8 @@ type Options struct {
 
 func options() Options {
 	c := Options{
+		Width:    1280,
+		Height:   720,
 		Profile:  false,
 		Sky:      pbr.Vector3{0, 0, 0},
 		Uniform:  false,
@@ -48,5 +52,8 @@ func options() Options {
 		Expose:   1,
 	}
 	arg.MustParse(&c)
+	if c.Focus == nil {
+		c.Focus = &c.To
+	}
 	return c
 }

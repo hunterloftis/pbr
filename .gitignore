@@ -4,3 +4,4 @@ bin/*
 profile.*
 *.pngvendor
 vendor
+render.png
