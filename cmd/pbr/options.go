@@ -16,8 +16,8 @@ type Options struct {
 	Width   int    `help:"rendering width in pixels"`
 	Height  int    `help:"rendering height in pixels"`
 
-	Env string      `help:"environment as a panoramic hdr radiosity map"`
-	Sky pbr.Vector3 `help:"ambient sky color"`
+	Env string       `help:"environment as a panoramic hdr radiosity map"`
+	Sky *pbr.Vector3 `help:"ambient sky color"`
 
 	Uniform  bool    `help:"disable adaptive sampling"`
 	Bounce   int     `help:"number of light bounces"`
@@ -25,8 +25,8 @@ type Options struct {
 	Indirect int     `help:"number of indirect rays to cast"`
 	Exit     float64 `help:"samples-per-pixel at which to exit"`
 
-	From   pbr.Vector3  `help:"camera position"`
-	To     pbr.Vector3  `help:"camera target"`
+	From   *pbr.Vector3 `help:"camera position"`
+	To     *pbr.Vector3 `help:"camera target"`
 	Focus  *pbr.Vector3 `help:"camera focus (if other than 'to')"`
 	Lens   float64      `help:"camera focal length in mm"`
 	FStop  float64      `help:"camera f-stop"`
@@ -38,14 +38,14 @@ func options() Options {
 		Width:    1280,
 		Height:   720,
 		Profile:  false,
-		Sky:      pbr.Vector3{0, 0, 0},
+		Sky:      &pbr.Vector3{0, 0, 0},
 		Uniform:  false,
 		Bounce:   10,
 		Direct:   1,
 		Indirect: 1,
 		Exit:     math.Inf(1),
-		From:     pbr.Vector3{0, 0, 2},
-		To:       pbr.Vector3{0, 0, 0},
+		From:     &pbr.Vector3{0, 0, 2},
+		To:       &pbr.Vector3{0, 0, 0},
 		Focus:    nil,
 		Lens:     50,
 		FStop:    4,
@@ -53,7 +53,7 @@ func options() Options {
 	}
 	arg.MustParse(&c)
 	if c.Focus == nil {
-		c.Focus = &c.To
+		c.Focus = c.To
 	}
 	return c
 }

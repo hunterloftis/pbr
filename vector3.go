@@ -108,6 +108,6 @@ func (a *Vector3) Set(val string) error {
 }
 
 // UnmarshalText unmarshals a byte slice into a Vector3 value
-func (a Vector3) UnmarshalText(b []byte) error {
+func (a *Vector3) UnmarshalText(b []byte) error {
 	return a.Set(string(b))
 }

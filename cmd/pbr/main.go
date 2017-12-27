@@ -19,8 +19,8 @@ func main() {
 	scene := pbr.EmptyScene()
 	camera := pbr.NewCamera(o.Width, o.Height, pbr.CameraConfig{
 		Lens:     o.Lens / 1000.0,
-		Position: &o.From, // TODO: why by address?
-		Target:   &o.To,   // TODO: why by address?
+		Position: o.From,
+		Target:   o.To,
 		Focus:    o.Focus,
 		FStop:    o.FStop,
 	})
@@ -35,7 +35,7 @@ func main() {
 	renderer := pbr.NewRenderer(sampler, pbr.RenderConfig{
 		Exposure: o.Expose,
 	})
-	scene.SetSky(pbr.Vector3{40, 50, 60}, pbr.Vector3{})
+	scene.SetSky(*o.Sky, pbr.Vector3{})
 	if len(o.Env) > 0 {
 		hdr, _ := os.Open(o.Env)
 		defer hdr.Close()
