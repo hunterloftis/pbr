@@ -35,7 +35,7 @@ func main() {
 	renderer := pbr.NewRenderer(sampler, pbr.RenderConfig{
 		Exposure: o.Expose,
 	})
-	scene.SetSky(*o.Sky, pbr.Vector3{})
+	scene.SetSky(*o.Sky, *o.Ground)
 	if len(o.Env) > 0 {
 		hdr, _ := os.Open(o.Env)
 		defer hdr.Close()
