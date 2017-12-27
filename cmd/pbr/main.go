@@ -42,7 +42,7 @@ func main() {
 		scene.SetPano(hdr, 100) // TODO: read radiosity info or allow it as an option
 	}
 
-	// For debugging until we're actually parsing collada files
+	// For debugging until we're actually parsing scene files
 	scene.Add(pbr.UnitCube(pbr.Plastic(1, 0, 0, 1), pbr.Rot(pbr.Vector3{0, 1, 0}), pbr.Scale(0.5, 0.5, 0.5)))
 
 	start := time.Now()
@@ -53,15 +53,13 @@ func main() {
 	go func() {
 		<-interrupt
 		running = false
-		pbr.ShowProgress(sampler, start, running)
 	}()
 
-	pbr.ShowProgress(sampler, start, running)
 	for running && sampler.PerPixel() < o.Exit {
-		sampler.Sample()
 		pbr.ShowProgress(sampler, start, running)
+		sampler.Sample()
 	}
-
+	pbr.ShowProgress(sampler, start, running)
 	pbr.WritePNG(o.Render, renderer.Rgb())
 	if len(o.Heat) > 0 {
 		pbr.WritePNG(o.Heat, renderer.Heat())
