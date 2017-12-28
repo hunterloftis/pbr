@@ -1,4 +1,6 @@
 package pbr
 
 // Triangle describes a triangle
-type Triangle [3]Vector3
+type Triangle struct {
+	Points [3]Vector3
+}
