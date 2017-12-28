@@ -22,35 +22,35 @@ func UnitSphere(m *Material, transforms ...*Matrix4) *Sphere {
 
 // Intersect tests whether the sphere intersects a given ray.
 // http://tfpsly.free.fr/english/index.html?url=http://tfpsly.free.fr/english/3d/Raytracing.html
-func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64) {
+func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64, id int) {
 	i := s.Pos.Inverse()
 	r := i.MultRay(ray)
 	op := Vector3{}.Minus(r.Origin)
 	b := op.Dot(Vector3(r.Dir))
 	det := b*b - op.Dot(op) + 0.5*0.5
 	if det < 0 {
-		return false, 0
+		return false, 0, 0
 	}
 	root := math.Sqrt(det)
 	t1 := b - root
 	if t1 > 0 {
 		dist := s.Pos.MultDist(r.Dir.Scaled(t1)).Len()
 		if dist > Bias {
-			return true, dist
+			return true, dist, 0
 		}
 	}
 	t2 := b + root
 	if t2 > 0 {
 		dist := s.Pos.MultDist(r.Dir.Scaled(t2)).Len()
 		if dist > Bias {
-			return true, dist
+			return true, dist, 0
 		}
 	}
-	return false, 0
+	return false, 0, 0
 }
 
 // At returns the surface normal given a point on the surface.
-func (s *Sphere) At(point Vector3) (Direction, *Material) {
+func (s *Sphere) At(point Vector3, id int) (Direction, *Material) {
 	i := s.Pos.Inverse()
 	p := i.MultPoint(point)
 	return s.Pos.MultDir(p.Unit()), s.Mat

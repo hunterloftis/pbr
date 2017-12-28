@@ -36,12 +36,12 @@ func ColladaScene(xml []byte) *Scene {
 }
 
 // Intersect tests whether a ray hits any objects in the scene
-func (s *Scene) Intersect(ray Ray3) (hit bool, surf Surface, dist float64) {
+func (s *Scene) Intersect(ray Ray3) (hit bool, surf Surface, dist float64, id int) {
 	dist = math.Inf(1)
 	for _, s := range s.Surfaces {
-		i, d := s.Intersect(ray)
-		if i && d < dist {
-			hit, dist, surf = true, d, s
+		h, d, i := s.Intersect(ray)
+		if h && d < dist {
+			hit, dist, surf, id = true, d, s, i // TODO: this should be an Intersection struct
 		}
 	}
 	return

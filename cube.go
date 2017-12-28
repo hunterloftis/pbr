@@ -36,7 +36,7 @@ func (c *Cube) SetGrid(mat *Material, size float64) *Cube {
 // Both the Ray3 and the distance are in world space.
 // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
 // https://tavianator.com/fast-branchless-raybounding-box-intersections/
-func (c *Cube) Intersect(ray Ray3) (bool, float64) {
+func (c *Cube) Intersect(ray Ray3) (bool, float64, int) {
 	inv := c.Pos.Inverse() // global to local transform
 	r := inv.MultRay(ray)  // translate ray into local space
 	or := [3]float64{r.Origin.X, r.Origin.Y, r.Origin.Z}
@@ -56,24 +56,24 @@ func (c *Cube) Intersect(ray Ray3) (bool, float64) {
 			t1 = tFar
 		}
 		if t0 > t1 {
-			return false, 0
+			return false, 0, 0
 		}
 	}
 	if t0 > 0 {
 		if dist := c.Pos.MultDist(r.Dir.Scaled(t0)).Len(); dist >= Bias {
-			return true, dist
+			return true, dist, 0
 		}
 	}
 	if t1 > 0 {
 		if dist := c.Pos.MultDist(r.Dir.Scaled(t1)).Len(); dist >= Bias {
-			return true, dist
+			return true, dist, 0
 		}
 	}
-	return false, 0
+	return false, 0, 0
 }
 
 // At returns the normal Vector3 at this point on the Surface
-func (c *Cube) At(p Vector3) (normal Direction, mat *Material) {
+func (c *Cube) At(p Vector3, id int) (normal Direction, mat *Material) {
 	i := c.Pos.Inverse() // global to local transform
 	p1 := i.MultPoint(p) // translate point into local space
 	abs := p1.Abs()
