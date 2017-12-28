@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,12 +9,8 @@ import (
 	"github.com/hunterloftis/pbr"
 )
 
-// pbr [options] scene.obj render.png
-
 func main() {
 	o := options()
-	fmt.Println(o)
-
 	scene := pbr.EmptyScene()
 	camera := pbr.NewCamera(o.Width, o.Height, pbr.CameraConfig{
 		Lens:     o.Lens / 1000.0,
@@ -28,6 +23,7 @@ func main() {
 	if o.Uniform {
 		adapt = 0
 	}
+	// TODO: should Renderer and Sampler be separate?
 	sampler := pbr.NewSampler(camera, scene, pbr.SamplerConfig{
 		Bounces: o.Bounce,
 		Adapt:   adapt, // TODO: make this boolean
@@ -35,16 +31,31 @@ func main() {
 	renderer := pbr.NewRenderer(sampler, pbr.RenderConfig{
 		Exposure: o.Expose,
 	})
+
 	scene.SetSky(*o.Sky, *o.Ground)
 	if len(o.Env) > 0 {
-		hdr, _ := os.Open(o.Env)
+		hdr, _ := os.Open(o.Env) // TODO: handle err
 		defer hdr.Close()
 		scene.SetPano(hdr, 100) // TODO: read radiosity info or allow it as an option
 	}
 
 	// For debugging until we're actually parsing scene files
 	scene.Add(pbr.UnitCube(pbr.Plastic(1, 0, 0, 1), pbr.Rot(pbr.Vector3{0, 1, 0}), pbr.Scale(0.5, 0.5, 0.5)))
+	mesh := pbr.Mesh{
+		Tris: []pbr.Triangle{pbr.Triangle{pbr.Vector3{0, 0, 0}, pbr.Vector3{0, 1, 0}, pbr.Vector3{1, 0, 0}}},
+		Pos:  pbr.Identity(),
+		Mat:  pbr.Plastic(1, 0, 0, 1),
+	}
+	scene.Add(&mesh)
 
+	render(sampler, renderer, o.Exit)
+	pbr.WritePNG(o.Render, renderer.Rgb()) // TODO: should o.Expose be passed in here instead of as a global option?
+	if len(o.Heat) > 0 {
+		pbr.WritePNG(o.Heat, renderer.Heat())
+	}
+}
+
+func render(sampler *pbr.Sampler, renderer *pbr.Renderer, quality float64) {
 	start := time.Now()
 	running := true
 	interrupt := make(chan os.Signal, 2)
@@ -55,13 +66,9 @@ func main() {
 		running = false
 	}()
 
-	for running && sampler.PerPixel() < o.Exit {
+	for running && sampler.PerPixel() < quality {
 		pbr.ShowProgress(sampler, start, running)
 		sampler.Sample()
 	}
 	pbr.ShowProgress(sampler, start, running)
-	pbr.WritePNG(o.Render, renderer.Rgb())
-	if len(o.Heat) > 0 {
-		pbr.WritePNG(o.Heat, renderer.Heat())
-	}
 }
