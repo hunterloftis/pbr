@@ -1,7 +1,6 @@
 package pbr
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -19,7 +18,7 @@ func (m *Mesh) Intersect(ray Ray3) (bool, float64, int) {
 	const EPS float64 = 0.000001
 	nearest := math.MaxFloat64
 	id := -1
-	for _, t := range m.Tris {
+	for i, t := range m.Tris {
 		edge1 := t.Points[1].Minus(t.Points[0])
 		edge2 := t.Points[2].Minus(t.Points[0])
 		h := ray.Dir.Cross(Direction(edge2))
@@ -43,19 +42,19 @@ func (m *Mesh) Intersect(ray Ray3) (bool, float64, int) {
 			continue
 		}
 		if dist < nearest {
+			id = i
 			nearest = dist
 		}
 	}
 	if id == -1 {
 		return false, 0, 0
 	}
-	fmt.Println("hit at", nearest)
-	panic("woah")
+	// fmt.Println(nearest, id)
 	return true, nearest, id
 }
 
 // At returns the material at a point on the mesh
 // TODO: implement after Intersect
 func (m *Mesh) At(v Vector3, id int) (normal Direction, material *Material) {
-	return Vector3{0, 1, 0}.Unit(), m.Mat
+	return Vector3{0, 0, 1}.Unit(), m.Mat
 }
