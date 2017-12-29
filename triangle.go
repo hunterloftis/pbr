@@ -3,21 +3,22 @@ package pbr
 // Triangle describes a triangle
 // TODO: store per-vertex Normal data so .obj file curved surfaces can be read in and rendered smoothly / without edges
 type Triangle struct {
-	Points [3]Vector3
-	Normal Direction
-	edge1  Vector3
-	edge2  Vector3
+	Points  [3]Vector3
+	Normals [3]Direction
+	edge1   Vector3
+	edge2   Vector3
 }
 
 // NewTriangle creates a new triangle
 func NewTriangle(a, b, c Vector3) Triangle {
 	edge1 := b.Minus(a)
 	edge2 := c.Minus(a)
+	n := edge1.Cross(edge2).Unit()
 	return Triangle{
-		Points: [3]Vector3{a, b, c},
-		Normal: edge1.Cross(edge2).Unit(),
-		edge1:  edge1,
-		edge2:  edge2,
+		Points:  [3]Vector3{a, b, c},
+		Normals: [3]Direction{n, n, n},
+		edge1:   edge1,
+		edge2:   edge2,
 	}
 }
 
@@ -45,4 +46,32 @@ func (t *Triangle) Intersect(ray Ray3) (bool, float64) {
 		return false, 0
 	}
 	return true, dist
+}
+
+// Normal computes the smoothed normal
+func (t *Triangle) Normal(p Vector3) Direction {
+	u, v, w := t.Bary(p)
+	n0 := t.Normals[0].Scaled(u)
+	n1 := t.Normals[1].Scaled(v)
+	n2 := t.Normals[2].Scaled(w)
+	return n0.Plus(n1).Plus(n2).Unit()
+}
+
+// Bary returns the Barycentric coords of Vector p on Triangle t
+// TODO: using this in several places; integrate
+// https://codeplea.com/triangular-interpolation
+func (t *Triangle) Bary(p Vector3) (u, v, w float64) {
+	v0 := t.Points[1].Minus(t.Points[0])
+	v1 := t.Points[2].Minus(t.Points[0])
+	v2 := p.Minus(t.Points[0])
+	d00 := v0.Dot(v0)
+	d01 := v0.Dot(v1)
+	d11 := v1.Dot(v1)
+	d20 := v2.Dot(v0)
+	d21 := v2.Dot(v1)
+	d := d00*d11 - d01*d01
+	v = (d11*d20 - d01*d21) / d
+	w = (d00*d21 - d01*d20) / d
+	u = 1 - v - w
+	return
 }

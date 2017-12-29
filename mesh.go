@@ -33,5 +33,5 @@ func (m *Mesh) Intersect(ray Ray3) (bool, float64, int) {
 // At returns the material at a point on the mesh
 func (m *Mesh) At(v Vector3, id int) (normal Direction, material *Material) {
 	t := m.Tris[id]
-	return t.Normal, m.Mat
+	return t.Normal(v), m.Mat
 }

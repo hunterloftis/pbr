@@ -118,6 +118,7 @@ func (s *Scene) ImportObj(r io.Reader) {
 }
 
 // TODO: make robust
+// https://codeplea.com/triangular-interpolation
 func vertex(s string, vs []Vector3) Vector3 {
 	n, err := strconv.ParseInt(strings.Split(s, "/")[0], 0, 0)
 	if err != nil {
