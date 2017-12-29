@@ -11,7 +11,7 @@ import (
 
 func main() {
 	o := options()
-	scene := pbr.EmptyScene()
+	scene := pbr.NewScene(*o.Sky, *o.Ground)
 	camera := pbr.NewCamera(o.Width, o.Height, pbr.CameraConfig{
 		Lens:     o.Lens / 1000.0,
 		Position: o.From,
@@ -32,7 +32,6 @@ func main() {
 		Exposure: o.Expose,
 	})
 
-	scene.SetSky(*o.Sky, *o.Ground)
 	if len(o.Env) > 0 {
 		hdr, _ := os.Open(o.Env) // TODO: handle err
 		defer hdr.Close()

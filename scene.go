@@ -19,13 +19,16 @@ type RGBAE struct {
 type Scene struct {
 	Surfaces []Surface
 	pano     *RGBAE
-	skyUp    Vector3 // TODO: these should be Energy
-	skyDown  Vector3
+	skyUp    Energy // TODO: these should be Energy
+	skyDown  Energy
 }
 
-// EmptyScene creates and returns a pointer to an empty Scene.
-func EmptyScene() *Scene {
-	return &Scene{}
+// NewScene creates and returns a pointer to an empty Scene.
+func NewScene(up, down Energy) *Scene {
+	return &Scene{
+		skyUp:   up,
+		skyDown: down,
+	}
 }
 
 // ColladaScene creates a Scene from collada xml data
@@ -62,7 +65,7 @@ func (s *Scene) Env(ray Ray3) Energy {
 		return Energy(Vector3{r, g, b}.Scaled(s.pano.Expose))
 	}
 	vertical := math.Max((ray.Dir.Cos(UP)+0.5)/1.5, 0)
-	return Energy(s.skyDown.Lerp(s.skyUp, vertical))
+	return Energy(Vector3(s.skyDown).Lerp(Vector3(s.skyUp), vertical))
 }
 
 // Add adds new Surfaces to the scene.
@@ -74,10 +77,4 @@ func (s *Scene) Add(surfaces ...Surface) {
 func (s *Scene) SetPano(r io.Reader, expose float64) {
 	width, height, data, _ := rgbe.Decode(r)
 	s.pano = &RGBAE{Width: width, Height: height, Data: data, Expose: expose}
-}
-
-// SetSky sets the top (up) and bottom (down) sky color.
-func (s *Scene) SetSky(up, down Vector3) {
-	s.skyUp = up
-	s.skyDown = down
 }

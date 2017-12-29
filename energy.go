@@ -33,3 +33,9 @@ func (a Energy) RandomGain(rnd *rand.Rand) Energy {
 func (a Energy) Strength(b Energy) Energy {
 	return Energy{a.X * b.X, a.Y * b.Y, a.Z * b.Z}
 }
+
+// UnmarshalText creates an Energy from a byte array
+func (a *Energy) UnmarshalText(b []byte) error {
+	v := Vector3(*a)
+	return (&v).UnmarshalText(b)
+}

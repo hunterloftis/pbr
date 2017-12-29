@@ -16,9 +16,9 @@ type Options struct {
 	Width   int    `help:"rendering width in pixels"`
 	Height  int    `help:"rendering height in pixels"`
 
-	Env    string       `help:"environment as a panoramic hdr radiosity map"`
-	Sky    *pbr.Vector3 `help:"ambient sky color"`
-	Ground *pbr.Vector3 `help:"ground color"`
+	Env    string      `help:"environment as a panoramic hdr radiosity map"`
+	Sky    *pbr.Energy `help:"ambient sky color"`
+	Ground *pbr.Energy `help:"ground color"`
 
 	Uniform  bool    `help:"disable adaptive sampling"`
 	Bounce   int     `help:"number of light bounces"`
@@ -39,8 +39,8 @@ func options() Options {
 		Width:    1280,
 		Height:   720,
 		Profile:  false,
-		Sky:      &pbr.Vector3{40, 50, 60},
-		Ground:   &pbr.Vector3{0, 0, 0},
+		Sky:      &pbr.Energy{40, 50, 60},
+		Ground:   &pbr.Energy{0, 0, 0},
 		Uniform:  false,
 		Bounce:   10,
 		Direct:   1,
