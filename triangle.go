@@ -5,18 +5,20 @@ package pbr
 type Triangle struct {
 	Points  [3]Vector3
 	Normals [3]Direction
+	Mat     *Material
 	edge1   Vector3
 	edge2   Vector3
 }
 
 // NewTriangle creates a new triangle
-func NewTriangle(a, b, c Vector3) Triangle {
+func NewTriangle(a, b, c Vector3, m *Material) Triangle {
 	edge1 := b.Minus(a)
 	edge2 := c.Minus(a)
 	n := edge1.Cross(edge2).Unit()
 	return Triangle{
 		Points:  [3]Vector3{a, b, c},
 		Normals: [3]Direction{n, n, n},
+		Mat:     m,
 		edge1:   edge1,
 		edge2:   edge2,
 	}
@@ -46,6 +48,11 @@ func (t *Triangle) Intersect(ray Ray3) (bool, float64) {
 		return false, 0
 	}
 	return true, dist
+}
+
+// At returns the material at a point on the Triangle
+func (t *Triangle) At(v Vector3) (norm Direction, mat *Material) {
+	return t.Normal(v), t.Mat
 }
 
 // SetNormals sets values for each vertex normal

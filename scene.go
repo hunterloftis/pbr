@@ -43,12 +43,12 @@ func ColladaScene(xml []byte) *Scene {
 }
 
 // Intersect tests whether a ray hits any objects in the scene
-func (s *Scene) Intersect(ray Ray3) (hit bool, surf Surface, dist float64, id int) {
+func (s *Scene) Intersect(ray Ray3) (hit bool, surf Surface, dist float64) {
 	dist = math.Inf(1)
 	for _, s := range s.Surfaces {
-		h, d, i := s.Intersect(ray)
+		h, d := s.Intersect(ray)
 		if h && d < dist {
-			hit, dist, surf, id = true, d, s, i // TODO: this should be an Intersection struct
+			hit, dist, surf = true, d, s // TODO: this should be an Intersection struct
 		}
 	}
 	return
@@ -68,7 +68,7 @@ func (s *Scene) Env(ray Ray3) Energy {
 		b := float64(s.pano.Data[index+2])
 		return Energy(Vector3{r, g, b}.Scaled(s.pano.Expose))
 	}
-	vertical := math.Max((ray.Dir.Cos(UP)+0.5)/1.5, 0)
+	vertical := (ray.Dir.Cos(UP) + 1) / 2.0
 	return Energy(Vector3(s.skyDown).Lerp(Vector3(s.skyUp), vertical))
 }
 
@@ -89,11 +89,8 @@ func (s *Scene) ImportObj(r io.Reader) {
 	vs := make([]Vector3, 0, 1024)
 	vns := make([]Direction, 0, 1024)
 	scanner := bufio.NewScanner(r)
-	mesh := Mesh{
-		Tris: []Triangle{},
-		Pos:  Identity(),
-		Mat:  Plastic(1, 1, 1, 1),
-	}
+	mat := Glass(0.2, 1, 0.1, 0.95)
+	tris := 0
 	for scanner.Scan() {
 		line := scanner.Text()
 		fields := strings.Fields(line)
@@ -115,13 +112,13 @@ func (s *Scene) ImportObj(r io.Reader) {
 			v1, n1 := vertex(args[0], vs, vns)
 			v2, n2 := vertex(args[1], vs, vns)
 			v3, n3 := vertex(args[2], vs, vns)
-			t := NewTriangle(v1, v2, v3)
+			t := NewTriangle(v1, v2, v3, mat)
 			t.SetNormals(n1, n2, n3)
-			mesh.Tris = append(mesh.Tris, t)
+			s.Add(&t)
+			tris++
 		}
 	}
-	s.Add(&mesh)
-	fmt.Println("Imported mesh with", len(mesh.Tris), "triangles.")
+	fmt.Println("Imported mesh with", tris, "triangles.")
 }
 
 // TODO: make robust

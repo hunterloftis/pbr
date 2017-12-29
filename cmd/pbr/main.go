@@ -47,16 +47,9 @@ func main() {
 	defer obj.Close()
 	scene.ImportObj(obj)
 
-	// For debugging until we're actually parsing scene files
-	// scene.Add(pbr.UnitCube(pbr.Plastic(1, 0, 0, 1), pbr.Rot(pbr.Vector3{0, 1, 0}), pbr.Scale(0.5, 0.5, 0.5)))
-	// mesh := pbr.Mesh{
-	// 	Tris: []pbr.Triangle{
-	// 		pbr.NewTriangle(pbr.Vector3{0, 0, 0}, pbr.Vector3{0, 1, 0}, pbr.Vector3{1, 0, 0}),
-	// 	},
-	// 	Pos: pbr.Identity(),
-	// 	Mat: pbr.Plastic(1, 0, 0, 1),
-	// }
-	// scene.Add(&mesh)
+	whitePlastic := pbr.Plastic(1, 1, 1, 0.8)
+	bluePlastic := pbr.Plastic(0, 0, 1, 1)
+	scene.Add(pbr.UnitCube(whitePlastic, pbr.Trans(0, 11, -600), pbr.Scale(10000, 1, 10000)).SetGrid(bluePlastic, 8.0))
 
 	render(sampler, renderer, o.Exit)
 	pbr.WritePNG(o.Render, renderer.Rgb()) // TODO: should o.Expose be passed in here instead of as a global option?

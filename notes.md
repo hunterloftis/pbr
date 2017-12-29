@@ -106,3 +106,10 @@
 ## refs
 
 - http://people.tamu.edu/~ergun/courses/viza656/
+- https://blog.frogslayer.com/kd-trees-for-faster-ray-tracing-with-triangles/
+
+## renders
+
+```
+go run cmd/pbr/*.go fixtures/models/chair.obj chair2.png -from "400,400,0" -to "10,75,-600" -sky 600,800,1000 -lens 150 -fstop 2.8
+```
