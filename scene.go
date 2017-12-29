@@ -86,8 +86,8 @@ func (s *Scene) SetPano(r io.Reader, expose float64) {
 // ImportObj imports the meshes and materials from a .obj file
 // TODO: make robust
 func (s *Scene) ImportObj(r io.Reader) {
-	vs := make([]Vector3, 1, 1024)
-	vns := make([]Direction, 1, 1024)
+	vs := make([]Vector3, 0, 1024)
+	vns := make([]Direction, 0, 1024)
 	scanner := bufio.NewScanner(r)
 	mesh := Mesh{
 		Tris: []Triangle{},
