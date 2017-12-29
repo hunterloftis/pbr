@@ -1,6 +1,7 @@
 package pbr
 
 // Triangle describes a triangle
+// TODO: store per-vertex Normal data so .obj file curved surfaces can be read in and rendered smoothly / without edges
 type Triangle struct {
 	Points [3]Vector3
 	Normal Direction
@@ -14,7 +15,7 @@ func NewTriangle(a, b, c Vector3) Triangle {
 	edge2 := c.Minus(a)
 	return Triangle{
 		Points: [3]Vector3{a, b, c},
-		Normal: edge2.Cross(edge1).Unit(),
+		Normal: edge1.Cross(edge2).Unit(),
 		edge1:  edge1,
 		edge2:  edge2,
 	}

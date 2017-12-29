@@ -87,7 +87,7 @@ func (a *Vector3) String() string {
 
 // Set sets the vector from a string value
 func (a *Vector3) Set(val string) error {
-	xyz := strings.Split(val, ",")
+	xyz := strings.FieldsFunc(val, split)
 	if len(xyz) != 3 {
 		return fmt.Errorf("pbr: 3 values required for Vector3, received %v", len(xyz))
 	}
@@ -105,6 +105,10 @@ func (a *Vector3) Set(val string) error {
 	}
 	a.X, a.Y, a.Z = x, y, z
 	return nil
+}
+
+func split(r rune) bool {
+	return r == ',' || r == ' '
 }
 
 // UnmarshalText unmarshals a byte slice into a Vector3 value

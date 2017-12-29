@@ -49,14 +49,14 @@ func main() {
 
 	// For debugging until we're actually parsing scene files
 	// scene.Add(pbr.UnitCube(pbr.Plastic(1, 0, 0, 1), pbr.Rot(pbr.Vector3{0, 1, 0}), pbr.Scale(0.5, 0.5, 0.5)))
-	mesh := pbr.Mesh{
-		Tris: []pbr.Triangle{
-			pbr.NewTriangle(pbr.Vector3{0, 0, 0}, pbr.Vector3{0, 1, 0}, pbr.Vector3{1, 0, 0}),
-		},
-		Pos: pbr.Identity(),
-		Mat: pbr.Plastic(1, 0, 0, 1),
-	}
-	scene.Add(&mesh)
+	// mesh := pbr.Mesh{
+	// 	Tris: []pbr.Triangle{
+	// 		pbr.NewTriangle(pbr.Vector3{0, 0, 0}, pbr.Vector3{0, 1, 0}, pbr.Vector3{1, 0, 0}),
+	// 	},
+	// 	Pos: pbr.Identity(),
+	// 	Mat: pbr.Plastic(1, 0, 0, 1),
+	// }
+	// scene.Add(&mesh)
 
 	render(sampler, renderer, o.Exit)
 	pbr.WritePNG(o.Render, renderer.Rgb()) // TODO: should o.Expose be passed in here instead of as a global option?

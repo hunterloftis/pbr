@@ -1,8 +1,12 @@
 package pbr
 
 import (
+	"bufio"
+	"fmt"
 	"io"
 	"math"
+	"strconv"
+	"strings"
 
 	"github.com/Opioid/rgbe"
 )
@@ -80,6 +84,48 @@ func (s *Scene) SetPano(r io.Reader, expose float64) {
 }
 
 // ImportObj imports the meshes and materials from a .obj file
+// TODO: make robust
 func (s *Scene) ImportObj(r io.Reader) {
+	vs := make([]Vector3, 1, 1024)
+	scanner := bufio.NewScanner(r)
+	mesh := Mesh{
+		Tris: []Triangle{},
+		Pos:  Identity(),
+		Mat:  Plastic(1, 1, 1, 1),
+	}
+	for scanner.Scan() {
+		line := scanner.Text()
+		fields := strings.Fields(line)
+		if len(fields) == 0 {
+			continue
+		}
+		key := fields[0]
+		args := fields[1:]
+		switch key {
+		case "v":
+			v := Vector3{}
+			_ = v.Set(strings.Join(args[0:3], ","))
+			vs = append(vs, v)
+		case "f":
+			v1 := vertex(args[0], vs)
+			v2 := vertex(args[1], vs)
+			v3 := vertex(args[2], vs)
+			mesh.Tris = append(mesh.Tris, NewTriangle(v1, v2, v3))
+		}
+	}
+	s.Add(&mesh)
+	fmt.Println(mesh.Tris[0])
+}
 
+// TODO: make robust
+func vertex(s string, vs []Vector3) Vector3 {
+	n, err := strconv.ParseInt(strings.Split(s, "/")[0], 0, 0)
+	if err != nil {
+		panic(err)
+	}
+	i := int(n)
+	if i > 0 {
+		return vs[i-1]
+	}
+	return vs[len(vs)+i]
 }
