@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -37,6 +38,14 @@ func main() {
 		defer hdr.Close()
 		scene.SetPano(hdr, 100) // TODO: read radiosity info or allow it as an option
 	}
+
+	obj, err := os.Open(o.Scene)
+	if err != nil {
+		fmt.Println("Unable to open scene", o.Scene)
+		os.Exit(1)
+	}
+	defer obj.Close()
+	scene.ImportObj(obj)
 
 	// For debugging until we're actually parsing scene files
 	// scene.Add(pbr.UnitCube(pbr.Plastic(1, 0, 0, 1), pbr.Rot(pbr.Vector3{0, 1, 0}), pbr.Scale(0.5, 0.5, 0.5)))

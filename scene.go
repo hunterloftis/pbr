@@ -78,3 +78,8 @@ func (s *Scene) SetPano(r io.Reader, expose float64) {
 	width, height, data, _ := rgbe.Decode(r)
 	s.pano = &RGBAE{Width: width, Height: height, Data: data, Expose: expose}
 }
+
+// ImportObj imports the meshes and materials from a .obj file
+func (s *Scene) ImportObj(r io.Reader) {
+
+}
