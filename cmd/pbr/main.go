@@ -42,9 +42,9 @@ func main() {
 	// For debugging until we're actually parsing scene files
 	// scene.Add(pbr.UnitCube(pbr.Plastic(1, 0, 0, 1), pbr.Rot(pbr.Vector3{0, 1, 0}), pbr.Scale(0.5, 0.5, 0.5)))
 	mesh := pbr.Mesh{
-		Tris: []pbr.Triangle{pbr.Triangle{
-			Points: [3]pbr.Vector3{pbr.Vector3{0, 0, 0}, pbr.Vector3{0, 1, 0}, pbr.Vector3{1, 0, 0}},
-		}},
+		Tris: []pbr.Triangle{
+			pbr.NewTriangle(pbr.Vector3{0, 0, 0}, pbr.Vector3{0, 1, 0}, pbr.Vector3{1, 0, 0}),
+		},
 		Pos: pbr.Identity(),
 		Mat: pbr.Plastic(1, 0, 0, 1),
 	}
