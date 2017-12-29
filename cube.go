@@ -60,12 +60,12 @@ func (c *Cube) Intersect(ray Ray3) (bool, float64, int) {
 		}
 	}
 	if t0 > 0 {
-		if dist := c.Pos.MultDist(r.Dir.Scaled(t0)).Len(); dist >= Bias {
+		if dist := c.Pos.MultDist(r.Dir.Scaled(t0)).Len(); dist >= BIAS {
 			return true, dist, 0
 		}
 	}
 	if t1 > 0 {
-		if dist := c.Pos.MultDist(r.Dir.Scaled(t1)).Len(); dist >= Bias {
+		if dist := c.Pos.MultDist(r.Dir.Scaled(t1)).Len(); dist >= BIAS {
 			return true, dist, 0
 		}
 	}

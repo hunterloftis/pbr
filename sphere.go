@@ -35,14 +35,14 @@ func (s *Sphere) Intersect(ray Ray3) (hit bool, dist float64, id int) {
 	t1 := b - root
 	if t1 > 0 {
 		dist := s.Pos.MultDist(r.Dir.Scaled(t1)).Len()
-		if dist > Bias {
+		if dist > BIAS {
 			return true, dist, 0
 		}
 	}
 	t2 := b + root
 	if t2 > 0 {
 		dist := s.Pos.MultDist(r.Dir.Scaled(t2)).Len()
-		if dist > Bias {
+		if dist > BIAS {
 			return true, dist, 0
 		}
 	}

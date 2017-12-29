@@ -80,7 +80,7 @@ func (s *Sampler) Sample() {
 				stat.count += samples
 			}
 			ch <- stat
-		}(i, s.Adapt, s.Adapt*3, s.meanNoise+Bias)
+		}(i, s.Adapt, s.Adapt*3, s.meanNoise+BIAS)
 	}
 
 	var sample sampleStat
@@ -116,7 +116,7 @@ func (s *Sampler) Pixels() int {
 // adaptive returns the number of samples to take given specific and average noise values.
 // TODO: this is a pretty slow function (think it's inlined), speed it up
 func adaptive(noise float64, adapt, max int, mean float64) int {
-	ratio := noise/mean + Bias
+	ratio := noise/mean + BIAS
 	return int(math.Min(math.Ceil(math.Pow(ratio, float64(adapt))), float64(max)))
 }
 

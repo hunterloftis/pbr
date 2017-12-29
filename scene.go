@@ -61,7 +61,7 @@ func (s *Scene) Env(ray Ray3) Energy {
 		b := float64(s.pano.Data[index+2])
 		return Energy(Vector3{r, g, b}.Scaled(s.pano.Expose))
 	}
-	vertical := math.Max((ray.Dir.Cos(Up)+0.5)/1.5, 0)
+	vertical := math.Max((ray.Dir.Cos(UP)+0.5)/1.5, 0)
 	return Energy(s.skyDown.Lerp(s.skyUp, vertical))
 }
 
