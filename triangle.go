@@ -21,6 +21,7 @@ func NewTriangle(a, b, c Vector3) Triangle {
 }
 
 // Intersect determines whether or not, and where, a Ray intersects this Triangle
+// https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 func (t *Triangle) Intersect(ray Ray3) (bool, float64) {
 	const EPS float64 = 0.000001
 	h := ray.Dir.Cross(Direction(t.edge2))
