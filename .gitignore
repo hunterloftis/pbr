@@ -5,3 +5,5 @@ profile.*
 *.pngvendor
 vendor
 render.png
+fixtures/models/lucy.obj
+*.png

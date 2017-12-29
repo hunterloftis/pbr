@@ -121,7 +121,7 @@ func (s *Scene) ImportObj(r io.Reader) {
 		}
 	}
 	s.Add(&mesh)
-	fmt.Println(mesh.Tris[0])
+	fmt.Println("Imported mesh with", len(mesh.Tris), "triangles.")
 }
 
 // TODO: make robust
@@ -132,7 +132,7 @@ func vertex(s string, vs []Vector3, vns []Direction) (v Vector3, n *Direction) {
 	if err != nil {
 		panic(err)
 	}
-	if len(fields) >= 2 {
+	if len(fields) >= 3 {
 		ni, err := strconv.ParseInt(fields[2], 0, 0)
 		if err != nil {
 			panic(err)

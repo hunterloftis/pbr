@@ -95,3 +95,14 @@
 - https://3dwarehouse.sketchup.com/model/ufa8589fa-fcb2-4b98-8a57-53f1ec10f6f7/jar-chinese-porcelain-02
 - https://3dwarehouse.sketchup.com/model/f75b167f-f8b8-4cd8-85f2-ea50b9ac56fd/lustre-de-spikes-spikey-ceiling-lamp
 - https://3dwarehouse.sketchup.com/model/138ca3a137edc990ff085529822a7226/Citroen-C2
+
+# Large break
+
+## .obj models
+
+- http://students.cs.tamu.edu/hrg/viza656/pr04/index.html
+- http://students.cs.tamu.edu/hrg/viza656/pr09/index.html
+
+## refs
+
+- http://people.tamu.edu/~ergun/courses/viza656/
