@@ -48,6 +48,20 @@ func (t *Triangle) Intersect(ray Ray3) (bool, float64) {
 	return true, dist
 }
 
+// SetNormals sets values for each vertex normal
+// TODO: figure out proper use of pointers
+func (t *Triangle) SetNormals(a, b, c *Direction) {
+	if a != nil {
+		t.Normals[0] = *a
+	}
+	if b != nil {
+		t.Normals[1] = *b
+	}
+	if c != nil {
+		t.Normals[2] = *c
+	}
+}
+
 // Normal computes the smoothed normal
 func (t *Triangle) Normal(p Vector3) Direction {
 	u, v, w := t.Bary(p)

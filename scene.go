@@ -87,6 +87,7 @@ func (s *Scene) SetPano(r io.Reader, expose float64) {
 // TODO: make robust
 func (s *Scene) ImportObj(r io.Reader) {
 	vs := make([]Vector3, 1, 1024)
+	vns := make([]Direction, 1, 1024)
 	scanner := bufio.NewScanner(r)
 	mesh := Mesh{
 		Tris: []Triangle{},
@@ -106,11 +107,17 @@ func (s *Scene) ImportObj(r io.Reader) {
 			v := Vector3{}
 			_ = v.Set(strings.Join(args[0:3], ","))
 			vs = append(vs, v)
+		case "vn":
+			v := Vector3{}
+			_ = v.Set(strings.Join(args[0:3], ","))
+			vns = append(vns, v.Unit())
 		case "f":
-			v1 := vertex(args[0], vs)
-			v2 := vertex(args[1], vs)
-			v3 := vertex(args[2], vs)
-			mesh.Tris = append(mesh.Tris, NewTriangle(v1, v2, v3))
+			v1, n1 := vertex(args[0], vs, vns)
+			v2, n2 := vertex(args[1], vs, vns)
+			v3, n3 := vertex(args[2], vs, vns)
+			t := NewTriangle(v1, v2, v3)
+			t.SetNormals(n1, n2, n3)
+			mesh.Tris = append(mesh.Tris, t)
 		}
 	}
 	s.Add(&mesh)
@@ -119,14 +126,27 @@ func (s *Scene) ImportObj(r io.Reader) {
 
 // TODO: make robust
 // https://codeplea.com/triangular-interpolation
-func vertex(s string, vs []Vector3) Vector3 {
-	n, err := strconv.ParseInt(strings.Split(s, "/")[0], 0, 0)
+func vertex(s string, vs []Vector3, vns []Direction) (v Vector3, n *Direction) {
+	fields := strings.Split(s, "/")
+	vi, err := strconv.ParseInt(fields[0], 0, 0)
 	if err != nil {
 		panic(err)
 	}
-	i := int(n)
-	if i > 0 {
-		return vs[i-1]
+	if len(fields) >= 2 {
+		ni, err := strconv.ParseInt(fields[2], 0, 0)
+		if err != nil {
+			panic(err)
+		}
+		if ni > 0 {
+			n = &vns[ni-1]
+		} else {
+			n = &vns[len(vns)+int(ni)]
+		}
 	}
-	return vs[len(vs)+i]
+	if vi > 0 {
+		v = vs[vi-1]
+	} else {
+		v = vs[len(vs)+int(vi)]
+	}
+	return v, n
 }
