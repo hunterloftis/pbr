@@ -12,6 +12,8 @@ import (
 
 func main() {
 	o := options()
+	size := o.Width * o.Height
+	cutoff := uint(float64(size) * o.Complete)
 	scene := pbr.NewScene(*o.Sky, *o.Ground)
 	camera := pbr.NewCamera(o.Width, o.Height, pbr.CameraConfig{
 		Lens:     o.Lens / 1000.0,
@@ -51,27 +53,29 @@ func main() {
 	bluePlastic := pbr.Plastic(0, 0, 1, 1)
 	scene.Add(pbr.UnitCube(whitePlastic, pbr.Trans(0, 11, -600), pbr.Scale(10000, 1, 10000)).SetGrid(bluePlastic, 8.0))
 
-	render(sampler, renderer, o.Exit)
+	fmt.Println("cutoff:", cutoff)
+	render(sampler, renderer, cutoff)
 	pbr.WritePNG(o.Render, renderer.Rgb()) // TODO: should o.Expose be passed in here instead of as a global option?
 	if len(o.Heat) > 0 {
 		pbr.WritePNG(o.Heat, renderer.Heat())
 	}
 }
 
-func render(sampler *pbr.Sampler, renderer *pbr.Renderer, quality float64) {
+func render(sampler *pbr.Sampler, renderer *pbr.Renderer, samples uint) {
 	start := time.Now()
 	running := true
 	interrupt := make(chan os.Signal, 2)
+	sampled := uint(0)
 
-	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM) // TODO: abstract this?
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-interrupt
 		running = false
 	}()
 
-	for running && sampler.PerPixel() < quality {
+	for running && sampled < samples {
 		pbr.ShowProgress(sampler, start, running)
-		sampler.Sample()
+		sampled += sampler.Sample()
 	}
 	pbr.ShowProgress(sampler, start, running)
 }

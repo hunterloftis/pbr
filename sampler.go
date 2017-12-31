@@ -65,7 +65,7 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 // It returns the total number of samples taken.
 // TODO: clean this up a bit
 // https://stackoverflow.com/questions/22517614/golang-concurrent-array-access
-func (s *Sampler) Sample() {
+func (s *Sampler) Sample() uint {
 	length := index(len(s.samples))
 	workers := index(runtime.NumCPU())
 	ch := make(chan sampleStat, workers)
@@ -91,6 +91,7 @@ func (s *Sampler) Sample() {
 	}
 	s.count += sample.count
 	s.meanNoise = sample.noise / float64(sample.count)
+	return uint(s.count)
 }
 
 // Count returns the total sample count.

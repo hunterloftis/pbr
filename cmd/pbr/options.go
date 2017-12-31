@@ -24,7 +24,7 @@ type Options struct {
 	Bounce   int     `help:"number of light bounces"`
 	Direct   int     `help:"number of direct rays to cast"`
 	Indirect int     `help:"number of indirect rays to cast"`
-	Exit     float64 `help:"samples-per-pixel at which to exit"`
+	Complete float64 `help:"number of samples-per-pixel at which to exit"`
 
 	From   *pbr.Vector3 `help:"camera position"`
 	To     *pbr.Vector3 `help:"camera target"`
@@ -45,7 +45,7 @@ func options() Options {
 		Bounce:   10,
 		Direct:   1,
 		Indirect: 1,
-		Exit:     math.Inf(1),
+		Complete: math.Inf(1),
 		From:     &pbr.Vector3{0, 0, 2},
 		To:       &pbr.Vector3{0, 0, 0},
 		Focus:    nil,
