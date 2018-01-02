@@ -1,7 +1,6 @@
 package pbr
 
 import (
-	"fmt"
 	"image"
 	"math"
 	"math/rand"
@@ -66,14 +65,14 @@ func (r *Renderer) Start(tick time.Duration) <-chan uint {
 			Bounces: r.Bounces,
 		})
 		samplers[i].Sample(pixels, results)
-		r.ask(pixels)
+		r.request(pixels)
 	}
 	go func() {
 		for {
 			select {
 			case res := <-results:
 				r.integrate(res)
-				r.ask(pixels)
+				r.request(pixels)
 			case <-ticker.C:
 				ch <- r.count
 			default:
@@ -88,13 +87,14 @@ func (r *Renderer) Start(tick time.Duration) <-chan uint {
 	return ch
 }
 
-func (r *Renderer) ask(pixels chan<- uint) {
+// TODO: skip all these calculations if Uniform == true
+func (r *Renderer) request(pixels chan<- uint) {
 	size := uint(r.Width * r.Height)
 	p := r.cursor * Stride
-	noise := math.Min(r.pixels[p+Noise], r.meanVariance*3)
-	advance := r.pixels[p+Count] < 4 || r.rnd.Float64()*noise < r.meanVariance
+	ratio := math.Min((r.pixels[p+Noise]+1)/(r.meanVariance+1), 5)
+	rand := r.rnd.Float64() * ratio
 	pixels <- r.cursor
-	if advance {
+	if rand < 0.9 {
 		r.cursor++
 		if r.cursor%size == 0 {
 			r.cursor = 0
@@ -102,7 +102,6 @@ func (r *Renderer) ask(pixels chan<- uint) {
 			for i := uint(0); i < size; i++ {
 				r.meanVariance += r.pixels[p+Noise] / float64(size)
 			}
-			fmt.Println("computed new mean variance:", r.meanVariance)
 		}
 	}
 }
@@ -164,7 +163,11 @@ func (r *Renderer) integrate(res result) {
 	r.pixels[p+Blue] += rgb[2]
 	r.pixels[p+Count]++
 	r.count++
+	r.computeNoise(res)
+}
 
+func (r *Renderer) computeNoise(res result) {
+	p := res.index * Stride
 	mean := r.average(res.index)
 	variance := res.energy.Variance(mean)
 	count := r.pixels[p+Count]

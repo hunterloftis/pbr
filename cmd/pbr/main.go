@@ -12,9 +12,10 @@ import (
 
 func main() {
 	o := options()
+	fmt.Println("option sky:", o.Sky)
 	size := o.Width * o.Height
 	cutoff := uint(float64(size) * o.Complete)
-	scene := pbr.NewScene(*o.Sky, *o.Ground)
+	scene := pbr.NewScene(o.Sky, o.Ground)
 	camera := pbr.NewCamera(o.Width, o.Height, pbr.CameraConfig{
 		Lens:     o.Lens / 1000.0,
 		Position: o.From,

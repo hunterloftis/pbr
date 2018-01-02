@@ -23,12 +23,12 @@ type RGBAE struct {
 type Scene struct {
 	Surfaces []Surface
 	pano     *RGBAE
-	skyUp    Energy // TODO: these should be Energy
-	skyDown  Energy
+	skyUp    *Energy // TODO: these should be Energy
+	skyDown  *Energy
 }
 
 // NewScene creates and returns a pointer to an empty Scene.
-func NewScene(up, down Energy) *Scene {
+func NewScene(up, down *Energy) *Scene {
 	return &Scene{
 		skyUp:   up,
 		skyDown: down,
@@ -69,7 +69,7 @@ func (s *Scene) Env(ray Ray3) Energy {
 		return Energy(Vector3{r, g, b}.Scaled(s.pano.Expose))
 	}
 	vertical := (ray.Dir.Cos(UP) + 1) / 2.0
-	return Energy(Vector3(s.skyDown).Lerp(Vector3(s.skyUp), vertical))
+	return s.skyDown.Blend(*s.skyUp, vertical)
 }
 
 // Add adds new Surfaces to the scene.

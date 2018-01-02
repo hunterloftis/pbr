@@ -1,7 +1,10 @@
 package pbr
 
 import (
+	"fmt"
 	"math/rand"
+	"strconv"
+	"strings"
 )
 
 // Energy stores RGB light energy as a 3D Vector.
@@ -34,10 +37,32 @@ func (a Energy) Strength(b Energy) Energy {
 	return Energy{a.X * b.X, a.Y * b.Y, a.Z * b.Z}
 }
 
+// TODO: figure out why this won't work
 // UnmarshalText creates an Energy from a byte array
+// func (a *Energy) UnmarshalText(b []byte) error {
+// 	v := Vector3(*a)
+// 	return (&v).UnmarshalText(b)
+// }
+
 func (a *Energy) UnmarshalText(b []byte) error {
-	v := Vector3(*a)
-	return (&v).UnmarshalText(b)
+	xyz := strings.FieldsFunc(string(b), split)
+	if len(xyz) != 3 {
+		return fmt.Errorf("pbr: 3 values required for Energy, received %v", len(xyz))
+	}
+	x, err := strconv.ParseFloat(xyz[0], 64)
+	if err != nil {
+		return err
+	}
+	y, err := strconv.ParseFloat(xyz[1], 64)
+	if err != nil {
+		return err
+	}
+	z, err := strconv.ParseFloat(xyz[2], 64)
+	if err != nil {
+		return err
+	}
+	a.X, a.Y, a.Z = x, y, z
+	return nil
 }
 
 // Diff returns the difference in two Energies
@@ -48,4 +73,8 @@ func (a *Energy) Variance(b Energy) float64 {
 
 func (a *Energy) Amount() float64 {
 	return Vector3(*a).Len()
+}
+
+func (a *Energy) Blend(b Energy, n float64) Energy {
+	return Energy(Vector3(*a).Lerp(Vector3(b), n))
 }
