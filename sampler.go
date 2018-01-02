@@ -1,9 +1,7 @@
 package pbr
 
 import (
-	"math"
 	"math/rand"
-	"runtime"
 	"time"
 )
 
@@ -13,23 +11,22 @@ type Sampler struct {
 	Height int
 	SamplerConfig
 
-	samples   []float64 // stored in a flat array, chunked by Stride
-	cam       *Camera
-	scene     *Scene
-	count     int
-	meanNoise float64
+	cam   *Camera
+	scene *Scene
+	rnd   *rand.Rand
+
+	// state
+	cursor uint
 }
 
 // SamplerConfig configures a Sampler.
 type SamplerConfig struct {
 	Bounces int
-	Samples float64
-	Adapt   int
 }
 
-type sampleStat struct {
-	count int
-	noise float64
+type result struct {
+	index  uint
+	energy Energy
 }
 
 // NewSampler constructs a new Sampler for a given Camera and Scene.
@@ -44,109 +41,23 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 	if conf.Bounces == 0 {
 		conf.Bounces = 10 // Reasonable default
 	}
-	if conf.Samples == 0 {
-		conf.Samples = math.Inf(1) // Sample forever by default
-	}
-	if conf.Adapt == 0 { // TODO: 0 should be a valid value
-		conf.Adapt = 4
-	}
 	return &Sampler{
 		Width:         cam.Width,
 		Height:        cam.Height,
 		SamplerConfig: conf,
-		samples:       make([]float64, index(cam.Width*cam.Height)*Stride),
 		cam:           cam,
 		scene:         scene,
+		rnd:           rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
-// Sample samples every pixel in the Camera's frame at least once.
-// Depending on the Sampler's `adapt` value, noisy pixels may be sampled several times.
-// It returns the total number of samples taken.
-// TODO: clean this up a bit
-// https://stackoverflow.com/questions/22517614/golang-concurrent-array-access
-func (s *Sampler) Sample() uint {
-	length := index(len(s.samples))
-	workers := index(runtime.NumCPU())
-	ch := make(chan sampleStat, workers)
-
-	for i := index(0); i < workers; i++ {
-		go func(i index, adapt, max int, mean float64) {
-			var stat sampleStat
-			rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-			for p := i * Stride; p < length; p += Stride * workers {
-				samples := adaptive(s.samples[p+Noise], adapt, max, mean)
-				stat.noise += s.samplePixel(p, rnd, samples)
-				stat.count += samples
-			}
-			ch <- stat
-		}(i, s.Adapt, s.Adapt*3, s.meanNoise+BIAS)
-	}
-
-	var sample sampleStat
-	for i := index(0); i < workers; i++ {
-		stat := <-ch
-		sample.count += stat.count
-		sample.noise += stat.noise
-	}
-	s.count += sample.count
-	s.meanNoise = sample.noise / float64(sample.count)
-	return uint(s.count)
-}
-
-// Count returns the total sample count.
-func (s *Sampler) Count() int {
-	return s.count
-}
-
-// PerPixel returns the per-pixel sample count.
-func (s *Sampler) PerPixel() float64 {
-	return float64(s.count) / float64(s.Width*s.Height)
-}
-
-// Samples returns an array of float64 pixel values.
-func (s *Sampler) Samples() []float64 {
-	return s.samples
-}
-
-// Pixels returns the number of pixels per sample.
-func (s *Sampler) Pixels() int {
-	return s.Width * s.Height
-}
-
-// adaptive returns the number of samples to take given specific and average noise values.
-// TODO: this is a pretty slow function (think it's inlined), speed it up
-func adaptive(noise float64, adapt, max int, mean float64) int {
-	ratio := noise/mean + BIAS
-	return int(math.Min(math.Ceil(math.Pow(ratio, float64(adapt))), float64(max)))
-}
-
-// samplePixel samples a single pixel `samples` times.
-// The pixel is specified by the index `p`.
-func (s *Sampler) samplePixel(p index, rnd *rand.Rand, samples int) float64 {
-	x, y := s.pixelAt(p)
-	before := value(s.samples, p)
-	for i := 0; i < samples; i++ {
-		sample := s.trace(x, y, rnd)
-		rgb := [3]float64{sample.X, sample.Y, sample.Z}
-		s.samples[p+Red] += rgb[0]
-		s.samples[p+Green] += rgb[1]
-		s.samples[p+Blue] += rgb[2]
-		s.samples[p+Count]++
-	}
-	after := value(s.samples, p)
-	scale := (before.Len()+after.Len())/2 + 1e-6
-	noise := before.Minus(after).Len() / scale
-	s.samples[p+Noise] = noise
-	return noise
-}
-
-func value(pixels []float64, i index) Vector3 {
-	if pixels[i+Count] == 0 {
-		return Vector3{}
-	}
-	sample := Vector3{pixels[i+Red], pixels[i+Green], pixels[i+Blue]}
-	return sample.Scaled(1 / pixels[i+Count])
+func (s *Sampler) Sample(out chan<- result, stop <-chan struct{}) {
+	go func() {
+		x, y := s.pixelAt(s.cursor)
+		sample := s.trace(x, y, s.rnd)
+		out <- result{s.cursor, sample}
+		s.cursor++
+	}()
 }
 
 func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Energy {
@@ -177,7 +88,7 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Energy {
 	return energy
 }
 
-func (s *Sampler) pixelAt(i index) (x, y float64) {
+func (s *Sampler) pixelAt(i uint) (x, y float64) {
 	pos := int(i / Stride)
 	return float64(pos % s.Width), float64(pos / s.Width)
 }

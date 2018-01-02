@@ -24,20 +24,20 @@ func WritePNG(file string, i image.Image) error {
 
 // ShowProgress shows the current sampling progress (billion samples, samples/pixel, samples/ms, shutting down?).
 // https://stackoverflow.com/a/15442704/1911432
-func ShowProgress(s *Sampler, start time.Time, running bool) {
-	var pp, pms int
+func ShowProgress(r *Renderer, start time.Time) {
+	var pp, pms uint
 	var note string
-	var bil float64
-	if !running {
+	var mil float64
+	if !r.Active() {
 		note = " (wrapping up...)"
 	}
-	samples := s.Count()
-	pixels := s.Pixels()
-	ms := int(time.Now().Sub(start).Nanoseconds() / 1e6)
-	if s.Pixels() > 0 && ms > 0 {
-		bil = float64(samples) / 1e9
+	samples := r.Count()
+	pixels := r.Size()
+	ms := uint(time.Now().Sub(start).Nanoseconds() / 1e6)
+	if pixels > 0 && ms > 0 {
+		mil = float64(samples) / 1e6
 		pp = samples / pixels
 		pms = samples / ms
 	}
-	fmt.Printf("\rsamples: %.3f billion - %v/pixel - %v/ms%v", bil, pp, pms, note)
+	fmt.Printf("\rsamples: %.3f million - %v/pixel - %v/ms%v", mil, pp, pms, note)
 }

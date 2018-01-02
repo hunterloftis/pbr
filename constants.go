@@ -4,12 +4,10 @@ package pbr
 // Applying bias provides more robust processing of geometry.
 const BIAS = 1e-6
 
-type index int
-
 // Pixel elements are stored in specific offsets.
 // These constants allow easy access, eg `someFloat64Array[i + Blue]`
 const (
-	Red index = iota
+	Red uint = iota
 	Green
 	Blue
 	Count

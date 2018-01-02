@@ -22,17 +22,9 @@ func main() {
 		Focus:    o.Focus,
 		FStop:    o.FStop,
 	})
-	adapt := 5
-	if o.Uniform {
-		adapt = 0
-	}
-	// TODO: should Renderer and Sampler be separate?
-	sampler := pbr.NewSampler(camera, scene, pbr.SamplerConfig{
+	renderer := pbr.NewRenderer(camera, scene, pbr.RenderConfig{
 		Bounces: o.Bounce,
-		Adapt:   adapt, // TODO: make this boolean
-	})
-	renderer := pbr.NewRenderer(sampler, pbr.RenderConfig{
-		Exposure: o.Expose,
+		Adapt:   !o.Uniform,
 	})
 
 	if len(o.Env) > 0 {
@@ -53,29 +45,24 @@ func main() {
 	bluePlastic := pbr.Plastic(0, 0, 1, 1)
 	scene.Add(pbr.UnitCube(whitePlastic, pbr.Trans(0, 11, -600), pbr.Scale(10000, 1, 10000)).SetGrid(bluePlastic, 8.0))
 
-	fmt.Println("cutoff:", cutoff)
-	render(sampler, renderer, cutoff)
-	pbr.WritePNG(o.Render, renderer.Rgb()) // TODO: should o.Expose be passed in here instead of as a global option?
+	interrupt := make(chan os.Signal, 2)
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
+
+	start := time.Now()
+	for samples := range renderer.Start(time.Second / 4) {
+		select {
+		case <-interrupt:
+			renderer.Stop()
+		default:
+			if samples >= cutoff {
+				renderer.Stop()
+			}
+		}
+		pbr.ShowProgress(renderer, start)
+	}
+
+	pbr.WritePNG(o.Render, renderer.Rgb(o.Expose))
 	if len(o.Heat) > 0 {
 		pbr.WritePNG(o.Heat, renderer.Heat())
 	}
-}
-
-func render(sampler *pbr.Sampler, renderer *pbr.Renderer, samples uint) {
-	start := time.Now()
-	running := true
-	interrupt := make(chan os.Signal, 2)
-	sampled := uint(0)
-
-	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-interrupt
-		running = false
-	}()
-
-	for running && sampled < samples {
-		pbr.ShowProgress(sampler, start, running)
-		sampled += sampler.Sample()
-	}
-	pbr.ShowProgress(sampler, start, running)
 }
