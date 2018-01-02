@@ -18,7 +18,9 @@ type Sampler struct {
 
 // SamplerConfig configures a Sampler.
 type SamplerConfig struct {
-	Bounces int
+	Bounces  int
+	Direct   uint // TODO
+	Indirect uint // TODO
 }
 
 type result struct {

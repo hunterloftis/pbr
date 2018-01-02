@@ -28,8 +28,8 @@ type Renderer struct {
 
 // RenderConfig configures rendering settings.
 type RenderConfig struct {
+	Uniform  bool
 	Bounces  int
-	Uniform  bool // TODO
 	Direct   uint // TODO
 	Indirect uint // TODO
 }
@@ -52,19 +52,72 @@ func NewRenderer(c *Camera, s *Scene, config ...RenderConfig) *Renderer {
 	}
 }
 
+func (r *Renderer) Sample(in <-chan uint, out chan<- result) {
+	size := uint(r.Width * r.Height)
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	go func() {
+		for {
+			if p, ok := <-in; ok {
+				i := p % size
+				x, y := r.pixelAt(i)
+				sample := r.trace(x, y, rnd)
+				out <- result{i, sample}
+			} else {
+				return
+			}
+		}
+	}()
+}
+
+func (r *Renderer) pixelAt(i uint) (x, y float64) {
+	return float64(i % uint(r.Width)), float64(i / uint(r.Width))
+}
+
+func (r *Renderer) trace(x, y float64, rnd *rand.Rand) Energy {
+	ray := r.camera.ray(x, y, rnd)
+	signal := Energy{1, 1, 1}
+	energy := Energy{0, 0, 0}
+
+	for bounce := 0; bounce < r.Bounces; bounce++ {
+		hit, surface, dist := r.scene.Intersect(ray)
+		if !hit {
+			energy = energy.Merged(r.scene.Env(ray), signal)
+			break
+		}
+		point := ray.Moved(dist)
+		normal, mat := surface.At(point)
+		energy = energy.Merged(mat.Emit(normal, ray.Dir), signal)
+		signal = signal.RandomGain(rnd) // "Russian Roulette"
+		if signal == (Energy{}) {
+			break
+		}
+		if next, dir, str := mat.Bsdf(normal, ray.Dir, dist, rnd); next {
+			signal = signal.Strength(str)
+			ray = Ray3{point, dir}
+		} else {
+			break
+		}
+	}
+	return energy
+}
+
 func (r *Renderer) Start(tick time.Duration) <-chan uint {
 	r.active = true
 	n := runtime.NumCPU()
-	samplers := make([]*Sampler, n)
+	// samplers := make([]*Sampler, n)
 	ticker := time.NewTicker(tick)
-	ch := make(chan uint)
+	updates := make(chan uint)
 	results := make(chan result, n*2)
 	pixels := make(chan uint)
 	for i := 0; i < n; i++ {
-		samplers[i] = NewSampler(r.camera, r.scene, SamplerConfig{
-			Bounces: r.Bounces,
-		})
-		samplers[i].Sample(pixels, results)
+		r.Sample(pixels, results)
+
+		// samplers[i] = NewSampler(r.camera, r.scene, SamplerConfig{
+		// 	Bounces:  r.Bounces,
+		// 	Direct:   r.Direct,
+		// 	Indirect: r.Indirect,
+		// })
+		// samplers[i].Sample(pixels, results)
 		r.request(pixels)
 	}
 	go func() {
@@ -74,36 +127,17 @@ func (r *Renderer) Start(tick time.Duration) <-chan uint {
 				r.integrate(res)
 				r.request(pixels)
 			case <-ticker.C:
-				ch <- r.count
+				updates <- r.count
 			default:
 				if !r.active {
 					close(pixels)
-					close(ch)
+					close(updates)
 					return
 				}
 			}
 		}
 	}()
-	return ch
-}
-
-// TODO: skip all these calculations if Uniform == true
-func (r *Renderer) request(pixels chan<- uint) {
-	size := uint(r.Width * r.Height)
-	p := r.cursor * Stride
-	ratio := math.Min((r.pixels[p+Noise]+1)/(r.meanVariance+1), 5)
-	rand := r.rnd.Float64() * ratio
-	pixels <- r.cursor
-	if rand < 0.9 {
-		r.cursor++
-		if r.cursor%size == 0 {
-			r.cursor = 0
-			r.meanVariance = 0
-			for i := uint(0); i < size; i++ {
-				r.meanVariance += r.pixels[p+Noise] / float64(size)
-			}
-		}
-	}
+	return updates
 }
 
 func (r *Renderer) Stop() {
@@ -155,6 +189,28 @@ func (r *Renderer) Heat() image.Image {
 	return im
 }
 
+func (r *Renderer) request(pixels chan<- uint) {
+	size := uint(r.Width * r.Height)
+	pixels <- r.cursor
+	if r.Uniform {
+		r.cursor = (r.cursor + 1) % size
+		return
+	}
+	p := r.cursor * Stride
+	ratio := math.Min((r.pixels[p+Noise]+1)/(r.meanVariance+1), 5)
+	rand := r.rnd.Float64() * ratio
+	if rand < 0.9 {
+		r.cursor++
+		if r.cursor%size == 0 {
+			r.cursor = 0
+			r.meanVariance = 0
+			for i := uint(0); i < size; i++ {
+				r.meanVariance += r.pixels[p+Noise] / float64(size)
+			}
+		}
+	}
+}
+
 func (r *Renderer) integrate(res result) {
 	p := res.index * Stride
 	rgb := [3]float64{res.energy.X, res.energy.Y, res.energy.Z}
@@ -167,6 +223,9 @@ func (r *Renderer) integrate(res result) {
 }
 
 func (r *Renderer) computeNoise(res result) {
+	if r.Uniform {
+		return
+	}
 	p := res.index * Stride
 	mean := r.average(res.index)
 	variance := res.energy.Variance(mean)
