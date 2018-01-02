@@ -52,6 +52,7 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 }
 
 func (s *Sampler) Sample(out chan<- result, stop <-chan struct{}) {
+	size := uint(s.cam.Width * s.cam.Height)
 	go func() {
 		for {
 			select {
@@ -59,16 +60,20 @@ func (s *Sampler) Sample(out chan<- result, stop <-chan struct{}) {
 				return
 			default:
 				x, y := s.pixelAt(s.cursor)
-				sample := s.trace(x, y, s.rnd)
+				// fmt.Println("x, y:", x, y)
+				// if s.rnd.Float64() < 0.1 {
+				// 	panic("ok")
+				// }
+				sample := s.trace(x, y)
 				out <- result{s.cursor, sample}
-				s.cursor++
+				s.cursor = (s.cursor + 1) % size
 			}
 		}
 	}()
 }
 
-func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Energy {
-	ray := s.cam.ray(x, y, rnd)
+func (s *Sampler) trace(x, y float64) Energy {
+	ray := s.cam.ray(x, y, s.rnd)
 	signal := Energy{1, 1, 1}
 	energy := Energy{0, 0, 0}
 
@@ -81,11 +86,11 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Energy {
 		point := ray.Moved(dist)
 		normal, mat := surface.At(point)
 		energy = energy.Merged(mat.Emit(normal, ray.Dir), signal)
-		signal = signal.RandomGain(rnd) // "Russian Roulette"
+		signal = signal.RandomGain(s.rnd) // "Russian Roulette"
 		if signal == (Energy{}) {
 			break
 		}
-		if next, dir, str := mat.Bsdf(normal, ray.Dir, dist, rnd); next {
+		if next, dir, str := mat.Bsdf(normal, ray.Dir, dist, s.rnd); next {
 			signal = signal.Strength(str)
 			ray = Ray3{point, dir}
 		} else {
@@ -96,6 +101,5 @@ func (s *Sampler) trace(x, y float64, rnd *rand.Rand) Energy {
 }
 
 func (s *Sampler) pixelAt(i uint) (x, y float64) {
-	pos := int(i / Stride)
-	return float64(pos % s.Width), float64(pos / s.Width)
+	return float64(i % uint(s.Width)), float64(i / uint(s.Width))
 }

@@ -38,9 +38,9 @@ func NewRenderer(c *Camera, s *Scene, config ...RenderConfig) *Renderer {
 		Width:        c.Width,
 		Height:       c.Height,
 		RenderConfig: conf,
-
-		camera: c,
-		scene:  s,
+		camera:       c,
+		scene:        s,
+		pixels:       make([]float64, uint(c.Width*c.Height)*Stride),
 	}
 }
 
@@ -53,7 +53,9 @@ func (r *Renderer) Start(tick time.Duration) <-chan uint {
 	results := make(chan result, n)
 	stop := make(chan struct{})
 	for i := 0; i < n; i++ {
-		samplers[i] = NewSampler(r.camera, r.scene, SamplerConfig{})
+		samplers[i] = NewSampler(r.camera, r.scene, SamplerConfig{
+			Bounces: r.Bounces,
+		})
 		samplers[i].Sample(results, stop)
 	}
 	go func() {
@@ -93,7 +95,12 @@ func (r *Renderer) Size() uint {
 }
 
 func (r *Renderer) integrate(res result) {
-
+	p := res.index * Stride
+	rgb := [3]float64{res.energy.X, res.energy.Y, res.energy.Z}
+	r.pixels[p+Red] += rgb[0]
+	r.pixels[p+Green] += rgb[1]
+	r.pixels[p+Blue] += rgb[2]
+	r.pixels[p+Count]++
 }
 
 // Rgb averages each sample into an rgb value.
