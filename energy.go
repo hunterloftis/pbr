@@ -41,8 +41,9 @@ func (a *Energy) UnmarshalText(b []byte) error {
 }
 
 // Diff returns the difference in two Energies
-func (a *Energy) Diff(b Energy) float64 {
-	return Vector3(*a).Minus(Vector3(b)).Len()
+func (a *Energy) Variance(b Energy) float64 {
+	d := Vector3(*a).Minus(Vector3(b))
+	return d.X*d.X + d.Y*d.Y + d.Z*d.Z
 }
 
 func (a *Energy) Amount() float64 {

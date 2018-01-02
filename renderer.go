@@ -1,8 +1,10 @@
 package pbr
 
 import (
+	"fmt"
 	"image"
 	"math"
+	"math/rand"
 	"runtime"
 	"time"
 )
@@ -15,11 +17,14 @@ type Renderer struct {
 
 	camera *Camera
 	scene  *Scene
+	rnd    *rand.Rand
 
 	// state
-	active bool
-	pixels []float64 // stored in a flat array, chunked by Stride
-	count  uint
+	active       bool
+	pixels       []float64 // stored in a flat array, chunked by Stride
+	count        uint
+	cursor       uint
+	meanVariance float64
 }
 
 // RenderConfig configures rendering settings.
@@ -43,6 +48,8 @@ func NewRenderer(c *Camera, s *Scene, config ...RenderConfig) *Renderer {
 		camera:       c,
 		scene:        s,
 		pixels:       make([]float64, uint(c.Width*c.Height)*Stride),
+		meanVariance: math.MaxFloat64,
+		rnd:          rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
@@ -59,14 +66,14 @@ func (r *Renderer) Start(tick time.Duration) <-chan uint {
 			Bounces: r.Bounces,
 		})
 		samplers[i].Sample(pixels, results)
-		pixels <- uint(i)
+		r.ask(pixels)
 	}
 	go func() {
 		for {
 			select {
 			case res := <-results:
 				r.integrate(res)
-				pixels <- uint(r.count)
+				r.ask(pixels)
 			case <-ticker.C:
 				ch <- r.count
 			default:
@@ -79,6 +86,25 @@ func (r *Renderer) Start(tick time.Duration) <-chan uint {
 		}
 	}()
 	return ch
+}
+
+func (r *Renderer) ask(pixels chan<- uint) {
+	size := uint(r.Width * r.Height)
+	p := r.cursor * Stride
+	noise := math.Min(r.pixels[p+Noise], r.meanVariance*3)
+	advance := r.pixels[p+Count] < 4 || r.rnd.Float64()*noise < r.meanVariance
+	pixels <- r.cursor
+	if advance {
+		r.cursor++
+		if r.cursor%size == 0 {
+			r.cursor = 0
+			r.meanVariance = 0
+			for i := uint(0); i < size; i++ {
+				r.meanVariance += r.pixels[p+Noise] / float64(size)
+			}
+			fmt.Println("computed new mean variance:", r.meanVariance)
+		}
+	}
 }
 
 func (r *Renderer) Stop() {
@@ -131,7 +157,6 @@ func (r *Renderer) Heat() image.Image {
 }
 
 func (r *Renderer) integrate(res result) {
-	before := r.average(res.index)
 	p := res.index * Stride
 	rgb := [3]float64{res.energy.X, res.energy.Y, res.energy.Z}
 	r.pixels[p+Red] += rgb[0]
@@ -139,11 +164,13 @@ func (r *Renderer) integrate(res result) {
 	r.pixels[p+Blue] += rgb[2]
 	r.pixels[p+Count]++
 	r.count++
-	after := r.average(res.index)
-	change := before.Diff(after)
-	larger := math.Max(before.Amount(), after.Amount())
-	noise := change / larger // between 0 and 1
-	r.pixels[p+Noise] = (r.pixels[p+Noise] + noise) / 2
+
+	mean := r.average(res.index)
+	variance := res.energy.Variance(mean)
+	count := r.pixels[p+Count]
+	oldNoise := r.pixels[p+Noise] * (count - 1) / count
+	newNoise := variance / count
+	r.pixels[p+Noise] = oldNoise + newNoise
 }
 
 func (r *Renderer) average(pixel uint) Energy {
