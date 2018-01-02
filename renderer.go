@@ -8,6 +8,17 @@ import (
 	"time"
 )
 
+// Pixel elements are stored in specific offsets.
+// These constants allow easy access, eg `someFloat64Array[i + Blue]`
+const (
+	Red uint = iota
+	Green
+	Blue
+	Count
+	Noise
+	Stride
+)
+
 // Renderer renders the samples in a Sampler to an Image.
 type Renderer struct {
 	Width  int
@@ -34,6 +45,11 @@ type RenderConfig struct {
 	Indirect uint // TODO
 }
 
+type Sample struct {
+	index  uint
+	energy Energy
+}
+
 // NewRenderer creates a renderer referencing a Sampler.
 func NewRenderer(c *Camera, s *Scene, config ...RenderConfig) *Renderer {
 	conf := RenderConfig{}
@@ -52,72 +68,15 @@ func NewRenderer(c *Camera, s *Scene, config ...RenderConfig) *Renderer {
 	}
 }
 
-func (r *Renderer) Sample(in <-chan uint, out chan<- result) {
-	size := uint(r.Width * r.Height)
-	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	go func() {
-		for {
-			if p, ok := <-in; ok {
-				i := p % size
-				x, y := r.pixelAt(i)
-				sample := r.trace(x, y, rnd)
-				out <- result{i, sample}
-			} else {
-				return
-			}
-		}
-	}()
-}
-
-func (r *Renderer) pixelAt(i uint) (x, y float64) {
-	return float64(i % uint(r.Width)), float64(i / uint(r.Width))
-}
-
-func (r *Renderer) trace(x, y float64, rnd *rand.Rand) Energy {
-	ray := r.camera.ray(x, y, rnd)
-	signal := Energy{1, 1, 1}
-	energy := Energy{0, 0, 0}
-
-	for bounce := 0; bounce < r.Bounces; bounce++ {
-		hit, surface, dist := r.scene.Intersect(ray)
-		if !hit {
-			energy = energy.Merged(r.scene.Env(ray), signal)
-			break
-		}
-		point := ray.Moved(dist)
-		normal, mat := surface.At(point)
-		energy = energy.Merged(mat.Emit(normal, ray.Dir), signal)
-		signal = signal.RandomGain(rnd) // "Russian Roulette"
-		if signal == (Energy{}) {
-			break
-		}
-		if next, dir, str := mat.Bsdf(normal, ray.Dir, dist, rnd); next {
-			signal = signal.Strength(str)
-			ray = Ray3{point, dir}
-		} else {
-			break
-		}
-	}
-	return energy
-}
-
 func (r *Renderer) Start(tick time.Duration) <-chan uint {
 	r.active = true
 	n := runtime.NumCPU()
-	// samplers := make([]*Sampler, n)
 	ticker := time.NewTicker(tick)
 	updates := make(chan uint)
-	results := make(chan result, n*2)
+	results := make(chan Sample, n*2)
 	pixels := make(chan uint)
 	for i := 0; i < n; i++ {
-		r.Sample(pixels, results)
-
-		// samplers[i] = NewSampler(r.camera, r.scene, SamplerConfig{
-		// 	Bounces:  r.Bounces,
-		// 	Direct:   r.Direct,
-		// 	Indirect: r.Indirect,
-		// })
-		// samplers[i].Sample(pixels, results)
+		r.sample(pixels, results)
 		r.request(pixels)
 	}
 	go func() {
@@ -189,6 +148,55 @@ func (r *Renderer) Heat() image.Image {
 	return im
 }
 
+func (r *Renderer) sample(in <-chan uint, out chan<- Sample) {
+	size := uint(r.Width * r.Height)
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	go func() {
+		for {
+			if p, ok := <-in; ok {
+				i := p % size
+				x, y := r.pixelAt(i)
+				sample := r.trace(x, y, rnd)
+				out <- Sample{i, sample}
+			} else {
+				return
+			}
+		}
+	}()
+}
+
+func (r *Renderer) pixelAt(i uint) (x, y float64) {
+	return float64(i % uint(r.Width)), float64(i / uint(r.Width))
+}
+
+func (r *Renderer) trace(x, y float64, rnd *rand.Rand) Energy {
+	ray := r.camera.ray(x, y, rnd)
+	signal := Energy{1, 1, 1}
+	energy := Energy{0, 0, 0}
+
+	for bounce := 0; bounce < r.Bounces; bounce++ {
+		hit, surface, dist := r.scene.Intersect(ray)
+		if !hit {
+			energy = energy.Merged(r.scene.Env(ray), signal)
+			break
+		}
+		point := ray.Moved(dist)
+		normal, mat := surface.At(point)
+		energy = energy.Merged(mat.Emit(normal, ray.Dir), signal)
+		signal = signal.RandomGain(rnd) // "Russian Roulette"
+		if signal == (Energy{}) {
+			break
+		}
+		if next, dir, str := mat.Bsdf(normal, ray.Dir, dist, rnd); next {
+			signal = signal.Strength(str)
+			ray = Ray3{point, dir}
+		} else {
+			break
+		}
+	}
+	return energy
+}
+
 func (r *Renderer) request(pixels chan<- uint) {
 	size := uint(r.Width * r.Height)
 	pixels <- r.cursor
@@ -211,7 +219,7 @@ func (r *Renderer) request(pixels chan<- uint) {
 	}
 }
 
-func (r *Renderer) integrate(res result) {
+func (r *Renderer) integrate(res Sample) {
 	p := res.index * Stride
 	rgb := [3]float64{res.energy.X, res.energy.Y, res.energy.Z}
 	r.pixels[p+Red] += rgb[0]
@@ -222,7 +230,7 @@ func (r *Renderer) integrate(res result) {
 	r.computeNoise(res)
 }
 
-func (r *Renderer) computeNoise(res result) {
+func (r *Renderer) computeNoise(res Sample) {
 	if r.Uniform {
 		return
 	}
