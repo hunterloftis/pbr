@@ -39,3 +39,12 @@ func (a *Energy) UnmarshalText(b []byte) error {
 	v := Vector3(*a)
 	return (&v).UnmarshalText(b)
 }
+
+// Diff returns the difference in two Energies
+func (a *Energy) Diff(b Energy) float64 {
+	return Vector3(*a).Minus(Vector3(b)).Len()
+}
+
+func (a *Energy) Amount() float64 {
+	return Vector3(*a).Len()
+}

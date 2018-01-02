@@ -14,9 +14,6 @@ type Sampler struct {
 	cam   *Camera
 	scene *Scene
 	rnd   *rand.Rand
-
-	// state
-	cursor uint
 }
 
 // SamplerConfig configures a Sampler.
@@ -51,22 +48,17 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 	}
 }
 
-func (s *Sampler) Sample(out chan<- result, stop <-chan struct{}) {
+func (s *Sampler) Sample(in <-chan uint, out chan<- result) {
 	size := uint(s.cam.Width * s.cam.Height)
 	go func() {
 		for {
-			select {
-			case <-stop:
-				return
-			default:
-				x, y := s.pixelAt(s.cursor)
-				// fmt.Println("x, y:", x, y)
-				// if s.rnd.Float64() < 0.1 {
-				// 	panic("ok")
-				// }
+			if p, ok := <-in; ok {
+				i := p % size
+				x, y := s.pixelAt(i)
 				sample := s.trace(x, y)
-				out <- result{s.cursor, sample}
-				s.cursor = (s.cursor + 1) % size
+				out <- result{i, sample}
+			} else {
+				return
 			}
 		}
 	}()

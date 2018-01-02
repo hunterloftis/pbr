@@ -24,8 +24,10 @@ type Renderer struct {
 
 // RenderConfig configures rendering settings.
 type RenderConfig struct {
-	Bounces int
-	Adapt   bool
+	Bounces  int
+	Uniform  bool // TODO
+	Direct   uint // TODO
+	Indirect uint // TODO
 }
 
 // NewRenderer creates a renderer referencing a Sampler.
@@ -50,25 +52,26 @@ func (r *Renderer) Start(tick time.Duration) <-chan uint {
 	samplers := make([]*Sampler, n)
 	ticker := time.NewTicker(tick)
 	ch := make(chan uint)
-	results := make(chan result, n)
-	stop := make(chan struct{})
+	results := make(chan result, n*2)
+	pixels := make(chan uint)
 	for i := 0; i < n; i++ {
 		samplers[i] = NewSampler(r.camera, r.scene, SamplerConfig{
 			Bounces: r.Bounces,
 		})
-		samplers[i].Sample(results, stop)
+		samplers[i].Sample(pixels, results)
+		pixels <- uint(i)
 	}
 	go func() {
 		for {
 			select {
 			case res := <-results:
 				r.integrate(res)
-				r.count++
+				pixels <- uint(r.count)
 			case <-ticker.C:
 				ch <- r.count
 			default:
 				if !r.active {
-					close(stop)
+					close(pixels)
 					close(ch)
 					return
 				}
@@ -92,15 +95,6 @@ func (r *Renderer) Count() uint {
 
 func (r *Renderer) Size() uint {
 	return uint(r.camera.Width * r.camera.Height)
-}
-
-func (r *Renderer) integrate(res result) {
-	p := res.index * Stride
-	rgb := [3]float64{res.energy.X, res.energy.Y, res.energy.Z}
-	r.pixels[p+Red] += rgb[0]
-	r.pixels[p+Green] += rgb[1]
-	r.pixels[p+Blue] += rgb[2]
-	r.pixels[p+Count]++
 }
 
 // Rgb averages each sample into an rgb value.
@@ -134,6 +128,31 @@ func (r *Renderer) Heat() image.Image {
 		im.Pix[i2+3] = 255
 	}
 	return im
+}
+
+func (r *Renderer) integrate(res result) {
+	before := r.average(res.index)
+	p := res.index * Stride
+	rgb := [3]float64{res.energy.X, res.energy.Y, res.energy.Z}
+	r.pixels[p+Red] += rgb[0]
+	r.pixels[p+Green] += rgb[1]
+	r.pixels[p+Blue] += rgb[2]
+	r.pixels[p+Count]++
+	r.count++
+	after := r.average(res.index)
+	change := before.Diff(after)
+	larger := math.Max(before.Amount(), after.Amount())
+	noise := change / larger // between 0 and 1
+	r.pixels[p+Noise] = (r.pixels[p+Noise] + noise) / 2
+}
+
+func (r *Renderer) average(pixel uint) Energy {
+	i := pixel * Stride
+	c := float64(r.pixels[i+Count])
+	red := r.pixels[i+Red] / c
+	green := r.pixels[i+Green] / c
+	blue := r.pixels[i+Blue] / c
+	return Energy{red, green, blue}
 }
 
 func (r *Renderer) color(n float64) uint8 {
