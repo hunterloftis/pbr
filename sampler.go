@@ -53,10 +53,17 @@ func NewSampler(cam *Camera, scene *Scene, config ...SamplerConfig) *Sampler {
 
 func (s *Sampler) Sample(out chan<- result, stop <-chan struct{}) {
 	go func() {
-		x, y := s.pixelAt(s.cursor)
-		sample := s.trace(x, y, s.rnd)
-		out <- result{s.cursor, sample}
-		s.cursor++
+		for {
+			select {
+			case <-stop:
+				return
+			default:
+				x, y := s.pixelAt(s.cursor)
+				sample := s.trace(x, y, s.rnd)
+				out <- result{s.cursor, sample}
+				s.cursor++
+			}
+		}
 	}()
 }
 

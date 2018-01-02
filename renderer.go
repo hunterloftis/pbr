@@ -67,7 +67,6 @@ func (r *Renderer) Start(tick time.Duration) <-chan uint {
 			default:
 				if !r.active {
 					close(stop)
-					close(results)
 					close(ch)
 					return
 				}
