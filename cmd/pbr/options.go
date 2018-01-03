@@ -12,6 +12,7 @@ type Options struct {
 	Scene   string `arg:"positional,required" help:"input scene .obj"`
 	Render  string `arg:"positional,required" help:"output render .png"`
 	Heat    string `help:"output heatmap as .png"`
+	Noise   string `help:"output noisemap as .png"`
 	Profile bool   `help:"record performance into profile.pprof"`
 	Width   int    `help:"rendering width in pixels"`
 	Height  int    `help:"rendering height in pixels"`

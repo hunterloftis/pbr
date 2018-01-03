@@ -66,4 +66,7 @@ func main() {
 	if len(o.Heat) > 0 {
 		pbr.WritePNG(o.Heat, renderer.Heat())
 	}
+	if len(o.Noise) > 0 {
+		pbr.WritePNG(o.Noise, renderer.Noise())
+	}
 }
