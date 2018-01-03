@@ -173,10 +173,12 @@ func (r *Renderer) trace(x, y float64, rnd *rand.Rand) Energy {
 func (r *Renderer) next(pixels chan<- uint) uint {
 	count := uint(1)
 	if r.Adapt > 1 {
-		noise := r.image.Noise(r.cursor * Stride) // TODO: shouldn't have to calc with Stride
-		ratio := (noise + 1) / (r.image.MaxVariance() + 1)
-		scale := uint(math.Max(math.Min(ratio, r.Adapt), 0))
-		count += scale
+		noise := r.image.Noise(r.cursor * Stride)
+		max := r.image.MaxVariance()
+		mean := r.image.MeanVariance()
+		ratio := (noise - mean) / (max - mean + 1) * r.Adapt
+		limited := math.Max(0, math.Min(r.Adapt, ratio))
+		count += uint(limited)
 	}
 	for i := uint(0); i < count; i++ {
 		pixels <- r.cursor

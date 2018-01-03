@@ -5,6 +5,8 @@ import (
 	"math"
 )
 
+// TODO: enforce immutability by creating an interface that exposes only readable properties
+
 // Pixel elements are stored in specific offsets.
 // These constants allow easy access, eg `someFloat64Array[i + Blue]`
 const (
@@ -20,6 +22,7 @@ type Image struct {
 	Width, Height uint
 	pixels        []float64 // stored in a flat array, chunked by Stride
 	maxVariance   float64
+	meanVariance  float64
 }
 
 func NewImage(width, height uint) Image {
@@ -31,24 +34,24 @@ func NewImage(width, height uint) Image {
 }
 
 // TODO: this is confusing. Currently is the size of the array, but could also be width * height
-func (im Image) Size() uint {
+func (im *Image) Size() uint {
 	return uint(len(im.pixels))
 }
 
-func (im Image) Color(i uint) (r, g, b float64) {
+func (im *Image) Color(i uint) (r, g, b float64) {
 	return im.pixels[i+Red], im.pixels[i+Green], im.pixels[i+Blue]
 }
 
-func (im Image) Count(i uint) float64 {
+func (im *Image) Count(i uint) float64 {
 	return im.pixels[i+Count]
 }
 
 // TODO: these should all factor in stride and take "i" as a pixel index, vs a slice index
-func (im Image) Noise(i uint) float64 {
+func (im *Image) Noise(i uint) float64 {
 	return im.pixels[i+Noise]
 }
 
-func (im Image) Average(pixel uint) Energy {
+func (im *Image) Average(pixel uint) Energy {
 	i := pixel * Stride
 	c := float64(im.pixels[i+Count])
 	red := im.pixels[i+Red] / c
@@ -58,7 +61,7 @@ func (im Image) Average(pixel uint) Energy {
 }
 
 // Rgb averages each sample into an rgb value.
-func (im Image) Rgb(expose float64) image.Image {
+func (im *Image) Rgb(expose float64) image.Image {
 	rgba := image.NewRGBA(image.Rect(0, 0, int(im.Width), int(im.Height)))
 	length := im.Size()
 	for i := uint(0); i < length; i += Stride {
@@ -74,7 +77,7 @@ func (im Image) Rgb(expose float64) image.Image {
 }
 
 // Heat returns a heatmap of the sample count for each pixel.
-func (im Image) Heat(offset uint) image.Image {
+func (im *Image) Heat(offset uint) image.Image {
 	rgba := image.NewRGBA(image.Rect(0, 0, int(im.Width), int(im.Height)))
 	max := 0.0
 	length := im.Size()
@@ -92,7 +95,7 @@ func (im Image) Heat(offset uint) image.Image {
 	return rgba
 }
 
-func (im Image) Integrate(index uint, sample Energy) {
+func (im *Image) Integrate(index uint, sample Energy) {
 	p := index * Stride
 	rgb := [3]float64{sample.X, sample.Y, sample.Z}
 	im.pixels[p+Red] += rgb[0]
@@ -110,17 +113,23 @@ func (im Image) Integrate(index uint, sample Energy) {
 	im.pixels[p+Noise] = oldNoise + newNoise
 }
 
-func (im Image) UpdateVariance() float64 {
+func (im *Image) UpdateVariance() {
 	im.maxVariance = 0
+	im.meanVariance = 0
 	length := im.Size()
+	count := float64(im.Width * im.Height)
 	for i := uint(0); i < length; i += Stride {
 		im.maxVariance = math.Max(im.maxVariance, im.pixels[i+Noise])
+		im.meanVariance += im.pixels[i+Noise] / count
 	}
+}
+
+func (im *Image) MaxVariance() float64 {
 	return im.maxVariance
 }
 
-func (im Image) MaxVariance() float64 {
-	return im.maxVariance
+func (im *Image) MeanVariance() float64 {
+	return im.meanVariance
 }
 
 func color(n float64) uint8 {
