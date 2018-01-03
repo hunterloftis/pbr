@@ -41,5 +41,5 @@ func ShowProgress(r *Renderer, start time.Time) {
 		pp = samples / pixels
 		pms = samples / ms
 	}
-	fmt.Printf("\r%ds samples: %.3f million - %v/pixel - %v/ms%v", int(secs), mil, pp, pms, note)
+	fmt.Printf("\r%ds - %.3f million samples - %v samples/pixel - %v samples/ms%v", int(secs), mil, pp, pms, note)
 }

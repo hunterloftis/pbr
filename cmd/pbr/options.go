@@ -37,8 +37,8 @@ type Options struct {
 
 func options() Options {
 	c := Options{
-		Width:    1280,
-		Height:   720,
+		Width:    800,
+		Height:   600,
 		Profile:  false,
 		Sky:      &pbr.Energy{40, 50, 60},
 		Ground:   &pbr.Energy{0, 0, 0},
