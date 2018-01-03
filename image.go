@@ -19,7 +19,7 @@ const (
 type Image struct {
 	Width, Height uint
 	pixels        []float64 // stored in a flat array, chunked by Stride
-	variance      float64
+	maxVariance   float64
 }
 
 func NewImage(width, height uint) Image {
@@ -111,17 +111,16 @@ func (im Image) Integrate(index uint, sample Energy, noise bool) {
 }
 
 func (im Image) UpdateVariance() float64 {
-	size := im.Size()
-	count := float64(im.Width * im.Height)
-	im.variance = 0
-	for i := uint(0); i < size; i += Stride {
-		im.variance += im.pixels[i+Noise] / count
+	im.maxVariance = 0
+	length := im.Size()
+	for i := uint(0); i < length; i += Stride {
+		im.maxVariance = math.Max(im.maxVariance, im.pixels[i+Noise])
 	}
-	return im.variance
+	return im.maxVariance
 }
 
-func (im Image) Variance() float64 {
-	return im.variance
+func (im Image) MaxVariance() float64 {
+	return im.maxVariance
 }
 
 func color(n float64) uint8 {

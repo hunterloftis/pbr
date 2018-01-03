@@ -63,18 +63,21 @@ func (r *Renderer) Start(tick time.Duration) <-chan uint {
 	ticker := time.NewTicker(tick)
 	update := make(chan uint)
 	result := make(chan Sample, n*2)
-	pixel := make(chan uint)
+	pixel := make(chan uint, n*1024) // TODO: calc the actual limit this can be given # of workers, image size, etc
+	planned := uint(0)
 	for i := 0; i < n; i++ {
 		r.sample(pixel, result)
-		r.next(pixel)
+		planned += r.next(pixel)
 	}
 	go func() {
 		for {
 			select {
 			case res := <-result:
 				r.image.Integrate(res.index, res.energy, !r.Uniform)
-				r.next(pixel)
 				r.count++
+				for planned < r.count+uint(n) {
+					planned += r.next(pixel)
+				}
 			case <-ticker.C:
 				update <- r.count
 			default:
@@ -166,21 +169,21 @@ func (r *Renderer) trace(x, y float64, rnd *rand.Rand) Energy {
 	return energy
 }
 
-func (r *Renderer) next(pixels chan<- uint) {
-	size := uint(r.Width * r.Height)
-	pixels <- r.cursor
-	if r.Uniform {
-		r.cursor = (r.cursor + 1) % size
-		return
+// TODO: make this more sophisticated (like using max-mean variance vs just max)
+func (r *Renderer) next(pixels chan<- uint) uint {
+	count := uint(1)
+	if !r.Uniform {
+		noise := r.image.Noise(r.cursor * Stride) // TODO: shouldn't have to calc with Stride
+		ratio := (noise + 1) / (r.image.MaxVariance() + 1)
+		scale := uint(math.Max(math.Min(ratio, 100), 0)) // TODO: remove the magic number
+		count += scale
 	}
-	noise := r.image.Noise(r.cursor * Stride) // TODO: shouldn't have to calc with Stride
-	ratio := math.Min((noise+1)/(r.image.Variance()+1), 5)
-	rand := r.rnd.Float64() * ratio
-	if rand < 0.9 {
-		r.cursor++
-		if r.cursor%size == 0 {
-			r.cursor = 0
-			r.image.UpdateVariance()
-		}
+	for i := uint(0); i < count; i++ {
+		pixels <- r.cursor
 	}
+	r.cursor = (r.cursor + 1) % uint(r.Width*r.Height)
+	if r.cursor == 0 {
+		r.image.UpdateVariance()
+	}
+	return count
 }
