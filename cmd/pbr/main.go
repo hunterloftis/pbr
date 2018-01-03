@@ -25,7 +25,7 @@ func main() {
 	})
 	renderer := pbr.NewRenderer(camera, scene, pbr.RenderConfig{
 		Bounces: o.Bounce,
-		Uniform: o.Uniform,
+		Adapt:   o.Adapt,
 	})
 
 	if len(o.Env) > 0 {

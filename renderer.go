@@ -28,7 +28,7 @@ type Renderer struct {
 
 // RenderConfig configures rendering settings.
 type RenderConfig struct {
-	Uniform  bool
+	Adapt    float64
 	Bounces  int
 	Direct   uint // TODO
 	Indirect uint // TODO
@@ -73,7 +73,7 @@ func (r *Renderer) Start(tick time.Duration) <-chan uint {
 		for {
 			select {
 			case res := <-result:
-				r.image.Integrate(res.index, res.energy, !r.Uniform)
+				r.image.Integrate(res.index, res.energy)
 				r.count++
 				for planned < r.count+uint(n) {
 					planned += r.next(pixel)
@@ -172,10 +172,10 @@ func (r *Renderer) trace(x, y float64, rnd *rand.Rand) Energy {
 // TODO: make this more sophisticated (like using max-mean variance vs just max)
 func (r *Renderer) next(pixels chan<- uint) uint {
 	count := uint(1)
-	if !r.Uniform {
+	if r.Adapt > 1 {
 		noise := r.image.Noise(r.cursor * Stride) // TODO: shouldn't have to calc with Stride
 		ratio := (noise + 1) / (r.image.MaxVariance() + 1)
-		scale := uint(math.Max(math.Min(ratio, 100), 0)) // TODO: remove the magic number
+		scale := uint(math.Max(math.Min(ratio, r.Adapt), 0))
 		count += scale
 	}
 	for i := uint(0); i < count; i++ {

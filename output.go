@@ -33,11 +33,13 @@ func ShowProgress(r *Renderer, start time.Time) {
 	}
 	samples := r.Count()
 	pixels := r.Size()
-	ms := uint(time.Now().Sub(start).Nanoseconds() / 1e6)
+	passed := time.Now().Sub(start)
+	secs := passed.Seconds()
+	ms := uint(passed.Nanoseconds() / 1e6)
 	if pixels > 0 && ms > 0 {
 		mil = float64(samples) / 1e6
 		pp = samples / pixels
 		pms = samples / ms
 	}
-	fmt.Printf("\rsamples: %.3f million - %v/pixel - %v/ms%v", mil, pp, pms, note)
+	fmt.Printf("\r%ds samples: %.3f million - %v/pixel - %v/ms%v", int(secs), mil, pp, pms, note)
 }

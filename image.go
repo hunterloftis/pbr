@@ -92,22 +92,22 @@ func (im Image) Heat(offset uint) image.Image {
 	return rgba
 }
 
-func (im Image) Integrate(index uint, sample Energy, noise bool) {
+func (im Image) Integrate(index uint, sample Energy) {
 	p := index * Stride
 	rgb := [3]float64{sample.X, sample.Y, sample.Z}
 	im.pixels[p+Red] += rgb[0]
 	im.pixels[p+Green] += rgb[1]
 	im.pixels[p+Blue] += rgb[2]
 	im.pixels[p+Count]++
-	if noise {
-		p := index * Stride
-		mean := im.Average(index)
-		variance := sample.Variance(mean)
-		count := im.pixels[p+Count]
-		oldNoise := im.pixels[p+Noise] * (count - 1) / count
-		newNoise := variance / count
-		im.pixels[p+Noise] = oldNoise + newNoise
-	}
+
+	// noise
+	// TODO: profile
+	mean := im.Average(index)
+	variance := sample.Variance(mean)
+	count := im.pixels[p+Count]
+	oldNoise := im.pixels[p+Noise] * (count - 1) / count
+	newNoise := variance / count
+	im.pixels[p+Noise] = oldNoise + newNoise
 }
 
 func (im Image) UpdateVariance() float64 {

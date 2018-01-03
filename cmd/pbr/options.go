@@ -21,7 +21,7 @@ type Options struct {
 	Sky    *pbr.Energy `help:"ambient sky color"`
 	Ground *pbr.Energy `help:"ground color"`
 
-	Uniform  bool    `help:"disable adaptive sampling"`
+	Adapt    float64 `help:"adaptive sampling multiplier"`
 	Bounce   int     `help:"number of light bounces"`
 	Direct   int     `help:"number of direct rays to cast"`
 	Indirect int     `help:"number of indirect rays to cast"`
@@ -42,7 +42,7 @@ func options() Options {
 		Profile:  false,
 		Sky:      &pbr.Energy{40, 50, 60},
 		Ground:   &pbr.Energy{0, 0, 0},
-		Uniform:  false,
+		Adapt:    10,
 		Bounce:   10,
 		Direct:   1,
 		Indirect: 1,
