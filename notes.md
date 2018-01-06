@@ -107,6 +107,7 @@
 
 - http://people.tamu.edu/~ergun/courses/viza656/
 - https://blog.frogslayer.com/kd-trees-for-faster-ray-tracing-with-triangles/
+- https://github.com/prman-pixar/RenderManForBlender/wiki/Path-tracing,-sampler-settings-and-noise-reduction-tips
 
 ## renders
 
