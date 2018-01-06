@@ -53,7 +53,7 @@ func (im *Image) Noise(i uint) float64 {
 
 func (im *Image) Average(pixel uint) Energy {
 	i := pixel * Stride
-	c := float64(im.pixels[i+Count])
+	c := float64(im.pixels[i+Count]) + BIAS // TODO: is this the best way to avoid a divide by zero?
 	red := im.pixels[i+Red] / c
 	green := im.pixels[i+Green] / c
 	blue := im.pixels[i+Blue] / c

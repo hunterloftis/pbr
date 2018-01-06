@@ -169,15 +169,22 @@ func (r *Renderer) trace(x, y float64, rnd *rand.Rand) Energy {
 	return energy
 }
 
-// TODO: make this more sophisticated (like using max-mean variance vs just max)
+// TODO: make this more sophisticated - "heat.png" should look as close to "noise.png" as possible
+// (but should ignore noise.png for very bright areas - or at least compensate for the increased variance there from absolute #s)
 func (r *Renderer) next(pixels chan<- uint) uint {
 	count := uint(1)
 	if r.Adapt > 1 {
 		noise := r.image.Noise(r.cursor * Stride)
-		max := r.image.MaxVariance()
-		mean := r.image.MeanVariance()
-		ratio := (noise - mean) / (max - mean + 1) * r.Adapt
-		limited := math.Max(0, math.Min(r.Adapt, ratio))
+		light := r.image.Average(r.cursor)
+		relNoise := (noise) / (light.Amount() + 1)
+		adapted := relNoise * r.Adapt // TODO: there's no real upper bound here
+
+		// max := r.image.MaxVariance()
+		// mean := r.image.MeanVariance()
+		// ratio := (noise - mean + 1) / (max - mean + 1)
+		// TODO: divide noise by brightness, or something, so brighter pixels with naturally higher variance don't get all the attention
+
+		limited := math.Max(0, math.Min(r.Adapt, adapted))
 		count += uint(limited)
 	}
 	for i := uint(0); i < count; i++ {
