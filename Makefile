@@ -1,3 +1,8 @@
+test:
+	go build ./cmd/pbr
+	./pbr fixtures/models/lucy.obj
+	open lucy.png
+
 chair:
 	go build ./cmd/pbr
 	./pbr fixtures/models/chair.obj chair.png -heat heat.png -noise noise.png -from 400,400,0 -to "10,75,-600" -sky 200,250,300 -lens 150 -fstop 2.8 -profile --complete 4

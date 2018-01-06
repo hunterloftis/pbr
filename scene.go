@@ -101,7 +101,7 @@ func (s *Scene) ImportObj(r io.Reader) {
 	vs := make([]Vector3, 0, 1024)
 	vns := make([]Direction, 0, 1024)
 	scanner := bufio.NewScanner(r)
-	mat := Plastic(0.8, 1, 0.9, 0.5) //Glass(0.85, 0.9, 0.8, 0.97) // Metal(1.022, 0.782, 0.344, 0.9)
+	mat := Plastic(1, 1, 1, 0.5)
 	tris := 0
 	for scanner.Scan() {
 		line := scanner.Text()

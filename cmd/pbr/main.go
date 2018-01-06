@@ -13,35 +13,15 @@ import (
 
 func main() {
 	o := options()
-
-	if o.Render == "" && !o.Info {
-		fmt.Fprintln(os.Stderr, "error: render file required (or run with -info)")
-		os.Exit(1)
-	}
-
 	scene := pbr.NewScene(o.Sky, o.Ground)
-
-	if len(o.Env) > 0 {
-		hdr, _ := os.Open(o.Env) // TODO: handle err
-		defer hdr.Close()
-		scene.SetPano(hdr, 150) // TODO: read radiosity info or allow it as an option
-	}
 
 	obj, err := os.Open(o.Scene)
 	if err != nil {
-		fmt.Println("Unable to open scene", o.Scene)
+		fmt.Println("Unable to open scene", o.Scene, "error:", err)
 		os.Exit(1)
 	}
 	defer obj.Close()
 	scene.ImportObj(obj)
-
-	// whitePlastic := pbr.Plastic(0.25, 0.25, 0.25, 0.7)
-	// bluePlastic := pbr.Plastic(0, 0, 0, 0.9)
-	gold := pbr.Metal(1.022, 0.782, 0.344, 0.9)
-	greenGlass := pbr.Plastic(0.9, 0.9, 0.9, 0.2)
-	scene.Add(pbr.UnitCube(greenGlass, pbr.Trans(0, -5, 0), pbr.Scale(750, 10, 750)))
-	// scene.Add(pbr.UnitSphere(greenGlass, pbr.Trans(65, 50, 85), pbr.Scale(100, 100, 100)))
-	scene.Add(pbr.UnitSphere(gold, pbr.Trans(-75, 50, -125), pbr.Scale(100, 100, 100)))
 
 	scene.Prepare()
 	min, max, center, surfaces := scene.Info()
@@ -54,6 +34,23 @@ func main() {
 
 	if o.Info {
 		os.Exit(0)
+	}
+
+	if o.From == nil {
+		twoThirds := pbr.Vector3{max.X * 9, max.Y, max.Z * 6}
+		o.From = &twoThirds
+	}
+	if o.To == nil {
+		o.To = &center
+	}
+	if o.Focus == nil {
+		o.Focus = o.To
+	}
+
+	if len(o.Env) > 0 {
+		hdr, _ := os.Open(o.Env) // TODO: handle err
+		defer hdr.Close()
+		scene.SetPano(hdr, o.Rad)
 	}
 
 	size := o.Width * o.Height
@@ -85,7 +82,7 @@ func main() {
 		case <-interrupt:
 			renderer.Stop()
 		case <-ticker.C:
-			pbr.WritePNG(o.Render, renderer.Rgb(o.Expose))
+			pbr.WritePNG(o.Out, renderer.Rgb(o.Expose))
 			if len(o.Heat) > 0 {
 				pbr.WritePNG(o.Heat, renderer.Heat())
 			}
@@ -105,7 +102,8 @@ func main() {
 		pprof.StopCPUProfile()
 	}
 
-	pbr.WritePNG(o.Render, renderer.Rgb(o.Expose))
+	fmt.Println("->", o.Out)
+	pbr.WritePNG(o.Out, renderer.Rgb(o.Expose))
 	if len(o.Heat) > 0 {
 		pbr.WritePNG(o.Heat, renderer.Heat())
 	}
