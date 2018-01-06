@@ -9,6 +9,8 @@ import (
 )
 
 // Renderer renders the samples in a Sampler to an Image.
+// TODO: should just be a "Render"
+// TODO: implement a de-noising filter; https://www.youtube.com/watch?v=Ee51bkOlbMw
 type Renderer struct {
 	Width  int
 	Height int
@@ -169,11 +171,10 @@ func (r *Renderer) trace(x, y float64, rnd *rand.Rand) Energy {
 	return energy
 }
 
-// TODO: limit targetCounts when brightness is very high
 func (r *Renderer) next(pixels chan<- uint) uint {
 	count := uint(1)
 	if r.Adapt > 1 {
-		color := r.image.Average(r.cursor) // TODO: inconsistent index with other funcs
+		color := r.image.Average(r.cursor) // TODO: inconsistent with other image func indices
 		if color.Amount() < 255 {          // TODO: more elegance, less magic number
 			noise := r.image.Noise(r.cursor * Stride)
 			noiseRatio := (noise + 1) / (r.image.meanVariance + 1)

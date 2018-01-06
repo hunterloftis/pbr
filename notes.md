@@ -100,6 +100,7 @@
 
 ## .obj models
 
+- https://benedikt-bitterli.me/tungsten.html
 - http://students.cs.tamu.edu/hrg/viza656/pr04/index.html
 - http://students.cs.tamu.edu/hrg/viza656/pr09/index.html
 
@@ -108,6 +109,18 @@
 - http://people.tamu.edu/~ergun/courses/viza656/
 - https://blog.frogslayer.com/kd-trees-for-faster-ray-tracing-with-triangles/
 - https://github.com/prman-pixar/RenderManForBlender/wiki/Path-tracing,-sampler-settings-and-noise-reduction-tips
+
+## features to try
+
+- bidirectional path tracing
+- metropolis light transport
+- bilateral smoothing filter
+- more abstract Material interface to support things like atmosphere, hair, smooth coat, participating media (smoke), etc.
+- shaped bokeh
+- materials: texture maps, normal maps
+- layered materials
+- distributed/networked rendering
+- chromatic aberration
 
 ## renders
 

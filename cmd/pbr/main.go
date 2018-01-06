@@ -24,7 +24,7 @@ func main() {
 	if len(o.Env) > 0 {
 		hdr, _ := os.Open(o.Env) // TODO: handle err
 		defer hdr.Close()
-		scene.SetPano(hdr, 100) // TODO: read radiosity info or allow it as an option
+		scene.SetPano(hdr, 150) // TODO: read radiosity info or allow it as an option
 	}
 
 	obj, err := os.Open(o.Scene)
@@ -35,13 +35,13 @@ func main() {
 	defer obj.Close()
 	scene.ImportObj(obj)
 
-	whitePlastic := pbr.Plastic(0.25, 0.25, 0.25, 0.7)
-	bluePlastic := pbr.Plastic(0, 0, 0, 0.9)
+	// whitePlastic := pbr.Plastic(0.25, 0.25, 0.25, 0.7)
+	// bluePlastic := pbr.Plastic(0, 0, 0, 0.9)
 	gold := pbr.Metal(1.022, 0.782, 0.344, 0.9)
-	// greenGlass := pbr.Glass(1, 1, 1, 0.94)
-	scene.Add(pbr.UnitCube(whitePlastic, pbr.Scale(2000, 1, 2000)).SetGrid(bluePlastic, 10.0))
+	greenGlass := pbr.Plastic(0.9, 0.9, 0.9, 0.2)
+	scene.Add(pbr.UnitCube(greenGlass, pbr.Trans(0, -5, 0), pbr.Scale(750, 10, 750)))
 	// scene.Add(pbr.UnitSphere(greenGlass, pbr.Trans(65, 50, 85), pbr.Scale(100, 100, 100)))
-	scene.Add(pbr.UnitSphere(gold, pbr.Trans(-150, 50, -200), pbr.Scale(100, 100, 100)))
+	scene.Add(pbr.UnitSphere(gold, pbr.Trans(-75, 50, -125), pbr.Scale(100, 100, 100)))
 
 	scene.Prepare()
 	min, max, center, surfaces := scene.Info()
@@ -78,7 +78,7 @@ func main() {
 		pprof.StartCPUProfile(f)
 	}
 
-	ticker := time.NewTicker(time.Second * 10)
+	ticker := time.NewTicker(time.Second * 60)
 	start := time.Now()
 	for samples := range renderer.Start(time.Second / 4) {
 		select {
