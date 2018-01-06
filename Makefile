@@ -10,5 +10,5 @@ skull:
 
 lucy:
 	go build ./cmd/pbr
-	./pbr fixtures/models/lucy.obj lucy.png -from "900,300,600" -to "15,165,-4" -env fixtures/images/uffizi.hdr -lens 90 -fstop 0.01 -width 600 -height 750 -expose 2 -noise noise.png -heat heat.png -adapt 20 -complete 200
+	./pbr fixtures/models/lucy.obj lucy.png -from "900,300,600" -to "15,165,-4" -env fixtures/images/uffizi.hdr -lens 90 -fstop 0.01 -width 600 -height 750 -expose 2 -noise noise.png -heat heat.png -adapt 20 -complete 500
 	open lucy.png heat.png noise.png
