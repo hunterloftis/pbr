@@ -23,6 +23,7 @@ type Image struct {
 	pixels        []float64 // stored in a flat array, chunked by Stride
 	maxVariance   float64
 	meanVariance  float64
+	meanCount     float64
 }
 
 func NewImage(width, height uint) Image {
@@ -116,11 +117,13 @@ func (im *Image) Integrate(index uint, sample Energy) {
 func (im *Image) UpdateVariance() {
 	im.maxVariance = 0
 	im.meanVariance = 0
+	im.meanCount = 0
 	length := im.Size()
 	count := float64(im.Width * im.Height)
 	for i := uint(0); i < length; i += Stride {
 		im.maxVariance = math.Max(im.maxVariance, im.pixels[i+Noise])
 		im.meanVariance += im.pixels[i+Noise] / count
+		im.meanCount += im.pixels[i+Count] / count
 	}
 }
 
