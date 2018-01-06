@@ -25,11 +25,12 @@ func main() {
 
 	scene.Prepare()
 	min, max, center, surfaces := scene.Info()
-	fmt.Println("surfaces:", surfaces)
-	fmt.Println("center of mass:", center)
-	fmt.Println("minX:", min.X, "maxX:", max.X)
-	fmt.Println("minY:", min.Y, "maxY:", max.Y)
-	fmt.Println("minZ:", min.Z, "maxZ:", max.Z)
+	fmt.Println()
+	fmt.Printf("surfaces: %v\n", surfaces)
+	fmt.Printf("center of mass: (%.2f, %.2f, %.2f)\n", center.X, center.Y, center.Z)
+	fmt.Printf("X range: [%.2f : %.2f]\n", min.X, max.X)
+	fmt.Printf("Y range: [%.2f : %.2f]\n", min.Y, max.Y)
+	fmt.Printf("Z range: [%.2f : %.2f]\n", min.Z, max.Z)
 	fmt.Println()
 
 	if o.Info {
