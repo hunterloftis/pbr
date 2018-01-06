@@ -12,6 +12,10 @@ type Vector3 struct {
 	X, Y, Z float64
 }
 
+func ArrayToVector3(a [3]float64) Vector3 {
+	return Vector3{a[0], a[1], a[2]}
+}
+
 // Scaled multiplies by a scalar
 func (a Vector3) Scaled(n float64) Vector3 {
 	return Vector3{a.X * n, a.Y * n, a.Z * n}
@@ -33,7 +37,7 @@ func (a Vector3) Ave() float64 {
 }
 
 // Max returns the highest of X, Y, and Z
-func (a Vector3) Max() float64 {
+func (a Vector3) Greatest() float64 {
 	return math.Max(a.X, math.Max(a.Y, a.Z))
 }
 
@@ -114,4 +118,41 @@ func split(r rune) bool {
 // UnmarshalText unmarshals a byte slice into a Vector3 value
 func (a *Vector3) UnmarshalText(b []byte) error {
 	return a.Set(string(b))
+}
+
+func (a Vector3) Min(b Vector3) Vector3 {
+	x := math.Min(a.X, b.X)
+	y := math.Min(a.Y, b.Y)
+	z := math.Min(a.Z, b.Z)
+	return Vector3{x, y, z}
+}
+
+func (a Vector3) Max(b Vector3) Vector3 {
+	x := math.Max(a.X, b.X)
+	y := math.Max(a.Y, b.Y)
+	z := math.Max(a.Z, b.Z)
+	return Vector3{x, y, z}
+}
+
+func (a Vector3) Axis(n int) float64 {
+	switch n {
+	case 0:
+		return a.X
+	case 1:
+		return a.Y
+	default:
+		return a.Z
+	}
+}
+
+func (a Vector3) GreaterEqual(b Vector3) bool {
+	return a.X >= b.X && a.Y >= b.Y && a.Z >= b.Z
+}
+
+func (a Vector3) LessEqual(b Vector3) bool {
+	return a.X <= b.X && a.Y <= b.Y && a.Z <= b.Z
+}
+
+func (a Vector3) Array() [3]float64 {
+	return [3]float64{a.X, a.Y, a.Z}
 }

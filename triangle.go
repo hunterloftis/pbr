@@ -8,46 +8,67 @@ type Triangle struct {
 	Mat     *Material
 	edge1   Vector3
 	edge2   Vector3
+	box     *Box
 }
 
 // NewTriangle creates a new triangle
-func NewTriangle(a, b, c Vector3, m *Material) Triangle {
+func NewTriangle(a, b, c Vector3, m *Material) *Triangle {
 	edge1 := b.Minus(a)
 	edge2 := c.Minus(a)
 	n := edge1.Cross(edge2).Unit()
-	return Triangle{
+	t := &Triangle{
 		Points:  [3]Vector3{a, b, c},
 		Normals: [3]Direction{n, n, n},
 		Mat:     m,
 		edge1:   edge1,
 		edge2:   edge2,
 	}
+	min := t.Points[0].Min(t.Points[1]).Min(t.Points[2])
+	max := t.Points[0].Max(t.Points[1]).Max(t.Points[2])
+	t.box = NewBox(min, max)
+	return t
+}
+
+func (t *Triangle) Box() *Box {
+	return t.box
 }
 
 // Intersect determines whether or not, and where, a Ray intersects this Triangle
 // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
-func (t *Triangle) Intersect(ray Ray3) (bool, float64) {
+func (t *Triangle) Intersect(ray *Ray3) Hit {
+	ok, _ := t.box.Check(ray)
+	if !ok {
+		return Miss
+	}
 	h := ray.Dir.Cross(Direction(t.edge2))
 	a := t.edge1.Dot(Vector3(h))
 	if a > -BIAS && a < BIAS {
-		return false, 0
+		return Miss
 	}
 	f := 1.0 / a
 	s := ray.Origin.Minus(t.Points[0])
 	u := f * s.Dot(Vector3(h))
 	if u < 0 || u > 1 {
-		return false, 0
+		return Miss
 	}
 	q := s.Cross(t.edge1)
 	v := f * Vector3(ray.Dir).Dot(q)
 	if v < 0 || (u+v) > 1 {
-		return false, 0
+		return Miss
 	}
 	dist := f * t.edge2.Dot(q)
 	if dist < BIAS {
-		return false, 0
+		return Miss
 	}
-	return true, dist
+	return NewHit(t, dist)
+}
+
+func (t *Triangle) Center() Vector3 {
+	c := Vector3{}
+	for _, p := range t.Points {
+		c = c.Plus(p)
+	}
+	return c.Scaled(1.0 / 3.0)
 }
 
 // At returns the material at a point on the Triangle

@@ -62,7 +62,7 @@ func NewCamera(width, height int, config ...CameraConfig) *Camera {
 }
 
 // TODO: precompute N rays for each x, y pixel & then remove Camera.focus
-func (c *Camera) ray(x, y float64, rnd *rand.Rand) Ray3 {
+func (c *Camera) ray(x, y float64, rnd *rand.Rand) *Ray3 {
 	rx := x + rnd.Float64()
 	ry := y + rnd.Float64()
 	px := rx / float64(c.Width)
@@ -72,7 +72,7 @@ func (c *Camera) ray(x, y float64, rnd *rand.Rand) Ray3 {
 	focalPt := Vector3(straight).Scaled(c.focus)
 	lensPt := c.aperturePoint(rnd)
 	refracted := focalPt.Minus(lensPt).Unit()
-	ray := Ray3{Origin: lensPt, Dir: refracted}
+	ray := NewRay(lensPt, refracted)
 	return c.pos.MultRay(ray)
 }
 

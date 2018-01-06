@@ -140,10 +140,8 @@ func (a *Matrix4) MultDir(v Direction) (result Direction) {
 
 // MultRay multiplies this matrix by a ray
 // https://gamedev.stackexchange.com/questions/72440/the-correct-way-to-transform-a-ray-with-a-matrix
-func (a *Matrix4) MultRay(r Ray3) (result Ray3) {
-	result.Origin = a.MultPoint(r.Origin)
-	result.Dir = a.MultDir(r.Dir)
-	return
+func (a *Matrix4) MultRay(r *Ray3) *Ray3 {
+	return NewRay(a.MultPoint(r.Origin), a.MultDir(r.Dir))
 }
 
 // Inverse returns the inverse of this matrix

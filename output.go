@@ -16,9 +16,9 @@ func WritePNG(file string, i image.Image) error {
 	}
 	defer f.Close()
 	err = png.Encode(f, i)
-	if err == nil {
-		fmt.Printf("\n-> %v\n", file)
-	}
+	// if err == nil {
+	// 	fmt.Println("->", file)
+	// }
 	return err
 }
 

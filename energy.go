@@ -25,11 +25,11 @@ func (a Energy) Amplified(n float64) Energy {
 // Weak signals are more likely to be destroyed but gain more amplification.
 // This creates greater overall system throughput (higher energy per signal, fewer signals).
 func (a Energy) RandomGain(rnd *rand.Rand) Energy {
-	max := Vector3(a).Max()
-	if rnd.Float64() > max {
+	greatest := Vector3(a).Greatest()
+	if rnd.Float64() > greatest {
 		return Energy{}
 	}
-	return a.Amplified(1 / max)
+	return a.Amplified(1 / greatest)
 }
 
 // Strength returns energy a multiplied by energy b.

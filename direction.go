@@ -92,6 +92,7 @@ func AngleDirection(theta, phi float64) Direction {
 // RandHemiCos returns a random unit vector within the hemisphere of the normal direction a.
 // It distributes these random vectors with a cosine weight.
 // https://github.com/fogleman/pt/blob/69e74a07b0af72f1601c64120a866d9a5f432e2f/pt/ray.go#L28
+// NOTE: Added .Unit() because this doesn't always return a unit vector otherwise
 func (a Direction) RandHemiCos(rnd *rand.Rand) Direction {
 	u := rnd.Float64()
 	v := rnd.Float64()
@@ -103,5 +104,5 @@ func (a Direction) RandHemiCos(rnd *rand.Rand) Direction {
 	d = d.Plus(s.Scaled(r * math.Cos(theta)))
 	d = d.Plus(t.Scaled(r * math.Sin(theta)))
 	d = d.Plus(a.Scaled(math.Sqrt(1 - u)))
-	return Direction(d) // TODO: be able to explain why this definitely returns a unit vector
+	return d.Unit()
 }

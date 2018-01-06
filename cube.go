@@ -10,6 +10,7 @@ type Cube struct {
 	Mat      *Material
 	GridMat  *Material
 	GridSize float64
+	box      *Box
 }
 
 // UnitCube returns a pointer to a new 1x1x1 Cube Surface with material and optional transforms.
@@ -18,10 +19,14 @@ func UnitCube(m *Material, transforms ...*Matrix4) *Cube {
 	for _, t := range transforms { // TODO: factor this so all surfaces can share it
 		pos = pos.Mult(t)
 	}
-	return &Cube{
+	c := &Cube{
 		Pos: pos,
 		Mat: m,
 	}
+	min := c.Pos.MultPoint(Vector3{-1, -1, -1})
+	max := c.Pos.MultPoint(Vector3{1, 1, 1})
+	c.box = NewBox(min, max)
+	return c
 }
 
 // SetGrid adds a second material to the cube which is applied as a grid across its surface
@@ -31,45 +36,48 @@ func (c *Cube) SetGrid(mat *Material, size float64) *Cube {
 	return c
 }
 
-// Intersect tests for an intersection between a Ray3 and this Cube
-// It returns whether there was an intersection (bool) and the intersection distance along the ray (float64)
-// Both the Ray3 and the distance are in world space.
-// https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-box-intersection
-// https://tavianator.com/fast-branchless-raybounding-box-intersections/
-func (c *Cube) Intersect(ray Ray3) (bool, float64) {
+// TODO: unify with Box.Check?
+func (c *Cube) Intersect(ray *Ray3) Hit {
+	ok, _ := c.box.Check(ray)
+	if !ok {
+		return Miss
+	}
 	inv := c.Pos.Inverse() // global to local transform
 	r := inv.MultRay(ray)  // translate ray into local space
-	or := [3]float64{r.Origin.X, r.Origin.Y, r.Origin.Z}
-	dir := [3]float64{r.Dir.X, r.Dir.Y, r.Dir.Z}
-	t0 := 0.0
-	t1 := math.Inf(1)
-	for i := 0; i < 3; i++ {
-		tNear := (-0.5 - or[i]) / dir[i]
-		tFar := (0.5 - or[i]) / dir[i]
-		if tNear > tFar {
-			tNear, tFar = tFar, tNear
+	dir := Vector3(r.Dir).Array()
+	or := r.Origin.Array()
+	min := Vector3{-0.5, -0.5, -0.5}.Array()
+	max := Vector3{0.5, 0.5, 0.5}.Array()
+	tmin := 0.0
+	tmax := math.Inf(1)
+	for a := 0; a < 3; a++ {
+		invD := 1 / dir[a]
+		t0 := (min[a] - or[a]) * invD
+		t1 := (max[a] - or[a]) * invD
+		if invD < 0 {
+			t0, t1 = t1, t0
 		}
-		if tNear > t0 {
-			t0 = tNear
+		if t0 > tmin {
+			tmin = t0
 		}
-		if tFar < t1 {
-			t1 = tFar
+		if t1 < tmax {
+			tmax = t1
 		}
-		if t0 > t1 {
-			return false, 0
-		}
-	}
-	if t0 > 0 {
-		if dist := c.Pos.MultDist(r.Dir.Scaled(t0)).Len(); dist >= BIAS {
-			return true, dist
+		if tmax < tmin {
+			return Miss
 		}
 	}
-	if t1 > 0 {
-		if dist := c.Pos.MultDist(r.Dir.Scaled(t1)).Len(); dist >= BIAS {
-			return true, dist
-		}
+	// TODO: lots of calculations here going from point to dist. optimize.
+	pointLocal := r.Moved(tmin)
+	point := c.Pos.MultPoint(pointLocal)
+	if dist := point.Minus(ray.Origin).Len(); dist >= BIAS {
+		return NewHit(c, dist)
 	}
-	return false, 0
+	return Miss
+}
+
+func (c *Cube) Center() Vector3 {
+	return c.Pos.MultPoint(Vector3{})
 }
 
 // At returns the normal Vector3 at this point on the Surface
@@ -96,4 +104,8 @@ func (c *Cube) At(p Vector3) (normal Direction, mat *Material) {
 		}
 	}
 	return c.Pos.MultDir(normal), mat
+}
+
+func (c *Cube) Box() *Box {
+	return c.box
 }

@@ -32,3 +32,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/alexflint/go-arg"
+
+[[constraint]]
+  name = "github.com/pkg/profile"
+  version = "1.2.1"

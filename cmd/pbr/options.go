@@ -9,8 +9,10 @@ import (
 
 // Options configures rendering behavior.
 type Options struct {
-	Scene   string `arg:"positional,required" help:"input scene .obj"`
-	Render  string `arg:"positional,required" help:"output render .png"`
+	Scene  string `arg:"positional,required" help:"input scene .obj"`
+	Render string `arg:"positional" help:"output render .png"`
+	Info   bool   `help:"output scene information and exit"`
+
 	Heat    string `help:"output heatmap as .png"`
 	Noise   string `help:"output noisemap as .png"`
 	Profile bool   `help:"record performance into profile.pprof"`

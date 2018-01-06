@@ -60,7 +60,6 @@ func NewRenderer(c *Camera, s *Scene, config ...RenderConfig) *Renderer {
 func (r *Renderer) Start(tick time.Duration) <-chan uint {
 	r.active = true
 	n := runtime.NumCPU()
-	ticker := time.NewTicker(tick)
 	update := make(chan uint)
 	result := make(chan Sample, n*2)
 	pixel := make(chan uint, n*1024) // TODO: calc the actual limit this can be given # of workers, image size, etc
@@ -69,23 +68,24 @@ func (r *Renderer) Start(tick time.Duration) <-chan uint {
 		r.sample(pixel, result)
 		planned += r.next(pixel)
 	}
+	last := time.Now()
 	go func() {
 		for {
-			select {
-			case res := <-result:
-				r.image.Integrate(res.index, res.energy)
-				r.count++
-				for planned < r.count+uint(n) {
-					planned += r.next(pixel)
-				}
-			case <-ticker.C:
+			res := <-result
+			r.image.Integrate(res.index, res.energy)
+			r.count++
+			for planned < r.count+uint(n) {
+				planned += r.next(pixel)
+			}
+			if !r.active {
+				close(pixel)
+				close(update)
+				return
+			}
+			now := time.Now()
+			if now.Sub(last) >= tick {
+				last = now
 				update <- r.count
-			default:
-				if !r.active {
-					close(pixel)
-					close(update)
-					return
-				}
 			}
 		}
 	}()
@@ -147,21 +147,21 @@ func (r *Renderer) trace(x, y float64, rnd *rand.Rand) Energy {
 	energy := Energy{0, 0, 0}
 
 	for bounce := 0; bounce < r.Bounces; bounce++ {
-		hit, surface, dist := r.scene.Intersect(ray)
-		if !hit {
+		hit := r.scene.Intersect(ray)
+		if !hit.ok {
 			energy = energy.Merged(r.scene.Env(ray), signal)
 			break
 		}
-		point := ray.Moved(dist)
-		normal, mat := surface.At(point)
+		point := ray.Moved(hit.dist)
+		normal, mat := hit.surface.At(point)
 		energy = energy.Merged(mat.Emit(normal, ray.Dir), signal)
 		signal = signal.RandomGain(rnd) // "Russian Roulette"
 		if signal == (Energy{}) {
 			break
 		}
-		if next, dir, str := mat.Bsdf(normal, ray.Dir, dist, rnd); next {
+		if next, dir, str := mat.Bsdf(normal, ray.Dir, hit.dist, rnd); next {
 			signal = signal.Strength(str)
-			ray = Ray3{point, dir}
+			ray = NewRay(point, dir)
 		} else {
 			break
 		}
