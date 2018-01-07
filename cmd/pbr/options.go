@@ -66,7 +66,7 @@ func options() *Options {
 	return c
 }
 
-func cameraPosition(o *Options, bounds *pbr.Box, center pbr.Vector3) (from, to, focus pbr.Vector3) {
+func cameraOptions(o *Options, bounds *pbr.Box, center pbr.Vector3) (from, to, focus pbr.Vector3) {
 	if o.From == nil {
 		twoThirds := pbr.Vector3{bounds.Max.X * 9, bounds.Max.Y, bounds.Max.Z * 6}
 		from = twoThirds

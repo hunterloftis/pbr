@@ -34,7 +34,7 @@ func run(o *Options) error {
 		return err
 	}
 
-	from, to, focus := cameraPosition(o, bounds, center)
+	from, to, focus := cameraOptions(o, bounds, center)
 	camera := pbr.NewCamera(o.Width, o.Height, pbr.CameraConfig{
 		Lens:     o.Lens / 1000.0,
 		Position: &from,
@@ -57,6 +57,7 @@ func run(o *Options) error {
 }
 
 func render(r *pbr.Renderer, o *Options) error {
+	size := o.Width * o.Height
 	cutoff := float64(o.Width*o.Height) * o.Complete
 	interrupt := make(chan os.Signal, 2)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -67,17 +68,18 @@ func render(r *pbr.Renderer, o *Options) error {
 		}
 		defer stopProfile(f)
 	}
-	ticker := time.NewTicker(time.Second * 60)
+	savePoint := uint(size)
 	start := time.Now()
 	for samples := range r.Start(time.Second / 4) {
 		select {
 		case <-interrupt:
 			r.Stop()
-		case <-ticker.C:
-			write(r, o.Out, o.Heat, o.Noise, o.Expose)
 		default:
 			if float64(samples) >= cutoff {
 				r.Stop()
+			} else if samples >= savePoint {
+				write(r, o.Out, o.Heat, o.Noise, o.Expose)
+				savePoint *= 2
 			}
 			showProgress(r, start)
 		}
