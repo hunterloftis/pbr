@@ -70,14 +70,14 @@ func (s *Scene) Add(surfaces ...Surface) {
 	s.Surfaces = append(s.Surfaces, surfaces...)
 }
 
-func (s *Scene) Info() (min, max, center Vector3, surfaces int) {
+func (s *Scene) Info() (box *Box, center Vector3, surfaces int) {
 	c := Vector3{}
 	for _, s := range s.Surfaces {
 		c = c.Plus(s.Center())
 	}
 	surfaces = len(s.Surfaces)
 	center = c.Scaled(1 / float64(surfaces))
-	return s.tree.box.min, s.tree.box.max, center, surfaces
+	return s.tree.box, center, surfaces
 }
 
 // TODO: make this called automatically by anything that depends on it instead of forcing that onto the visible API

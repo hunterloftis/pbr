@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"runtime/pprof"
 	"syscall"
 	"time"
 
@@ -12,55 +11,35 @@ import (
 )
 
 func main() {
-	o := options()
-	scene := pbr.NewScene(o.Sky, o.Ground)
-
-	obj, err := os.Open(o.Scene)
-	if err != nil {
-		fmt.Println("Unable to open scene", o.Scene, "error:", err)
+	if err := run(options()); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v", err)
 		os.Exit(1)
 	}
-	defer obj.Close()
-	scene.ImportObj(obj)
+}
 
-	scene.Prepare()
-	min, max, center, surfaces := scene.Info()
-	fmt.Println()
-	fmt.Printf("surfaces: %v\n", surfaces)
-	fmt.Printf("center of mass: (%.2f, %.2f, %.2f)\n", center.X, center.Y, center.Z)
-	fmt.Printf("X range: [%.2f : %.2f]\n", min.X, max.X)
-	fmt.Printf("Y range: [%.2f : %.2f]\n", min.Y, max.Y)
-	fmt.Printf("Z range: [%.2f : %.2f]\n", min.Z, max.Z)
-	fmt.Println()
+func run(o *Options) error {
+	scene, err := loadScene(o.Scene, o.Sky, o.Ground)
+	if err != nil {
+		return err
+	}
 
+	bounds, center, surfaces := scene.Info()
+	showInfo(bounds, center, surfaces)
 	if o.Info {
-		os.Exit(0)
+		return nil
 	}
 
-	if o.From == nil {
-		twoThirds := pbr.Vector3{max.X * 9, max.Y, max.Z * 6}
-		o.From = &twoThirds
-	}
-	if o.To == nil {
-		o.To = &center
-	}
-	if o.Focus == nil {
-		o.Focus = o.To
+	err = loadEnvironment(scene, o.Env, o.Rad)
+	if err != nil {
+		return err
 	}
 
-	if len(o.Env) > 0 {
-		hdr, _ := os.Open(o.Env) // TODO: handle err
-		defer hdr.Close()
-		scene.SetPano(hdr, o.Rad)
-	}
-
-	size := o.Width * o.Height
-	cutoff := uint(float64(size) * o.Complete)
+	from, to, focus := cameraPosition(o, bounds, center)
 	camera := pbr.NewCamera(o.Width, o.Height, pbr.CameraConfig{
 		Lens:     o.Lens / 1000.0,
-		Position: o.From,
-		Target:   o.To,
-		Focus:    o.Focus,
+		Position: &from,
+		Target:   &to,
+		Focus:    &focus,
 		FStop:    o.FStop,
 	})
 	renderer := pbr.NewRenderer(camera, scene, pbr.RenderConfig{
@@ -68,47 +47,41 @@ func main() {
 		Adapt:   o.Adapt,
 	})
 
+	err = render(renderer, o)
+	if err != nil {
+		return err
+	}
+
+	err = write(renderer, o.Out, o.Heat, o.Noise, o.Expose)
+	return err
+}
+
+func render(r *pbr.Renderer, o *Options) error {
+	cutoff := float64(o.Width*o.Height) * o.Complete
 	interrupt := make(chan os.Signal, 2)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-
 	if o.Profile {
-		f, _ := os.Create("cpu.pprof")
-		pprof.StartCPUProfile(f)
+		f, err := createProfile()
+		if err != nil {
+			return err
+		}
+		defer stopProfile(f)
 	}
-
 	ticker := time.NewTicker(time.Second * 60)
 	start := time.Now()
-	for samples := range renderer.Start(time.Second / 4) {
+	for samples := range r.Start(time.Second / 4) {
 		select {
 		case <-interrupt:
-			renderer.Stop()
+			r.Stop()
 		case <-ticker.C:
-			pbr.WritePNG(o.Out, renderer.Rgb(o.Expose))
-			if len(o.Heat) > 0 {
-				pbr.WritePNG(o.Heat, renderer.Heat())
-			}
-			if len(o.Noise) > 0 {
-				pbr.WritePNG(o.Noise, renderer.Noise())
-			}
+			write(r, o.Out, o.Heat, o.Noise, o.Expose)
 		default:
-			if samples >= cutoff {
-				renderer.Stop()
+			if float64(samples) >= cutoff {
+				r.Stop()
 			}
+			showProgress(r, start)
 		}
-		pbr.ShowProgress(renderer, start)
 	}
 	fmt.Println()
-
-	if o.Profile {
-		pprof.StopCPUProfile()
-	}
-
-	fmt.Println("->", o.Out)
-	pbr.WritePNG(o.Out, renderer.Rgb(o.Expose))
-	if len(o.Heat) > 0 {
-		pbr.WritePNG(o.Heat, renderer.Heat())
-	}
-	if len(o.Noise) > 0 {
-		pbr.WritePNG(o.Noise, renderer.Noise())
-	}
+	return nil
 }

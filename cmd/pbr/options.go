@@ -40,8 +40,8 @@ type Options struct {
 	Expose float64      `help:"exposure multiplier"`
 }
 
-func options() Options {
-	c := Options{
+func options() *Options {
+	c := &Options{
 		Width:    800,
 		Height:   600,
 		Profile:  false,
@@ -57,11 +57,25 @@ func options() Options {
 		FStop:    4,
 		Expose:   1,
 	}
-	arg.MustParse(&c)
+	arg.MustParse(c)
 	if c.Out == "" && !c.Info {
 		name := filepath.Base(c.Scene)
 		ext := filepath.Ext(name)
 		c.Out = name[0:len(name)-len(ext)] + ".png"
 	}
 	return c
+}
+
+func cameraPosition(o *Options, bounds *pbr.Box, center pbr.Vector3) (from, to, focus pbr.Vector3) {
+	if o.From == nil {
+		twoThirds := pbr.Vector3{bounds.Max.X * 9, bounds.Max.Y, bounds.Max.Z * 6}
+		from = twoThirds
+	}
+	if o.To == nil {
+		to = center
+	}
+	if o.Focus == nil {
+		focus = to
+	}
+	return from, to, focus
 }

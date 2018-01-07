@@ -3,21 +3,21 @@ package pbr
 import "math"
 
 type Box struct {
-	min, max           Vector3
+	Min, Max           Vector3
 	minArray, maxArray [3]float64
 }
 
 func NewBox(min, max Vector3) *Box {
 	return &Box{
-		min:      min,
-		max:      max,
+		Min:      min,
+		Max:      max,
 		minArray: min.Array(),
 		maxArray: max.Array(),
 	}
 }
 
 func MergeBoxes(a, b *Box) *Box {
-	return NewBox(a.min.Min(b.min), a.max.Max(b.max))
+	return NewBox(a.Min.Min(b.Min), a.Max.Max(b.Max))
 }
 
 func BoxAround(surfaces ...Surface) *Box {
@@ -33,19 +33,19 @@ func BoxAround(surfaces ...Surface) *Box {
 
 // TODO: should these receivers be pointers?
 func (b *Box) Overlaps(b2 *Box) bool {
-	if b.min.X > b2.max.X || b.max.X < b2.min.X || b.min.Y > b2.max.Y || b.max.Y < b2.min.Y || b.min.Z > b2.max.Z || b.max.Z < b2.min.Z {
+	if b.Min.X > b2.Max.X || b.Max.X < b2.Min.X || b.Min.Y > b2.Max.Y || b.Max.Y < b2.Min.Y || b.Min.Z > b2.Max.Z || b.Max.Z < b2.Min.Z {
 		return false
 	}
 	return true
 }
 
 func (b *Box) Split(axis int, val float64) (left, right *Box) {
-	maxL := b.max.Array()
-	minR := b.min.Array()
+	maxL := b.Max.Array()
+	minR := b.Min.Array()
 	maxL[axis] = val
 	minR[axis] = val
-	left = NewBox(b.min, ArrayToVector3(maxL))
-	right = NewBox(ArrayToVector3(minR), b.max)
+	left = NewBox(b.Min, ArrayToVector3(maxL))
+	right = NewBox(ArrayToVector3(minR), b.Max)
 	return left, right
 }
 
@@ -77,7 +77,7 @@ func (b *Box) Check(r *Ray3) (ok bool, dist float64) {
 }
 
 func (b *Box) Contains(p Vector3) bool {
-	if p.X > b.max.X || p.X < b.min.X || p.Y > b.max.Y || p.Y < b.min.Y || p.Z > b.max.Z || p.Z < b.min.Z {
+	if p.X > b.Max.X || p.X < b.Min.X || p.Y > b.Max.Y || p.Y < b.Min.Y || p.Z > b.Max.Z || p.Z < b.Min.Z {
 		return false
 	}
 	return true
