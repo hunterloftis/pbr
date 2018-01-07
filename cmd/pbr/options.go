@@ -68,7 +68,10 @@ func options() *Options {
 
 func cameraOptions(o *Options, bounds *pbr.Box, center pbr.Vector3) (from, to, focus pbr.Vector3) {
 	if o.From == nil {
-		twoThirds := pbr.Vector3{bounds.Max.X * 9, bounds.Max.Y, bounds.Max.Z * 6}
+		x := center.X + (bounds.Max.X-center.X)*9
+		y := bounds.Max.Y
+		z := center.Z + (bounds.Max.Z-center.Z)*6
+		twoThirds := pbr.Vector3{x, y, z}
 		from = twoThirds
 	}
 	if o.To == nil {
