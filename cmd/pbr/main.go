@@ -81,7 +81,7 @@ func render(r *pbr.Renderer, o *Options) error {
 				write(r, o.Out, o.Heat, o.Noise, o.Expose)
 				savePoint *= 2
 			}
-			showProgress(r, start)
+			showProgress(r, start, o.Out)
 		}
 	}
 	fmt.Println()
