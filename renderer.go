@@ -26,6 +26,7 @@ type Renderer struct {
 	cursor       uint
 	meanVariance float64
 	image        Image
+	rays         uint
 }
 
 // RenderConfig configures rendering settings.
@@ -122,6 +123,10 @@ func (r *Renderer) Noise() image.Image {
 	return r.image.Heat(Noise)
 }
 
+func (r *Renderer) Rays() uint {
+	return r.rays
+}
+
 func (r *Renderer) sample(in <-chan uint, out chan<- Sample) {
 	size := uint(r.Width * r.Height)
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -150,6 +155,7 @@ func (r *Renderer) trace(x, y float64, rnd *rand.Rand) Energy {
 
 	for bounce := 0; bounce < r.Bounces; bounce++ {
 		hit := r.scene.Intersect(ray)
+		r.rays++
 		if !hit.ok {
 			energy = energy.Merged(r.scene.Env(ray), signal)
 			break

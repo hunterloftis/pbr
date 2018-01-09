@@ -24,7 +24,10 @@ func run(o *Options) error {
 	}
 
 	bounds, center, surfaces := scene.Info()
-	showInfo(bounds, center, surfaces)
+	showSceneInfo(bounds, center, len(surfaces))
+	completeOptions(o, bounds, center, surfaces)
+	showRenderInfo(o)
+
 	if o.Info {
 		return nil
 	}
@@ -34,12 +37,12 @@ func run(o *Options) error {
 		return err
 	}
 
-	from, to, focus := cameraOptions(o, bounds, center)
+	// from, to, focus := cameraOptions(o, bounds, center, surfaces)
 	camera := pbr.NewCamera(o.Width, o.Height, pbr.CameraConfig{
 		Lens:     o.Lens / 1000.0,
-		Position: &from,
-		Target:   &to,
-		Focus:    &focus,
+		Position: o.From,
+		Target:   o.To,
+		Focus:    o.Focus,
 		FStop:    o.FStop,
 	})
 	renderer := pbr.NewRenderer(camera, scene, pbr.RenderConfig{
@@ -70,6 +73,7 @@ func render(r *pbr.Renderer, o *Options) error {
 	}
 	savePoint := uint(size)
 	start := time.Now()
+	fmt.Println()
 	for samples := range r.Start(time.Second / 4) {
 		select {
 		case <-interrupt:

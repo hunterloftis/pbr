@@ -85,6 +85,7 @@ func RandDirection(rnd *rand.Rand) Direction {
 }
 
 // AngleDirection creates a unit vector based on theta and phi.
+// http://mathworld.wolfram.com/SphericalCoordinates.html
 func AngleDirection(theta, phi float64) Direction {
 	return Direction{math.Cos(theta) * math.Cos(phi), math.Sin(phi), math.Sin(theta) * math.Cos(phi)}
 }

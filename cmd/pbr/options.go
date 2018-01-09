@@ -35,6 +35,8 @@ type Options struct {
 	From   *pbr.Vector3 `help:"camera position"`
 	To     *pbr.Vector3 `help:"camera target"`
 	Focus  *pbr.Vector3 `help:"camera focus (if other than 'to')"`
+	Dist   float64      `help:"camera distance from target"`
+	Polar  float64      `help:"camera polar angle on target"`
 	Lens   float64      `help:"camera focal length in mm"`
 	FStop  float64      `help:"camera f-stop"`
 	Expose float64      `help:"exposure multiplier"`
@@ -54,6 +56,7 @@ func options() *Options {
 		Indirect: 1,
 		Complete: math.Inf(1),
 		Lens:     50,
+		Polar:    math.Pi / 10,
 		FStop:    4,
 		Expose:   1,
 	}
@@ -66,19 +69,34 @@ func options() *Options {
 	return c
 }
 
-func cameraOptions(o *Options, bounds *pbr.Box, center pbr.Vector3) (from, to, focus pbr.Vector3) {
+// TODO: accept input that configures this smart behavior instead of specifying exact camera points
+// eg, -distance 5 -theta 0 -phi 3.14
+func completeOptions(o *Options, bounds *pbr.Box, center pbr.Vector3, surfaces []pbr.Surface) {
 	if o.From == nil {
-		x := center.X + (bounds.Max.X-center.X)*9
-		y := bounds.Max.Y
-		z := center.Z + (bounds.Max.Z-center.Z)*6
-		twoThirds := pbr.Vector3{x, y, z}
-		from = twoThirds
+		dir := pbr.AngleDirection(math.Pi/4, o.Polar)
+		ray := pbr.NewRay(center, dir)
+		theta := pbr.FieldOfView(o.Lens, 35) / 2
+		if o.Dist == 0 {
+			max := o.Dist
+			for _, s := range surfaces {
+				pt := s.Center()
+				dist0 := pt.Minus(center).Dot(pbr.Vector3(dir))
+				offset := pt.Minus(ray.Moved(dist0)).Len()
+				dist1 := offset / math.Tan(theta)
+				dist := dist0 + dist1
+				if dist > max {
+					max = dist
+				}
+			}
+			o.Dist = max
+		}
+		from := ray.Moved(o.Dist)
+		o.From = &from
 	}
 	if o.To == nil {
-		to = center
+		o.To = &center
 	}
 	if o.Focus == nil {
-		focus = to
+		o.Focus = o.To
 	}
-	return from, to, focus
 }

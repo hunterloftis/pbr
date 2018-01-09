@@ -70,14 +70,13 @@ func (s *Scene) Add(surfaces ...Surface) {
 	s.Surfaces = append(s.Surfaces, surfaces...)
 }
 
-func (s *Scene) Info() (box *Box, center Vector3, surfaces int) {
+func (s *Scene) Info() (box *Box, center Vector3, surfaces []Surface) {
 	c := Vector3{}
 	for _, s := range s.Surfaces {
 		c = c.Plus(s.Center())
 	}
-	surfaces = len(s.Surfaces)
-	center = c.Scaled(1 / float64(surfaces))
-	return s.tree.box, center, surfaces
+	center = c.Scaled(1 / float64(len(s.Surfaces)))
+	return s.tree.box, center, s.Surfaces
 }
 
 // TODO: make this called automatically by anything that depends on it instead of forcing that onto the visible API
@@ -101,7 +100,7 @@ func (s *Scene) ImportObj(r io.Reader) {
 	vs := make([]Vector3, 0, 1024)
 	vns := make([]Direction, 0, 1024)
 	scanner := bufio.NewScanner(r)
-	mat := Plastic(1, 1, 1, 0.5)
+	mat := Plastic(1, 1, 1, 0.7)
 	tris := 0
 	for scanner.Scan() {
 		line := scanner.Text()

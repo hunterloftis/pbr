@@ -95,3 +95,7 @@ func (c *Camera) aperturePoint(rnd *rand.Rand) Vector3 {
 	y := r * math.Sin(t)
 	return Vector3{x, y, 0}
 }
+
+func FieldOfView(lens, sensor float64) (radians float64) {
+	return 2 * math.Atan(sensor/(2*lens))
+}

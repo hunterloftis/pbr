@@ -101,6 +101,7 @@
 ## .obj models
 
 - https://benedikt-bitterli.me/tungsten.html
+- http://www.pbrt.org/scenes-v3.html
 - http://students.cs.tamu.edu/hrg/viza656/pr04/index.html
 - http://students.cs.tamu.edu/hrg/viza656/pr09/index.html
 

@@ -42,7 +42,6 @@ func (a Vector3) Greatest() float64 {
 }
 
 // Dot returns the dot product of two vectors
-// (which is also the cosine of the angle between them)
 func (a Vector3) Dot(b Vector3) float64 {
 	return a.X*b.X + a.Y*b.Y + a.Z*b.Z
 }
@@ -155,4 +154,9 @@ func (a Vector3) LessEqual(b Vector3) bool {
 
 func (a Vector3) Array() [3]float64 {
 	return [3]float64{a.X, a.Y, a.Z}
+}
+
+func (a Vector3) Projected(d Direction) Vector3 {
+	b := Vector3(d)
+	return b.Scaled(a.Dot(b))
 }
