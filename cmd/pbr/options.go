@@ -32,33 +32,35 @@ type Options struct {
 	Indirect int     `help:"number of indirect rays to cast"` // TODO: implement
 	Complete float64 `help:"number of samples-per-pixel at which to exit"`
 
-	From   *pbr.Vector3 `help:"camera position"`
-	To     *pbr.Vector3 `help:"camera target"`
-	Focus  *pbr.Vector3 `help:"camera focus (if other than 'to')"`
-	Dist   float64      `help:"camera distance from target"`
-	Polar  float64      `help:"camera polar angle on target"`
-	Lens   float64      `help:"camera focal length in mm"`
-	FStop  float64      `help:"camera f-stop"`
-	Expose float64      `help:"exposure multiplier"`
+	From      *pbr.Vector3 `help:"camera position"`
+	To        *pbr.Vector3 `help:"camera target"`
+	Focus     *pbr.Vector3 `help:"camera focus (if other than 'to')"`
+	Dist      float64      `help:"camera distance from target"`
+	Polar     float64      `help:"camera polar angle on target"`
+	Longitude float64      `help:"camera longitudinal angle on target"`
+	Lens      float64      `help:"camera focal length in mm"`
+	FStop     float64      `help:"camera f-stop"`
+	Expose    float64      `help:"exposure multiplier"`
 }
 
 func options() *Options {
 	c := &Options{
-		Width:    800,
-		Height:   600,
-		Profile:  false,
-		Sky:      &pbr.Energy{210, 230, 255},
-		Ground:   &pbr.Energy{0, 0, 0},
-		Rad:      100,
-		Adapt:    10,
-		Bounce:   10,
-		Direct:   1,
-		Indirect: 1,
-		Complete: math.Inf(1),
-		Lens:     50,
-		Polar:    math.Pi / 10,
-		FStop:    4,
-		Expose:   1,
+		Width:     800,
+		Height:    600,
+		Profile:   false,
+		Sky:       &pbr.Energy{210, 230, 255},
+		Ground:    &pbr.Energy{0, 0, 0},
+		Rad:       100,
+		Adapt:     10,
+		Bounce:    10,
+		Direct:    1,
+		Indirect:  1,
+		Complete:  math.Inf(1),
+		Lens:      50,
+		Polar:     math.Pi / 10,
+		Longitude: math.Pi / 8,
+		FStop:     4,
+		Expose:    1,
 	}
 	arg.MustParse(c)
 	if c.Out == "" && !c.Info {
@@ -73,7 +75,7 @@ func options() *Options {
 // eg, -distance 5 -theta 0 -phi 3.14
 func completeOptions(o *Options, bounds *pbr.Box, center pbr.Vector3, surfaces []pbr.Surface) {
 	if o.From == nil {
-		dir := pbr.AngleDirection(math.Pi/4, o.Polar)
+		dir := pbr.AngleDirection(o.Polar, o.Longitude)
 		ray := pbr.NewRay(center, dir)
 		theta := pbr.FieldOfView(o.Lens, 35) / 2
 		if o.Dist == 0 {

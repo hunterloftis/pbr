@@ -107,3 +107,11 @@ func (a Direction) RandHemiCos(rnd *rand.Rand) Direction {
 	d = d.Plus(a.Scaled(math.Sqrt(1 - u)))
 	return d.Unit()
 }
+
+func ParseDirection(s string) (d Direction, err error) {
+	v, err := ParseVector3(s)
+	if err != nil {
+		return d, err
+	}
+	return v.Unit(), nil
+}

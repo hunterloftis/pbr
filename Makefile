@@ -17,3 +17,14 @@ lucy:
 	go build ./cmd/pbr
 	./pbr fixtures/models/lucy.obj lucy.png -from "800,400,500" -to "15,165,-4" -env fixtures/images/uffizi.hdr -lens 70 -fstop 0.01 -width 600 -height 750 -expose 2 -noise noise.png -heat heat.png -complete 1000
 	open lucy.png heat.png noise.png
+
+destroyer:
+	go build ./cmd/pbr
+	./pbr fixtures/models/destroyer.obj -dist 12000 -polar 0 -width 1200 -height 500 -complete 10 -profile
+	open destroyer.png
+	go tool pprof --pdf ./pbr ./cpu.pprof > profile.pdf && open profile.pdf
+
+bmw:
+	go build ./cmd/pbr
+	./pbr fixtures/models/bmw/BMW850.obj -polar=-1 -longitude=0.3 -width 1200 -height 500 -lens 35 -dist 80 -complete 100
+	open BMW850.png

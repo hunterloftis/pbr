@@ -88,37 +88,6 @@ func (a *Vector3) String() string {
 	return strings.Join([]string{x, y, z}, ",")
 }
 
-// Set sets the vector from a string value
-func (a *Vector3) Set(val string) error {
-	xyz := strings.FieldsFunc(val, split)
-	if len(xyz) != 3 {
-		return fmt.Errorf("pbr: 3 values required for Vector3, received %v", len(xyz))
-	}
-	x, err := strconv.ParseFloat(xyz[0], 64)
-	if err != nil {
-		return err
-	}
-	y, err := strconv.ParseFloat(xyz[1], 64)
-	if err != nil {
-		return err
-	}
-	z, err := strconv.ParseFloat(xyz[2], 64)
-	if err != nil {
-		return err
-	}
-	a.X, a.Y, a.Z = x, y, z
-	return nil
-}
-
-func split(r rune) bool {
-	return r == ',' || r == ' '
-}
-
-// UnmarshalText unmarshals a byte slice into a Vector3 value
-func (a *Vector3) UnmarshalText(b []byte) error {
-	return a.Set(string(b))
-}
-
 func (a Vector3) Min(b Vector3) Vector3 {
 	x := math.Min(a.X, b.X)
 	y := math.Min(a.Y, b.Y)
@@ -159,4 +128,38 @@ func (a Vector3) Array() [3]float64 {
 func (a Vector3) Projected(d Direction) Vector3 {
 	b := Vector3(d)
 	return b.Scaled(a.Dot(b))
+}
+
+// Set sets the vector from a string value
+func (a *Vector3) Set(b Vector3) {
+	a.X = b.X
+	a.Y = b.Y
+	a.Z = b.Z
+}
+
+// UnmarshalText unmarshals a byte slice into a Vector3 value
+func (a *Vector3) UnmarshalText(b []byte) error {
+	v, err := ParseVector3(string(b))
+	if err != nil {
+		return err
+	}
+	a.Set(v)
+	return nil
+}
+
+func ParseVector3(s string) (v Vector3, err error) {
+	xyz := strings.Split(s, ",")
+	if len(xyz) != 3 {
+		return v, fmt.Errorf("pbr: 3 values required for Vector3, received %v", len(xyz))
+	}
+	v.X, err = strconv.ParseFloat(xyz[0], 64)
+	if err != nil {
+		return v, err
+	}
+	v.Y, err = strconv.ParseFloat(xyz[1], 64)
+	if err != nil {
+		return v, err
+	}
+	v.Z, err = strconv.ParseFloat(xyz[2], 64)
+	return v, err
 }

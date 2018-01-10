@@ -13,3 +13,4 @@ fixtures/images/grace.hdr
 pbr
 fixtures/images/*.hdr
 fixtures/models/*.obj
+fixtures/models/*/

@@ -25,7 +25,7 @@ func NewTree(box *Box, surfaces []Surface, depth int, suffix string) *Tree {
 		name:     strconv.Itoa(depth) + suffix,
 	}
 	t.name += " (" + fmt.Sprintf("%v", &t) + ")"
-	limit := int(math.Pow(2, float64(depth-1)))
+	limit := int(math.Max(1, math.Pow(2, float64(depth-1))))
 	if len(t.surfaces) < limit || depth > 10 {
 		t.leaf = true
 		return t
@@ -85,7 +85,6 @@ func (t *Tree) IntersectSurfaces(ray *Ray3) Hit {
 		if hit.ok {
 			if t.box.Contains(ray.Moved(hit.dist)) {
 				closest = hit.Closer(closest)
-			} else {
 			}
 		}
 	}
