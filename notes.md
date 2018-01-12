@@ -122,6 +122,7 @@
 - wireframe renders
 - displacement maps (http://blog.yiningkarlli.com/2017/05/subdivision-and-displacement.html)
 - bidirectional path tracing
+- car paint (http://www.msawtell.com/research/carpaint/carpaint.shtml)
 - metropolis light transport
 - bilateral smoothing filter
 - more abstract Material interface to support things like atmosphere, hair, smooth coat, participating media (smoke), etc.

@@ -14,6 +14,7 @@ type Material struct {
 	fresnel    float64 // Initd average Fresnel value
 }
 
+// TODO: "Thin" is a hack to get rid of.
 type MaterialDesc struct {
 	Color    Energy  // Diffuse color for opaque surfaces, transmission coefficients for transparent surfaces
 	Fresnel  Energy  // Fresnel coefficients, used for fresnel reflectivity and computing the refractive index
