@@ -36,5 +36,5 @@ bmw2:
 
 lambo:
 	go build ./cmd/pbr
-	./pbr fixtures/models/lambo2/lamborghini-aventador-pbribl.obj -floor -out lambo.png -polar 3.4 -longitude 0.1 -env fixtures/images/293.hdr -rad 400 -complete 500
+	./pbr fixtures/models/lambo2/lamborghini-aventador-pbribl.obj -floor -out lambo.png -polar 3.6 -longitude 0.1 -env fixtures/images/293.hdr -rad 400 -width 1152 -height 648 -lens 60 -fstop 1 -to=-0.1,0.25,0 -dist 7.5 -bounce 7 -complete 5000
 	open lambo.png
