@@ -13,9 +13,12 @@ import (
 type Scanner struct {
 	scanner *bufio.Scanner
 	next    []pbr.Surface
+	mtllib  string
 	err     error
 	v       []pbr.Vector3
 	vn      []pbr.Direction
+	lib     map[string]*pbr.Material
+	mat     *pbr.Material
 }
 
 func NewScanner(r io.Reader) *Scanner {
@@ -24,18 +27,24 @@ func NewScanner(r io.Reader) *Scanner {
 		next:    make([]pbr.Surface, 0),
 		v:       make([]pbr.Vector3, 0),
 		vn:      make([]pbr.Direction, 0),
+		lib:     make(map[string]*pbr.Material),
+		mat:     pbr.Plastic(1, 1, 1, 0.7),
 	}
 }
 
+// https://stackoverflow.com/a/18680899/1911432
+// https://www.opengl.org/discussion_boards/showthread.php/198728-loading-obj-file-how-to-triangularize-polygons
 func (s *Scanner) Scan() bool {
 	if len(s.next) > 0 {
 		return true
 	}
+	if len(s.mtllib) > 0 {
+		return true
+	}
 	for s.scanner.Scan() {
-		mat := pbr.Plastic(1, 1, 1, 0.7)
 		line := s.scanner.Text()
 		fields := strings.Fields(line)
-		if len(fields) == 0 {
+		if len(fields) < 2 {
 			continue
 		}
 		key := fields[0]
@@ -58,8 +67,8 @@ func (s *Scanner) Scan() bool {
 			s.vn = append(s.vn, vn)
 		case "f":
 			size := len(args)
-			if size < 3 || size > 4 {
-				s.err = fmt.Errorf("face must contain 3 or 4 vertices, but contains %v", size)
+			if size < 3 {
+				s.err = fmt.Errorf("face requires at least 3 vertices (contains %v)", size)
 			}
 			v := make([]pbr.Vector3, size)
 			n := make([]*pbr.Direction, size)
@@ -71,29 +80,124 @@ func (s *Scanner) Scan() bool {
 					return false
 				}
 			}
-			if size == 3 {
-				t := pbr.NewTriangle(v[0], v[1], v[2], mat)
-				t.SetNormals(n[0], n[1], n[2])
+			for i := 2; i < size; i++ {
+				t := pbr.NewTriangle(v[0], v[i-1], v[i], s.mat)
+				t.SetNormals(n[0], n[i-1], n[i])
 				s.next = append(s.next, t)
-				return true
 			}
-			if size == 4 {
-				t1 := pbr.NewTriangle(v[0], v[1], v[2], mat)
-				t1.SetNormals(n[0], n[1], n[2])
-				t2 := pbr.NewTriangle(v[0], v[2], v[3], mat)
-				t2.SetNormals(n[0], n[2], n[3])
-				s.next = append(s.next, t1, t2)
-				return true
+			return true
+		case "mtllib":
+			s.mtllib = args[0]
+			return true
+		case "usemtl":
+			if m, ok := s.lib[args[0]]; ok {
+				s.mat = m
 			}
 		}
 	}
 	return false
 }
 
-func (s *Scanner) Surface() (next pbr.Surface) {
-	next = s.next[0]
+type phong struct {
+	name string
+	kd   pbr.Energy // diffuse color
+	tr   float64    // transmission
+	ns   float64    // specular exponent
+	ks   pbr.Energy // specular color
+	ke   pbr.Energy // emissive color
+	ni   float64    // refractive index
+}
+
+func (s *Scanner) ReadMaterials(r io.Reader, thin bool) (err error) {
+	scanner := bufio.NewScanner(r)
+	mat := phong{}
+	for scanner.Scan() {
+		line := scanner.Text()
+		fields := strings.Fields(line)
+		if len(fields) < 2 {
+			continue
+		}
+		key := fields[0]
+		args := fields[1:]
+		switch key {
+		case "newmtl":
+			s.addMaterial(mat, thin)
+			mat = phong{name: args[0]}
+		case "Kd":
+			if mat.kd, err = pbr.ParseEnergy(strings.Join(args, ",")); err != nil {
+				return err
+			}
+		case "Tr":
+			if mat.tr, err = strconv.ParseFloat(args[0], 64); err != nil {
+				return err
+			}
+		case "d":
+			d, err := strconv.ParseFloat(args[0], 64)
+			if err != nil {
+				return err
+			}
+			mat.tr = 1 - d
+		case "Ns":
+			if mat.ns, err = strconv.ParseFloat(args[0], 64); err != nil {
+				return err
+			}
+		case "Ks":
+			if mat.ks, err = pbr.ParseEnergy(strings.Join(args, ",")); err != nil {
+				return err
+			}
+		case "Ke":
+			if mat.ke, err = pbr.ParseEnergy(strings.Join(args, ",")); err != nil {
+				return err
+			}
+		case "Ni":
+			if mat.ni, err = strconv.ParseFloat(args[0], 64); err != nil {
+				return err
+			}
+		}
+	}
+	s.addMaterial(mat, thin)
+	return nil
+}
+
+// https://github.com/AnalyticalGraphicsInc/obj2gltf#material-types
+// TODO: refractive index (ni) => .Fresnel
+func (s *Scanner) addMaterial(mat phong, thin bool) {
+	if len(mat.name) == 0 {
+		return
+	}
+	d := pbr.MaterialDesc{
+		Color:    mat.kd,
+		Transmit: mat.tr,
+		Gloss:    mat.ns / 1000,
+		Thin:     thin,
+	}
+	if mat.tr > 0 { // TODO: don't assume all transparent objects are glass?
+		if d.Thin {
+			d.Transmit = mat.tr
+		} else {
+			d.Transmit = 1
+			d.Color = d.Color.Amplified(mat.tr)
+		}
+		d.Fresnel = pbr.Energy{0.042, 0.042, 0.042} // Glass
+	} else if mat.ks.Average() == 1 { // TODO: is this the best way to detect metals?
+		d.Metal = 1
+		d.Fresnel = d.Color
+		d.Color = pbr.Energy{0, 0, 0}
+		d.Gloss *= 0.8
+	}
+	s.lib[mat.name] = pbr.NewMaterial(d)
+}
+
+func (s *Scanner) Surface() pbr.Surface {
+	next := s.next[0]
 	s.next = s.next[1:]
 	return next
+}
+
+func (s *Scanner) Material() string {
+	lib := s.mtllib
+	s.mtllib = ""
+	return lib
 }
 
 func (s *Scanner) Err() error {

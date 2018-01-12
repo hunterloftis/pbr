@@ -7,8 +7,9 @@ import (
 	"strconv"
 )
 
-// https://people.cs.clemson.edu/~dhouse/courses/405/notes/KDtrees-Fussell.pdf
 // http://slideplayer.com/slide/7653218/
+// https://www.cs.utexas.edu/~ckm/teaching/cs354_f11/lectures/Lecture21.pdf
+// https://people.cs.clemson.edu/~dhouse/courses/405/notes/KDtrees-Fussell.pdf
 type Tree struct {
 	box      *Box
 	left     *Tree
@@ -18,7 +19,11 @@ type Tree struct {
 	name     string
 }
 
-func NewTree(box *Box, surfaces []Surface, depth int, suffix string) *Tree {
+func NewTree(surfaces []Surface) *Tree {
+	return newBranch(BoxAround(surfaces...), surfaces, 0, "ROOT")
+}
+
+func newBranch(box *Box, surfaces []Surface, depth int, suffix string) *Tree {
 	t := &Tree{
 		surfaces: overlaps(box, surfaces),
 		box:      box,
@@ -26,15 +31,16 @@ func NewTree(box *Box, surfaces []Surface, depth int, suffix string) *Tree {
 	}
 	t.name += " (" + fmt.Sprintf("%v", &t) + ")"
 	limit := int(math.Max(1, math.Pow(2, float64(depth-1))))
-	if len(t.surfaces) < limit || depth > 10 {
+	if len(t.surfaces) < limit || depth > 12 {
 		t.leaf = true
 		return t
 	}
+	// TODO: try using maximum dimension instead
 	axis := depth % 3
 	wall := median(t.surfaces, axis)
 	lBox, rBox := box.Split(axis, wall)
-	t.left = NewTree(lBox, t.surfaces, depth+1, "L")
-	t.right = NewTree(rBox, t.surfaces, depth+1, "R")
+	t.left = newBranch(lBox, t.surfaces, depth+1, "L")
+	t.right = newBranch(rBox, t.surfaces, depth+1, "R")
 	return t
 }
 
@@ -50,6 +56,7 @@ func overlaps(box *Box, surfaces []Surface) []Surface {
 }
 
 // http://slideplayer.com/slide/7653218/
+// TODO: use tmin, tmax, tsplit to optimize this (vs Box.Check)
 func (t *Tree) Intersect(ray *Ray3) Hit {
 	if t.leaf {
 		hit := t.IntersectSurfaces(ray)
@@ -58,18 +65,16 @@ func (t *Tree) Intersect(ray *Ray3) Hit {
 	left, lDist := t.left.Check(ray)
 	right, rDist := t.right.Check(ray)
 	if left && right {
-		if lDist < rDist {
-			hit := t.left.Intersect(ray) // TODO: can probably optimize Intersect by putting a limit on the ray length, then skip this dist test
-			if hit.ok {                  // TODO: instead of checking for rDist, get tmin and tmax from .Check() and check against tmax
-				return hit
-			}
-			return t.right.Intersect(ray)
+		var near, far *Tree
+		if lDist <= rDist {
+			near, far = t.left, t.right
+		} else {
+			near, far = t.right, t.left
 		}
-		hit := t.right.Intersect(ray)
-		if hit.ok {
+		if hit := near.Intersect(ray); hit.ok {
 			return hit
 		}
-		return t.left.Intersect(ray)
+		return far.Intersect(ray)
 	} else if left {
 		return t.left.Intersect(ray)
 	} else if right {

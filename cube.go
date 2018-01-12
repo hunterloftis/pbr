@@ -38,8 +38,7 @@ func (c *Cube) SetGrid(mat *Material, size float64) *Cube {
 
 // TODO: unify with Box.Check?
 func (c *Cube) Intersect(ray *Ray3) Hit {
-	ok, _ := c.box.Check(ray)
-	if !ok {
+	if ok, _ := c.box.Check(ray); !ok {
 		return Miss
 	}
 	inv := c.Pos.Inverse() // global to local transform
@@ -81,7 +80,7 @@ func (c *Cube) Center() Vector3 {
 }
 
 // At returns the normal Vector3 at this point on the Surface
-func (c *Cube) At(p Vector3) (normal Direction, mat *Material) {
+func (c *Cube) At(p Vector3, dir Direction) (normal Direction, mat *Material) {
 	i := c.Pos.Inverse() // global to local transform
 	p1 := i.MultPoint(p) // translate point into local space
 	abs := p1.Abs()

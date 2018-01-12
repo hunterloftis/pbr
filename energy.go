@@ -40,8 +40,8 @@ func (a Energy) Variance(b Energy) float64 {
 	return d.X*d.X + d.Y*d.Y + d.Z*d.Z
 }
 
-func (a Energy) Amount() float64 {
-	return Vector3(a).Len()
+func (a Energy) Average() float64 {
+	return (a.X + a.Y + a.Z) / 3
 }
 
 func (a Energy) Blend(b Energy, n float64) Energy {
@@ -61,4 +61,9 @@ func (a *Energy) UnmarshalText(b []byte) error {
 	}
 	a.Set(Energy(v))
 	return nil
+}
+
+func ParseEnergy(s string) (e Energy, err error) {
+	v, err := ParseVector3(s)
+	return Energy(v), err
 }

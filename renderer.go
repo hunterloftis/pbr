@@ -148,6 +148,8 @@ func (r *Renderer) pixelAt(i uint) (x, y float64) {
 	return float64(i % uint(r.Width)), float64(i / uint(r.Width))
 }
 
+// TODO: use https://blog.carlmjohnson.net/post/2016-11-27-how-to-use-go-generate/
+// to flag in correctness assertions for testing (like dir.Len() == 1)
 func (r *Renderer) trace(x, y float64, rnd *rand.Rand) Energy {
 	ray := r.camera.ray(x, y, rnd)
 	signal := Energy{1, 1, 1}
@@ -161,7 +163,7 @@ func (r *Renderer) trace(x, y float64, rnd *rand.Rand) Energy {
 			break
 		}
 		point := ray.Moved(hit.dist)
-		normal, mat := hit.surface.At(point)
+		normal, mat := hit.surface.At(point, ray.Dir)
 		energy = energy.Merged(mat.Emit(normal, ray.Dir), signal)
 		signal = signal.RandomGain(rnd) // "Russian Roulette"
 		if signal == (Energy{}) {
@@ -181,7 +183,7 @@ func (r *Renderer) next(pixels chan<- uint) uint {
 	count := uint(1)
 	if r.Adapt > 1 {
 		color := r.image.Average(r.cursor) // TODO: inconsistent with other image func indices
-		if color.Amount() < 255 {          // TODO: more elegance, less magic number
+		if color.Average() < 255 {         // TODO: more elegance, less magic number
 			noise := r.image.Noise(r.cursor * Stride)
 			noiseRatio := (noise + 1) / (r.image.meanVariance + 1)
 			targetCount := noiseRatio * r.image.meanCount

@@ -98,8 +98,11 @@
 
 # Large break
 
-## .obj models
+## .obj models & environments
 
+- https://clara.io/library
+- http://hdri-skies.com/
+- https://viewer.autodesk.com
 - https://benedikt-bitterli.me/tungsten.html
 - http://www.pbrt.org/scenes-v3.html
 - http://students.cs.tamu.edu/hrg/viza656/pr04/index.html
@@ -107,6 +110,7 @@
 
 ## refs
 
+- https://www.youtube.com/watch?v=U9rgG2vPAvQ
 - http://people.tamu.edu/~ergun/courses/viza656/
 - https://blog.frogslayer.com/kd-trees-for-faster-ray-tracing-with-triangles/
 - https://github.com/prman-pixar/RenderManForBlender/wiki/Path-tracing,-sampler-settings-and-noise-reduction-tips
@@ -114,6 +118,9 @@
 
 ## features to try
 
+- importance sampling (http://blog.yiningkarlli.com/2015/02/multiple-importance-sampling.html)
+- wireframe renders
+- displacement maps (http://blog.yiningkarlli.com/2017/05/subdivision-and-displacement.html)
 - bidirectional path tracing
 - metropolis light transport
 - bilateral smoothing filter
@@ -123,13 +130,3 @@
 - layered materials
 - distributed/networked rendering
 - chromatic aberration
-
-## renders
-
-```
-go run cmd/pbr/*.go fixtures/models/chair.obj chair.png -heat heat.png -noise noise.png -from 400,400,0 -to "10,75,-600" -sky 200,250,300 -lens 150 -fstop 2.8
-
-go build ./cmd/pbr
-./pbr fixtures/models/chair.obj chair.png -heat heat.png -noise noise.png -from 400,400,0 -to "10,75,-600" -sky 200,250,300 -lens 150 -fstop 2.8 -profile
-go tool pprof --pdf ./pbr ./cpu.pprof > profile.pdf && open profile.pdf
-```

@@ -33,6 +33,7 @@ func NewScene(up, down *Energy) *Scene {
 }
 
 // Intersect tests whether a ray hits any objects in the scene
+// TODO: implement a BSP tree and compare
 func (s *Scene) Intersect(ray *Ray3) Hit {
 	return s.tree.Intersect(ray)
 	// return s.tree.IntersectSurfaces(ray) // unoptimized
@@ -68,19 +69,14 @@ func (s *Scene) Add(surfaces ...Surface) {
 }
 
 func (s *Scene) Info() (box *Box, center Vector3, surfaces []Surface) {
-	// c := Vector3{}
-	// for _, s := range s.Surfaces {
-	// 	c = c.Plus(s.Center())
-	// }
-	// center = c.Scaled(1 / float64(len(s.Surfaces)))
-	b := s.tree.box
+	b := BoxAround(s.Surfaces...)
 	center = b.Min.Plus(b.Max).Scaled(0.5)
-	return s.tree.box, center, s.Surfaces
+	return b, center, s.Surfaces
 }
 
 // TODO: make this called automatically by anything that depends on it instead of forcing that onto the visible API
 func (s *Scene) Prepare() {
-	s.tree = NewTree(BoxAround(s.Surfaces...), s.Surfaces, 0, "ROOT")
+	s.tree = NewTree(s.Surfaces)
 }
 
 // SetPano sets the environment to an HDR (radiance) panoramic mapping.

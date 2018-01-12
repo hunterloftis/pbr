@@ -21,16 +21,17 @@ type Options struct {
 	Width  int `help:"rendering width in pixels"`
 	Height int `help:"rendering height in pixels"`
 
-	Sky    *pbr.Energy `help:"ambient sky color"`
-	Ground *pbr.Energy `help:"ground color"`
-	Env    string      `help:"environment as a panoramic hdr radiosity map (.hdr file)"`
-	Rad    float64     `help:"exposure of the hdr (radiosity) environment map"`
-
-	Adapt    float64 `help:"adaptive sampling multiplier"`
-	Bounce   int     `help:"number of light bounces"`
-	Direct   int     `help:"number of direct rays to cast"`   // TODO: implement
-	Indirect int     `help:"number of indirect rays to cast"` // TODO: implement
-	Complete float64 `help:"number of samples-per-pixel at which to exit"`
+	Sky      *pbr.Energy `help:"ambient sky color"`
+	Ground   *pbr.Energy `help:"ground color"`
+	Env      string      `help:"environment as a panoramic hdr radiosity map (.hdr file)"`
+	Rad      float64     `help:"exposure of the hdr (radiosity) environment map"`
+	Floor    bool        `help:"create a floor underneath the scene"`
+	Adapt    float64     `help:"adaptive sampling multiplier"`
+	Bounce   int         `help:"number of light bounces"`
+	Direct   int         `help:"number of direct rays to cast"`   // TODO: implement
+	Indirect int         `help:"number of indirect rays to cast"` // TODO: implement
+	Complete float64     `help:"number of samples-per-pixel at which to exit"`
+	Thin     bool        `help:"treat transparent surfaces as having zero thickness"`
 
 	From      *pbr.Vector3 `help:"camera position"`
 	To        *pbr.Vector3 `help:"camera target"`
@@ -57,8 +58,8 @@ func options() *Options {
 		Indirect:  1,
 		Complete:  math.Inf(1),
 		Lens:      50,
-		Polar:     math.Pi / 10,
-		Longitude: math.Pi / 8,
+		Polar:     0,
+		Longitude: 0,
 		FStop:     4,
 		Expose:    1,
 	}
@@ -90,7 +91,7 @@ func completeOptions(o *Options, bounds *pbr.Box, center pbr.Vector3, surfaces [
 					max = dist
 				}
 			}
-			o.Dist = max
+			o.Dist = max * 1.1
 		}
 		from := ray.Moved(o.Dist)
 		o.From = &from

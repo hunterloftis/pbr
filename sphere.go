@@ -38,8 +38,7 @@ func (s *Sphere) Box() *Box {
 // Intersect tests whether the sphere intersects a given ray.
 // http://tfpsly.free.fr/english/index.html?url=http://tfpsly.free.fr/english/3d/Raytracing.html
 func (s *Sphere) Intersect(ray *Ray3) Hit {
-	ok, _ := s.box.Check(ray)
-	if !ok {
+	if ok, _ := s.box.Check(ray); !ok {
 		return Miss
 	}
 	i := s.Pos.Inverse()
@@ -69,7 +68,7 @@ func (s *Sphere) Intersect(ray *Ray3) Hit {
 }
 
 // At returns the surface normal given a point on the surface.
-func (s *Sphere) At(point Vector3) (Direction, *Material) {
+func (s *Sphere) At(point Vector3, dir Direction) (Direction, *Material) {
 	i := s.Pos.Inverse()
 	p := i.MultPoint(point)
 	return s.Pos.MultDir(p.Unit()), s.Mat

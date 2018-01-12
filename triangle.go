@@ -36,8 +36,7 @@ func (t *Triangle) Box() *Box {
 // Intersect determines whether or not, and where, a Ray intersects this Triangle
 // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
 func (t *Triangle) Intersect(ray *Ray3) Hit {
-	ok, _ := t.box.Check(ray)
-	if !ok {
+	if ok, _ := t.box.Check(ray); !ok {
 		return Miss
 	}
 	h := ray.Dir.Cross(Direction(t.edge2))
@@ -72,12 +71,18 @@ func (t *Triangle) Center() Vector3 {
 }
 
 // At returns the material at a point on the Triangle
-func (t *Triangle) At(v Vector3) (norm Direction, mat *Material) {
-	return t.Normal(v), t.Mat
+func (t *Triangle) At(v Vector3, dir Direction) (norm Direction, mat *Material) {
+	n := t.Normal(v)
+	if !t.Mat.d.Thin {
+		return n, t.Mat
+	}
+	if n.Cos(dir) > 0 {
+		return n.Inv(), t.Mat
+	}
+	return n, t.Mat
 }
 
 // SetNormals sets values for each vertex normal
-// TODO: figure out proper use of pointers
 func (t *Triangle) SetNormals(a, b, c *Direction) {
 	if a != nil {
 		t.Normals[0] = *a

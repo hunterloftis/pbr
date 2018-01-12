@@ -18,7 +18,7 @@ func main() {
 }
 
 func run(o *Options) error {
-	scene, err := loadScene(o.Scene, o.Sky, o.Ground)
+	scene, err := loadScene(o.Scene, o.Sky, o.Ground, o.Thin)
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,6 @@ func run(o *Options) error {
 	bounds, center, surfaces := scene.Info()
 	showSceneInfo(bounds, center, len(surfaces))
 	completeOptions(o, bounds, center, surfaces)
-	showRenderInfo(o)
 
 	if o.Info {
 		return nil
@@ -35,6 +34,15 @@ func run(o *Options) error {
 	err = loadEnvironment(scene, o.Env, o.Rad)
 	if err != nil {
 		return err
+	}
+
+	// TODO: implement a Plane surface type and use that instead of a scaled cube
+	if o.Floor {
+		p := pbr.Plastic(0.5, 0.5, 0.5, 0.1)
+		t := pbr.Trans(center.X, bounds.Min.Y-0.5, center.Z)
+		s := pbr.Scale(100000, 1, 100000)
+		floor := pbr.UnitCube(p, t, s)
+		scene.Add(floor)
 	}
 
 	// from, to, focus := cameraOptions(o, bounds, center, surfaces)
@@ -50,6 +58,8 @@ func run(o *Options) error {
 		Adapt:   o.Adapt,
 	})
 
+	showRenderInfo(o, camera)
+	scene.Prepare() // TODO: make this unnecessary
 	err = render(renderer, o)
 	if err != nil {
 		return err
@@ -78,6 +88,7 @@ func render(r *pbr.Renderer, o *Options) error {
 		select {
 		case <-interrupt:
 			r.Stop()
+			showProgress(r, start, o.Out)
 		default:
 			if float64(samples) >= cutoff {
 				r.Stop()
