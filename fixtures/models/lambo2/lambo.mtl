@@ -1,5 +1,33 @@
 # Blender MTL File: 'None'
-# Material Count: 27
+# Material Count: 28
+
+newmtl Glass_Physical_Rough
+Ns 950
+Ka 0.000000 0.000000 0.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.020000 0.020000 0.020000
+Ni 1.000000
+d 0.200000
+illum 2
+
+newmtl LightAssemblies_MainLight_Physical
+Ns 1000
+Ka 0.000000 0.000000 0.000000
+Kd 0.690196 0.690196 0.690196
+Ks 0.020000 0.020000 0.020000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl LightAssemblies_Reflectors_Physical
+Ns 1000
+Ke 2000.000 2000.000 2000.000
+Ka 0.000000 0.000000 0.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.020000 0.020000 0.020000
+Ni 1.000000
+d 1.000000
+illum 2
 
 newmtl BackupLights_Physical
 Ns 1000
@@ -118,25 +146,6 @@ newmtl Interior_Physical
 Ns 96.078431
 Ka 0.000000 0.000000 0.000000
 Kd 0.239216 0.239216 0.239216
-Ks 0.020000 0.020000 0.020000
-Ni 1.000000
-d 1.000000
-illum 2
-
-newmtl LightAssemblies_MainLight_Physical
-Ns 1000
-Ke 10000.00 10000.00 10000.00
-Ka 0.000000 0.000000 0.000000
-Kd 0.690196 0.690196 0.690196
-Ks 0.020000 0.020000 0.020000
-Ni 1.000000
-d 1.000000
-illum 2
-
-newmtl LightAssemblies_Reflectors_Physical
-Ns 1000
-Ka 0.000000 0.000000 0.000000
-Kd 1.000000 1.000000 1.000000
 Ks 0.020000 0.020000 0.020000
 Ni 1.000000
 d 1.000000

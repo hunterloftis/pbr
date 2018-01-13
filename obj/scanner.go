@@ -106,6 +106,7 @@ type phong struct {
 	ks   pbr.Energy // specular color
 	ke   pbr.Energy // emissive color
 	ni   float64    // refractive index
+	pm   float64    // metal percent
 }
 
 func (s *Scanner) ReadMaterials(r io.Reader, thin bool) (err error) {
@@ -153,6 +154,10 @@ func (s *Scanner) ReadMaterials(r io.Reader, thin bool) (err error) {
 			if mat.ni, err = strconv.ParseFloat(args[0], 64); err != nil {
 				return err
 			}
+		case "Pm":
+			if mat.pm, err = strconv.ParseFloat(args[0], 64); err != nil {
+				return err
+			}
 		}
 	}
 	s.addMaterial(mat, thin)
@@ -160,6 +165,7 @@ func (s *Scanner) ReadMaterials(r io.Reader, thin bool) (err error) {
 }
 
 // https://github.com/AnalyticalGraphicsInc/obj2gltf#material-types
+// http://exocortex.com/blog/extending_wavefront_mtl_to_support_pbr
 // TODO: refractive index (ni) => .Fresnel
 func (s *Scanner) addMaterial(mat phong, thin bool) {
 	if len(mat.name) == 0 {
@@ -170,6 +176,8 @@ func (s *Scanner) addMaterial(mat phong, thin bool) {
 		Transmit: mat.tr,
 		Gloss:    mat.ns / 1000,
 		Thin:     thin,
+		Light:    mat.ke,
+		Metal:    mat.pm,
 	}
 	if mat.tr > 0 { // TODO: don't assume all transparent objects are glass?
 		if d.Thin {
@@ -179,11 +187,9 @@ func (s *Scanner) addMaterial(mat phong, thin bool) {
 			d.Color = d.Color.Amplified(mat.tr)
 		}
 		d.Fresnel = pbr.Energy{0.042, 0.042, 0.042} // Glass
-	} else if mat.ks.Average() == 1 { // TODO: is this the best way to detect metals?
-		d.Metal = 1
-		d.Fresnel = d.Color
-		d.Color = pbr.Energy{0, 0, 0}
-		d.Gloss *= 0.8
+	} else if d.Metal > 0 {
+		d.Fresnel = mat.kd
+		d.Color = mat.ks
 	}
 	s.lib[mat.name] = pbr.NewMaterial(d)
 }

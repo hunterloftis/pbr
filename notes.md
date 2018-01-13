@@ -110,6 +110,9 @@
 
 ## refs
 
+- read on bsdf:
+  - http://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_notes.pdf
+  - http://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_slides.pdf
 - https://www.youtube.com/watch?v=U9rgG2vPAvQ
 - http://people.tamu.edu/~ergun/courses/viza656/
 - https://blog.frogslayer.com/kd-trees-for-faster-ray-tracing-with-triangles/
@@ -118,15 +121,21 @@
 
 ## features to try
 
+- instead of pixel indices, send closures? (https://archive.fosdem.org/2014/schedule/event/hpc_devroom_go/attachments/slides/486/export/events/attachments/hpc_devroom_go/slides/486/FOSDEM14_HPC_devroom_14_GoCUDA.pdf)
 - importance sampling (http://blog.yiningkarlli.com/2015/02/multiple-importance-sampling.html)
 - wireframe renders
 - displacement maps (http://blog.yiningkarlli.com/2017/05/subdivision-and-displacement.html)
 - bidirectional path tracing
 - car paint (http://www.msawtell.com/research/carpaint/carpaint.shtml)
 - metropolis light transport
+- GPU acceleration
+  - (https://archive.fosdem.org/2014/schedule/event/hpc_devroom_go/)
+  - https://github.com/go-gl/cl
+  - https://godoc.org/github.com/samuel/go-opencl/cl
 - bilateral smoothing filter
 - more abstract Material interface to support things like atmosphere, hair, smooth coat, participating media (smoke), etc.
 - shaped bokeh
+- STL support
 - materials: texture maps, normal maps
 - layered materials
 - distributed/networked rendering

@@ -36,5 +36,9 @@ bmw2:
 
 lambo:
 	go build ./cmd/pbr
-	./pbr fixtures/models/lambo2/lamborghini-aventador-pbribl.obj -floor -out lambo.png -polar 3.6 -longitude 0.1 -env fixtures/images/293.hdr -rad 400 -width 1152 -height 648 -lens 60 -fstop 1.4 -to=-0.1,0.5,0.1 -dist 7.5 -bounce 7 -complete 5000
+	./pbr fixtures/models/lambo2/lambo.obj -floor -out lambo.png -polar 3.6 -longitude 0.1 -env fixtures/images/293.hdr -rad 500 -width 1152 -height 648 -lens 60 -fstop 1.4 -to=-0.1,0.5,0.1 -dist 7.5 -focus=-2.2658,0.5542,0 -bounce 10 -complete 5000
 	open lambo.png
+
+count:
+	find . -name '*.go' -not -path "./vendor/*" | xargs wc -l
+	
