@@ -11,6 +11,7 @@ import (
 // Options configures rendering behavior.
 // TODO: add "watermark"
 // TODO: --filter (per pixel samples after which to apply smoothing filters; 0 = off)
+// TODO: change polar/latitude to lat/lon
 type Options struct {
 	Scene string `arg:"positional,required" help:"input scene .obj"`
 	Info  bool   `help:"output scene information and exit"`
