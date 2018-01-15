@@ -38,7 +38,7 @@ $ pbr $GOPATH/src/github.com/hunterloftis/pbr/fixtures/models/falcon.obj -longit
 $ open falcon.png
 ```
 
-![falcon render](https://user-images.githubusercontent.com/364501/34923693-23b9425a-f96c-11e7-9d2e-611f7fffdd8f.png)
+![falcon render](https://user-images.githubusercontent.com/364501/34923876-aaa1f07c-f96d-11e7-8dc2-199373bdb51e.png)
 
 ## API
 
