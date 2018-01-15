@@ -1,0 +1,16 @@
+out/*
+bin/*
+.DS_Store
+profile.*
+*.pngvendor
+vendor
+render.png
+fixtures/models/lucy.obj
+*.png
+cpu.pprof
+pbrfixtures/images/grace.hdr
+fixtures/images/grace.hdr
+pbr
+fixtures/images/*.hdr
+fixtures/models/*.obj
+fixtures/models/*/
