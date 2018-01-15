@@ -1,17 +1,25 @@
+.PHONY: fixtures
+
 test:
 	go build ./cmd/pbr
-	./pbr fixtures/models/lucy.obj -complete 2
-	open lucy.png
+	./pbr fixtures/models/destroyer.obj -dist 12000 -polar 0.4 -width 1200 -height 500 -complete 10
+	open destroyer.png
+
+count:
+	find . -name '*.go' -not -path "./vendor/*" | xargs wc -l
+
+fixtures:
+	@echo "download https://drive.google.com/drive/folders/1hXQfQ9bZOIt8TvyoaUrRpELMxhKzrOCG?usp=sharing into ./fixtures"
+
+skull:
+	go build ./cmd/pbr
+	./pbr fixtures/models/skull.obj -from 11,4,12 -to=-0.57,3.2,-1.69 -lens 50 -fstop 0.3 -expose 2 -complete 50
+	open skull.png
 
 chair:
 	go build ./cmd/pbr
 	./pbr fixtures/models/chair.obj -from 400,400,0 -to 10,75,-600 -sky 200,250,300 -lens 150 -fstop 2.8 -floor --complete 10
 	open chair.png
-
-skull:
-	go build ./cmd/pbr
-	./pbr fixtures/models/skull.obj -from 11,4,12 -to=-0.57,3.2,-1.69 -env fixtures/images/glacier.hdr -lens 50 -fstop 0.3 -expose 2 -complete 50
-	open skull.png
 
 lucy:
 	go build ./cmd/pbr
@@ -32,11 +40,3 @@ lambo:
 	go build ./cmd/pbr
 	./pbr fixtures/models/lambo2/lambo.obj -floor -out lambo.png -polar 3.6 -longitude 0.1 -env fixtures/images/293.hdr -rad 500 -width 1152 -height 648 -lens 60 -fstop 1.4 -to=-0.1,0.5,0.1 -dist 7.5 -focus=-2.2658,0.5542,0 -complete 512
 	open lambo.png
-
-count:
-	find . -name '*.go' -not -path "./vendor/*" | xargs wc -l
-	
-destroyer:
-	go build ./cmd/pbr
-	./pbr fixtures/models/destroyer.obj -dist 12000 -longitude 0 -width 1200 -height 500 -complete 10
-	open destroyer.png
