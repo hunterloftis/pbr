@@ -4,7 +4,7 @@ Package pbr implements Physically-Based Rendering with a Monte Carlo path tracer
 [[ Documentation ]](https://godoc.org/github.com/hunterloftis/pbr/pbr)
 [[ Github ]](https://github.com/hunterloftis/pbr)
 
-[![Render](https://user-images.githubusercontent.com/364501/34923521-c39b132c-f96a-11e7-9a27-f79f67268079.png)]
+![Render](https://user-images.githubusercontent.com/364501/34923521-c39b132c-f96a-11e7-9a27-f79f67268079.png)
 
 - [Unbiased Monte-Carlo integration](https://en.wikipedia.org/wiki/Monte_Carlo_integration)
 - [Adaptive sampling](https://renderman.pixar.com/resources/RenderMan_20/risSampling.html)
