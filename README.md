@@ -6,6 +6,10 @@ Package pbr implements Physically-Based Rendering with a Monte Carlo path tracer
 
 ![Render](https://user-images.githubusercontent.com/364501/34923521-c39b132c-f96a-11e7-9a27-f79f67268079.png)
 
+```
+pbr lambo.obj -floor -polar 3.6 -longitude 0.1 -env 293.hdr -rad 500 -lens 60 -fstop 1.4 -to=-0.1,0.5,0.1 -dist 7.5 -focus=-2.2658,0.5542,0
+```
+
 - [Unbiased Monte-Carlo integration](https://en.wikipedia.org/wiki/Monte_Carlo_integration)
 - [Adaptive sampling](https://renderman.pixar.com/resources/RenderMan_20/risSampling.html)
 - [Russian roulette](https://computergraphics.stackexchange.com/questions/2316/is-russian-roulette-really-the-answer)
