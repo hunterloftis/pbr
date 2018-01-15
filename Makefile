@@ -13,7 +13,7 @@ fixtures:
 
 skull:
 	go build ./cmd/pbr
-	./pbr fixtures/models/skull.obj -from 11,4,12 -to=-0.57,3.2,-1.69 -lens 50 -fstop 0.3 -expose 2 -complete 50
+	./pbr fixtures/models/skull.obj -complete 100
 	open skull.png
 
 chair:

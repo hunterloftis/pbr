@@ -1,7 +1,7 @@
 # pbr: a Physically-Based 3D Renderer in Go
 
 Package pbr implements Physically-Based Rendering with a Monte Carlo path tracer.
-[[ Documentation ]](https://godoc.org/github.com/hunterloftis/pbr/pbr)
+[[ Documentation ]](https://godoc.org/github.com/hunterloftis/pbr)
 [[ Github ]](https://github.com/hunterloftis/pbr)
 
 ![Render](https://user-images.githubusercontent.com/364501/34923521-c39b132c-f96a-11e7-9a27-f79f67268079.png)
@@ -27,10 +27,20 @@ $ pbr lambo.obj -floor -polar 3.6 -longitude 0.1 -env 293.hdr -rad 500 -lens 60 
   - Sensor, aperture, focal length, focus, depth-of-field
 - [Supersampled anti-aliasing](https://en.wikipedia.org/wiki/Supersampling)
 - 100% Go with no system dependencies
-	- Fully concurrent with a sequential API
-	- CLI and programmable API
+	- Sequential API, concurrent execution
+	- CLI
 
 ## Try it
+
+Download:
+
+```
+$ go get github.com/hunterloftis/pbr
+$ cd $GOPATH/src/github.com/hunterloftis/pbr
+$ dep ensure
+```
+
+Run:
 
 ```
 $ go install github.com/hunterloftis/pbr/cmd/pbr
@@ -42,7 +52,7 @@ $ open falcon.png
 
 ## API
 
-See [GoDoc](https://godoc.org/github.com/hunterloftis/pbr/pbr)
+See [GoDoc](https://godoc.org/github.com/hunterloftis/pbr)
 
 ## CLI
 
@@ -83,3 +93,8 @@ Options:
   --expose EXPOSE        exposure multiplier [default: 1]
   --help, -h             display this help and exit
 ```
+
+## More examples
+
+I've gitignored the /fixtures directory to keep large binaries out of the repository.
+You can download the Makefile fixtures from [Google Drive](https://drive.google.com/drive/folders/1hXQfQ9bZOIt8TvyoaUrRpELMxhKzrOCG?usp=sharing) for a library of models, materials, and HDR environments to play with.
