@@ -43,7 +43,7 @@ See [GoDoc](https://godoc.org/github.com/hunterloftis/pbr/pbr)
 ## CLI
 
 ```
-Usage: pbr [--info] [--out OUT] [--heat HEAT] [--noise NOISE] [--profile] [--width WIDTH] [--height HEIGHT] [--sky SKY] [--ground GROUND] [--env ENV] [--rad RAD] [--floor] [--adapt ADAPT] [--bounce BOUNCE] [--direct DIRECT] [--indirect INDIRECT] [--complete COMPLETE] [--thin] [--from FROM] [--to TO] [--focus FOCUS] [--dist DIST] [--polar POLAR] [--longitude LONGITUDE] [--lens LENS] [--fstop FSTOP] [--expose EXPOSE] SCENE
+Usage: pbr SCENE [options]
 
 Positional arguments:
   SCENE                  input scene .obj
