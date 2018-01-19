@@ -1,5 +1,9 @@
 .PHONY: fixtures
 
+hello:
+	go run ./examples/hello.go
+	open hello.png
+	
 test:
 	go build ./cmd/pbr
 	./pbr fixtures/models/destroyer.obj -dist 12000 -polar 0.4 -width 1200 -height 500 -complete 10
@@ -38,5 +42,5 @@ bmw2:
 
 lambo:
 	go build ./cmd/pbr
-	./pbr fixtures/models/lambo2/lambo.obj -floor -out lambo.png -polar 3.6 -longitude 0.1 -env fixtures/images/293.hdr -rad 500 -width 1152 -height 648 -lens 60 -fstop 1.4 -to=-0.1,0.5,0.1 -dist 7.5 -focus=-2.2658,0.5542,0 -complete 512
+	./pbr fixtures/models/lambo2/lambo.obj -noise lambo-noise.png -heat lambo-heat.png -floor -lon 3.6 -lat 0.1 -env fixtures/images/293.hdr -rad 450 -lens 60 -fstop 1.4 -target=-0.1,0.5,0.1 -dist 7.5 -focus=-2.2658,0.5542,0 -direct 0 -complete 512
 	open lambo.png

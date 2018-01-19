@@ -1,4 +1,4 @@
-package pbr
+package geom
 
 import (
 	"math"
@@ -7,6 +7,8 @@ import (
 
 // Direction is a unit vector that specifies a direction in 3D space.
 type Direction Vector3
+
+var Up = Direction{0, 1, 0}
 
 // Unit normalizes a Vector3 into a Direction.
 func (a Vector3) Unit() Direction {

@@ -1,8 +1,10 @@
-package pbr
+package surface
 
 import (
 	"math"
 	"sort"
+
+	"github.com/hunterloftis/pbr/geom"
 )
 
 // http://slideplayer.com/slide/7653218/
@@ -59,7 +61,7 @@ func overlaps(box *Box, surfaces []Surface) []Surface {
 }
 
 // http://slideplayer.com/slide/7653218/
-func (t *Tree) Intersect(ray *Ray3) Hit {
+func (t *Tree) Intersect(ray *geom.Ray3) Hit {
 	hit, min, max := t.box.Check(ray)
 	if !hit {
 		return Miss
@@ -69,30 +71,30 @@ func (t *Tree) Intersect(ray *Ray3) Hit {
 		return hit
 	}
 	var near, far *Tree
-	if ray.dirArray[t.axis] >= 0 {
+	if ray.DirArray[t.axis] >= 0 {
 		near, far = t.left, t.right
 	} else {
 		near, far = t.right, t.left
 	}
-	split := (t.wall - ray.orArray[t.axis]) * ray.invArray[t.axis]
+	split := (t.wall - ray.OrArray[t.axis]) * ray.InvArray[t.axis]
 	if min >= split {
 		return far.Intersect(ray)
 	}
 	if max <= split {
 		return near.Intersect(ray)
 	}
-	if nearHit := near.Intersect(ray); nearHit.ok {
+	if nearHit := near.Intersect(ray); nearHit.Ok {
 		return nearHit
 	}
 	return far.Intersect(ray)
 }
 
-func (t *Tree) IntersectSurfaces(ray *Ray3, max float64) Hit {
+func (t *Tree) IntersectSurfaces(ray *geom.Ray3, max float64) Hit {
 	closest := Miss
 	for _, s := range t.surfaces {
 		hit := s.Intersect(ray)
-		if hit.ok && hit.dist <= max {
-			max = hit.dist
+		if hit.Ok && hit.Dist <= max {
+			max = hit.Dist
 			closest = hit
 		}
 	}

@@ -100,6 +100,7 @@
 
 ## .obj models & environments
 
+- https://benedikt-bitterli.me/resources/
 - https://grabcad.com/library?page=1&time=all_time&sort=popular
 - https://clara.io/library
 - http://hdri-skies.com/
@@ -111,6 +112,9 @@
 
 ## refs
 
+- noise: https://support.solidangle.com/display/ARP/Removing+Noise
+- sampling: https://support.solidangle.com/display/AFMUG/Samples
+- class notes: http://www.cs.cornell.edu/courses/cs6630/2012sp/notes/07pathtr-notes.pdf
 - pixar: https://www.khanacademy.org/partner-content/pixar
 - performance: https://github.com/dgryski/go-perfbook/blob/master/performance.md
 - read on bsdf:
@@ -143,3 +147,29 @@
 - layered materials
 - distributed/networked rendering
 - chromatic aberration
+
+## plan for v3:
+
+- Indirect: Max number of ray branches for rough surfaces (1 + (1 - gloss) * indirect)
+- Direct: Max number of direct samples for diffuse surfaces
+- Batching pixels to evaluate to minimize communication overhead between goroutines
+- Maybe only branch on first hit? (like in Cycles)
+  - https://docs.blender.org/manual/en/dev/render/cycles/settings/scene/render/integrator.html#branched-path-tracing
+- Branching:
+  - Idea 1: For any BSDF options > 0, send a ray out, weight the results by the % chance of that option.
+  - Idea 2: Just send out N rays and randomly choose what type of ray they are (as currently happening)
+- Minimum bounces before starting Russian Roulette
+  - https://docs.blender.org/manual/en/dev/render/cycles/settings/scene/render/integrator.html#bounces
+- instead of tracking "depth," track diffuseDepth, refractDepth, reflectDepth, etc
+  - that way, branching can happen, for instance, whenever diffuseDepth < 2
+
+```
+# 8 * (1 - gloss) + 1 branches on every hit, <= 8 direct light samples taken at each diffuse surface, 16 camera rays per pixel / average
+$ pbr -branch 8 -direct 8 -complete 16
+```
+
+## How to make a path tracer faster:
+
+1. You optimize the ray intersection tests
+2. You budget your rays more intelligently
+3. You parallelize the system and scale out

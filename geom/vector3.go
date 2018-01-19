@@ -1,4 +1,4 @@
-package pbr
+package geom
 
 import (
 	"fmt"
@@ -7,9 +7,10 @@ import (
 	"strings"
 )
 
-var Vector31 = Vector3{1, 1, 1}
+var UnitVector3 = Vector3{1, 1, 1}
 
 // Vector3 holds x, y, z values.
+// TODO: rename to Vec3, V3, Vector, V, Vec? Used very frequently.
 type Vector3 struct {
 	X, Y, Z float64
 }

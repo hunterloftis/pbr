@@ -7,28 +7,31 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hunterloftis/pbr"
+	"github.com/hunterloftis/pbr/geom"
+	"github.com/hunterloftis/pbr/rgb"
+	"github.com/hunterloftis/pbr/surface"
+	"github.com/hunterloftis/pbr/surface/material"
 )
 
 type Scanner struct {
 	scanner *bufio.Scanner
-	next    []pbr.Surface
+	next    []surface.Surface
 	mtllib  string
 	err     error
-	v       []pbr.Vector3
-	vn      []pbr.Direction
-	lib     map[string]*pbr.Material
-	mat     *pbr.Material
+	v       []geom.Vector3
+	vn      []geom.Direction
+	lib     map[string]*material.Material
+	mat     *material.Material
 }
 
 func NewScanner(r io.Reader) *Scanner {
 	return &Scanner{
 		scanner: bufio.NewScanner(r),
-		next:    make([]pbr.Surface, 0),
-		v:       make([]pbr.Vector3, 0),
-		vn:      make([]pbr.Direction, 0),
-		lib:     make(map[string]*pbr.Material),
-		mat:     pbr.Plastic(1, 1, 1, 0.7),
+		next:    make([]surface.Surface, 0),
+		v:       make([]geom.Vector3, 0),
+		vn:      make([]geom.Direction, 0),
+		lib:     make(map[string]*material.Material),
+		mat:     material.Plastic(1, 1, 1, 0.7),
 	}
 }
 
@@ -52,14 +55,14 @@ func (s *Scanner) Scan() bool {
 
 		switch key {
 		case "v":
-			v, err := pbr.ParseVector3(strings.Join(args, ","))
+			v, err := geom.ParseVector3(strings.Join(args, ","))
 			if err != nil {
 				s.err = err
 				return false
 			}
 			s.v = append(s.v, v)
 		case "vn":
-			vn, err := pbr.ParseDirection(strings.Join(args, ","))
+			vn, err := geom.ParseDirection(strings.Join(args, ","))
 			if err != nil {
 				s.err = err
 				return false
@@ -70,8 +73,8 @@ func (s *Scanner) Scan() bool {
 			if size < 3 {
 				s.err = fmt.Errorf("face requires at least 3 vertices (contains %v)", size)
 			}
-			v := make([]pbr.Vector3, size)
-			n := make([]*pbr.Direction, size)
+			v := make([]geom.Vector3, size)
+			n := make([]*geom.Direction, size)
 			var err error
 			for i := 0; i < size; i++ {
 				v[i], n[i], err = s.vertex(args[i])
@@ -81,7 +84,7 @@ func (s *Scanner) Scan() bool {
 				}
 			}
 			for i := 2; i < size; i++ {
-				t := pbr.NewTriangle(v[0], v[i-1], v[i], s.mat)
+				t := surface.NewTriangle(v[0], v[i-1], v[i], s.mat)
 				t.SetNormals(n[0], n[i-1], n[i])
 				s.next = append(s.next, t)
 			}
@@ -100,11 +103,11 @@ func (s *Scanner) Scan() bool {
 
 type phong struct {
 	name string
-	kd   pbr.Energy // diffuse color
+	kd   rgb.Energy // diffuse color
 	tr   float64    // transmission
 	ns   float64    // specular exponent
-	ks   pbr.Energy // specular color
-	ke   pbr.Energy // emissive color
+	ks   rgb.Energy // specular color
+	ke   rgb.Energy // emissive color
 	ni   float64    // refractive index
 	pm   float64    // metal percent
 }
@@ -125,7 +128,7 @@ func (s *Scanner) ReadMaterials(r io.Reader, thin bool) (err error) {
 			s.addMaterial(mat, thin)
 			mat = phong{name: args[0]}
 		case "Kd":
-			if mat.kd, err = pbr.ParseEnergy(strings.Join(args, ",")); err != nil {
+			if mat.kd, err = rgb.ParseEnergy(strings.Join(args, ",")); err != nil {
 				return err
 			}
 		case "Tr":
@@ -143,11 +146,11 @@ func (s *Scanner) ReadMaterials(r io.Reader, thin bool) (err error) {
 				return err
 			}
 		case "Ks":
-			if mat.ks, err = pbr.ParseEnergy(strings.Join(args, ",")); err != nil {
+			if mat.ks, err = rgb.ParseEnergy(strings.Join(args, ",")); err != nil {
 				return err
 			}
 		case "Ke":
-			if mat.ke, err = pbr.ParseEnergy(strings.Join(args, ",")); err != nil {
+			if mat.ke, err = rgb.ParseEnergy(strings.Join(args, ",")); err != nil {
 				return err
 			}
 		case "Ni":
@@ -171,7 +174,7 @@ func (s *Scanner) addMaterial(mat phong, thin bool) {
 	if len(mat.name) == 0 {
 		return
 	}
-	d := pbr.MaterialDesc{
+	d := material.MaterialDesc{
 		Color:    mat.kd,
 		Transmit: mat.tr,
 		Gloss:    mat.ns / 1000,
@@ -186,15 +189,15 @@ func (s *Scanner) addMaterial(mat phong, thin bool) {
 			d.Transmit = 1
 			d.Color = d.Color.Amplified(mat.tr)
 		}
-		d.Fresnel = pbr.Energy{0.042, 0.042, 0.042} // Glass
+		d.Fresnel = rgb.Energy{0.042, 0.042, 0.042} // Glass
 	} else if d.Metal > 0 {
 		d.Fresnel = mat.kd
 		d.Color = mat.ks
 	}
-	s.lib[mat.name] = pbr.NewMaterial(d)
+	s.lib[mat.name] = material.New(d)
 }
 
-func (s *Scanner) Surface() pbr.Surface {
+func (s *Scanner) Surface() surface.Surface {
 	next := s.next[0]
 	s.next = s.next[1:]
 	return next
@@ -210,7 +213,7 @@ func (s *Scanner) Err() error {
 	return s.err
 }
 
-func (s *Scanner) vertex(val string) (v pbr.Vector3, n *pbr.Direction, err error) {
+func (s *Scanner) vertex(val string) (v geom.Vector3, n *geom.Direction, err error) {
 	fields := strings.Split(val, "/")
 	const position, texture, normal = 0, 1, 2
 	if len(fields) > position {
