@@ -69,12 +69,12 @@ Both of these techniques allow the renderer to spend its Ray-Scene intersection 
 Both closeups of the Millennium Falcon were rendered in 10 minutes.
 The top image used naive sampling while the bottom used the default adaptive and branching settings:
 
-![falcon adaptive](https://user-images.githubusercontent.com/364501/35202471-f2fd01bc-fef0-11e7-8a2a-e2744228bbc8.png)
-![falcon nonadaptive](https://user-images.githubusercontent.com/364501/35202473-f3143e5e-fef0-11e7-8ab5-cfd56a351dd3.png)
+![falcon adaptive](https://user-images.githubusercontent.com/364501/35202761-753e2d44-fef2-11e7-8d55-4893eb860144.png)
+![falcon nonadaptive](https://user-images.githubusercontent.com/364501/35202760-752b55ca-fef2-11e7-8181-e77e137c1668.png)
 
 This is a heatmap of where the sampler chose to spend more time evaluating noisy pixels:
 
-![falcon heatmap](https://user-images.githubusercontent.com/364501/35202487-00b8ebae-fef1-11e7-8d56-cf059ccd16ab.png)
+![falcon heatmap](https://user-images.githubusercontent.com/364501/35202759-7519367e-fef2-11e7-8cf9-62ad27d378c8.png)
 
 ## Parametric Shapes
 
