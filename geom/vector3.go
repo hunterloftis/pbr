@@ -1,4 +1,4 @@
-package pbr
+package geom
 
 import (
 	"fmt"
@@ -7,9 +7,10 @@ import (
 	"strings"
 )
 
-var Vector31 = Vector3{1, 1, 1}
+var UnitVector3 = Vector3{1, 1, 1}
 
 // Vector3 holds x, y, z values.
+// TODO: rename to Vec3, V3, Vector, V, Vec? Used very frequently.
 type Vector3 struct {
 	X, Y, Z float64
 }
@@ -130,6 +131,12 @@ func (a Vector3) Array() [3]float64 {
 func (a Vector3) Projected(d Direction) Vector3 {
 	b := Vector3(d)
 	return b.Scaled(a.Dot(b))
+}
+
+// Unit normalizes a Vector3 into a Direction.
+func (a Vector3) Unit() Direction {
+	d := a.Len()
+	return Direction{a.X / d, a.Y / d, a.Z / d}
 }
 
 // Set sets the vector from a string value
