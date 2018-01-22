@@ -64,24 +64,59 @@ func (c *Cube) SetGrid(mat *material.Material, size float64) *Cube {
 	return c
 }
 
-// TODO: unify with Box.Check?
 func (c *Cube) Intersect(ray *geom.Ray3) Hit {
+	inv := c.Pos.Inverse() // global to local transform
+	r := inv.MultRay(ray)  // translate ray into local space
+	or := [3]float64{r.Origin.X, r.Origin.Y, r.Origin.Z}
+	dir := [3]float64{r.Dir.X, r.Dir.Y, r.Dir.Z}
+	t0 := 0.0
+	t1 := math.Inf(1)
+	for i := 0; i < 3; i++ {
+		tNear := (-0.5 - or[i]) / dir[i]
+		tFar := (0.5 - or[i]) / dir[i]
+		if tNear > tFar {
+			tNear, tFar = tFar, tNear
+		}
+		if tNear > t0 {
+			t0 = tNear
+		}
+		if tFar < t1 {
+			t1 = tFar
+		}
+		if t0 > t1 {
+			return Miss
+		}
+	}
+	if t0 > 0 {
+		if dist := c.Pos.MultDist(r.Dir.Scaled(t0)).Len(); dist >= bias {
+			return NewHit(c, dist)
+		}
+	}
+	if t1 > 0 {
+		if dist := c.Pos.MultDist(r.Dir.Scaled(t1)).Len(); dist >= bias {
+			return NewHit(c, dist)
+		}
+	}
+	return Miss
+}
+
+// TODO: unify with Box.Check?
+func (c *Cube) Intersect2(ray *geom.Ray3) Hit {
 	// if ok, _, _ := c.box.Check(ray); !ok {
 	// 	return Miss
 	// }
+
 	inv := c.Pos.Inverse() // global to local transform
 	r := inv.MultRay(ray)  // translate ray into local space
-	dir := geom.Vector3(r.Dir).Array()
-	or := r.Origin.Array()
 	min := geom.Vector3{-0.5, -0.5, -0.5}.Array()
 	max := geom.Vector3{0.5, 0.5, 0.5}.Array()
+
 	tmin := 0.0
 	tmax := math.Inf(1)
 	for a := 0; a < 3; a++ {
-		invD := 1 / dir[a]
-		t0 := (min[a] - or[a]) * invD
-		t1 := (max[a] - or[a]) * invD
-		if invD < 0 {
+		t0 := (min[a] - r.OrArray[a]) * r.InvArray[a]
+		t1 := (max[a] - r.OrArray[a]) * r.InvArray[a]
+		if r.InvArray[a] < 0 {
 			t0, t1 = t1, t0
 		}
 		if t0 > tmin {
@@ -94,6 +129,25 @@ func (c *Cube) Intersect(ray *geom.Ray3) Hit {
 			return Miss
 		}
 	}
+	// tmin := 0.0
+	// tmax := math.Inf(1)
+	// for a := 0; a < 3; a++ {
+	// 	invD := 1 / dir[a]
+	// 	t0 := (min[a] - or[a]) * invD
+	// 	t1 := (max[a] - or[a]) * invD
+	// 	if invD < 0 {
+	// 		t0, t1 = t1, t0
+	// 	}
+	// 	if t0 > tmin {
+	// 		tmin = t0
+	// 	}
+	// 	if t1 < tmax {
+	// 		tmax = t1
+	// 	}
+	// 	if tmax < tmin {
+	// 		return Miss
+	// 	}
+	// }
 	// TODO: lots of calculations here going from point to dist. optimize.
 	pointLocal := r.Moved(tmin)
 	point := c.Pos.MultPoint(pointLocal)
