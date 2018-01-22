@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"os/signal"
 	"syscall"
@@ -105,6 +106,7 @@ func iterativeRender(r *pbr.Render, s *pbr.Scene, o *Options) error {
 	}
 	savePoint := uint(size)
 	start := time.Now()
+	end := start.Add(time.Second * time.Duration(o.Time))
 	ticker := time.NewTicker(time.Second / 10)
 	r.Start()
 Loop:
@@ -116,9 +118,12 @@ Loop:
 			break Loop
 		default:
 			if float64(samples) >= cutoff {
-				ticker.Stop()
 				break Loop
-			} else if samples >= savePoint {
+			}
+			if o.Time < math.Inf(1) && time.Now().After(end) {
+				break Loop
+			}
+			if samples >= savePoint {
 				printProgress(r, start, s.Rays(), o.Out, samples, savePoint)
 				r.WritePngs(o.Out, o.Heat, o.Noise, o.Expose)
 				savePoint *= 2
@@ -126,6 +131,7 @@ Loop:
 			printProgress(r, start, s.Rays(), o.Out, samples, savePoint)
 		}
 	}
+	ticker.Stop()
 	r.Stop()
 	printProgress(r, start, s.Rays(), o.Out, r.Count(), savePoint)
 	fmt.Println()
