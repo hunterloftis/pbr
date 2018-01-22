@@ -63,9 +63,9 @@ func (s *Sphere) Box() *Box {
 // Intersect tests whether the sphere intersects a given ray.
 // http://tfpsly.free.fr/english/index.html?url=http://tfpsly.free.fr/english/3d/Raytracing.html
 func (s *Sphere) Intersect(ray *geom.Ray3) Hit {
-	if ok, _, _ := s.box.Check(ray); !ok {
-		return Miss
-	}
+	// if ok, _, _ := s.box.Check(ray); !ok {
+	// 	return Miss
+	// }
 	i := s.Pos.Inverse()
 	r := i.MultRay(ray)
 	op := geom.Vector3{}.Minus(r.Origin)

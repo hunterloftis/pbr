@@ -66,9 +66,9 @@ func (c *Cube) SetGrid(mat *material.Material, size float64) *Cube {
 
 // TODO: unify with Box.Check?
 func (c *Cube) Intersect(ray *geom.Ray3) Hit {
-	if ok, _, _ := c.box.Check(ray); !ok {
-		return Miss
-	}
+	// if ok, _, _ := c.box.Check(ray); !ok {
+	// 	return Miss
+	// }
 	inv := c.Pos.Inverse() // global to local transform
 	r := inv.MultRay(ray)  // translate ray into local space
 	dir := geom.Vector3(r.Dir).Array()
