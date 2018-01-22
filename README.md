@@ -10,8 +10,11 @@ Package pbr implements Physically-Based Rendering with a Monte Carlo path tracer
 $ pbr lambo.obj -floor -polar 3.6 -longitude 0.1 -env 293.hdr -rad 500 -lens 60 -fstop 1.4 -to=-0.1,0.5,0.1 -dist 7.5 -focus=-2.2658,0.5542,0
 ```
 
-- [Unbiased Monte-Carlo integration](https://en.wikipedia.org/wiki/Monte_Carlo_integration)
-- [Adaptive sampling](https://renderman.pixar.com/resources/RenderMan_20/risSampling.html)
+This is an unbiased forward path-tracer written in Go and inspired by Disney's [Hyperion video](https://www.disneyanimation.com/technology/innovations/hyperion). It uses a single [BSDF](https://en.wikipedia.org/wiki/Bidirectional_scattering_distribution_function) to simulate realistic materials like plastic, aluminum, glass, rubber, and chalk with intuitive parameters like "color," "gloss," "metalness," and "opacity." It traces rays from physically-based cameras with focal lengths, apertures, and sensors. It has a simple API to create procedural scenes and also includes a robust CLI for rendering photorealistic images from the command line.
+
+### Features
+
+- Adaptive sampling
 - [Russian roulette](https://computergraphics.stackexchange.com/questions/2316/is-russian-roulette-really-the-answer)
 - Parametric shapes (spheres, cubes, triangles)
 - Transformation matrices (translate, rotate, scale)
@@ -55,13 +58,15 @@ $ open falcon.png
 
 ## Adaptive Sampling
 
+
+
 ## Parametric Shapes
 
 ## Transformational Matrices
 
 ## Wavefront .obj files
 
-## .mtl Materials with physical extensions
+## Physically-based materials
 
 ## Arbitrary light sources
 
