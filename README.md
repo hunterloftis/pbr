@@ -26,6 +26,7 @@ $ pbr lambo.obj -floor -polar 3.6 -longitude 0.1 -env 293.hdr -rad 500 -lens 60 
 - Physically-based cameras
   - Sensor, aperture, focal length, focus, depth-of-field
 - [K-D Tree acceleration](http://slideplayer.com/slide/7653218/)
+- [Branched path tracing](https://blender.stackexchange.com/a/3258)
 - [Supersampled anti-aliasing](https://en.wikipedia.org/wiki/Supersampling)
 - 100% Go with no system dependencies
 	- Sequential API, concurrent execution
