@@ -54,6 +54,8 @@ $ pbr fixtures/models/falcon.obj -lat 0.5 -lon 0.5 -complete 5
 $ open falcon.png
 ```
 
+![falcon render](https://user-images.githubusercontent.com/364501/34923876-aaa1f07c-f96d-11e7-8dc2-199373bdb51e.png)
+
 ## Adaptive Sampling & Branched Tracing
 
 Adaptive sampling devotes more time to sampling noisy areas than already-resolved ones.
@@ -63,12 +65,12 @@ Both of these techniques allow the renderer to spend its Ray-Scene intersection 
 Both closeups of the Millennium Falcon were rendered in 10 minutes.
 The top image used naive sampling while the bottom used the default adaptive and branching settings:
 
-[!falcon adaptive](https://user-images.githubusercontent.com/364501/35202471-f2fd01bc-fef0-11e7-8a2a-e2744228bbc8.png)
-[!falcon nonadaptive](https://user-images.githubusercontent.com/364501/35202473-f3143e5e-fef0-11e7-8ab5-cfd56a351dd3.png)
+![falcon adaptive](https://user-images.githubusercontent.com/364501/35202471-f2fd01bc-fef0-11e7-8a2a-e2744228bbc8.png)
+![falcon nonadaptive](https://user-images.githubusercontent.com/364501/35202473-f3143e5e-fef0-11e7-8ab5-cfd56a351dd3.png)
 
 This is a heatmap of where the sampler chose to spend more time evaluating noisy pixels:
 
-[!falcon heatmap](https://user-images.githubusercontent.com/364501/35202487-00b8ebae-fef1-11e7-8d56-cf059ccd16ab.png)
+![falcon heatmap](https://user-images.githubusercontent.com/364501/35202487-00b8ebae-fef1-11e7-8d56-cf059ccd16ab.png)
 
 ## Parametric Shapes
 
