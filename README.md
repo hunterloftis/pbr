@@ -20,7 +20,7 @@ This is an unbiased forward path-tracer written in Go and inspired by Disney's [
   - Wavefront .obj files (meshes) and .mtl files (materials)
 - Materials:
   - [Physically-based materials](https://www.marmoset.co/posts/basic-theory-of-physically-based-rendering/)
-	- [PBR extensions for .mtl files](http://exocortex.com/blog/extending_wavefront_mtl_to_support_pbr)
+  - [PBR extensions for .mtl files](http://exocortex.com/blog/extending_wavefront_mtl_to_support_pbr)
   - Fresnel reflection, transmission, absorption, diffusion
   - Color, refractive indices, gloss, transparency, separate fresnel channels, metals
 - Lighting:
