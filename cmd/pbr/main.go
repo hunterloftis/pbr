@@ -92,6 +92,7 @@ func run(o *Options) error {
 }
 
 // TODO: this is a bit messy.
+// TODO: move this iterative functionality into Render
 func iterativeRender(r *pbr.Render, s *pbr.Scene, o *Options) error {
 	size := o.Width * o.Height
 	cutoff := float64(o.Width*o.Height) * o.Complete
