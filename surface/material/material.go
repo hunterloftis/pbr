@@ -109,9 +109,11 @@ func (m *Material) exit(norm, inc geom.Direction, dist float64, rnd *rand.Rand) 
 	if rnd.Float64() >= schlick(norm, inc, 0, m.refract, 1.0) {
 		if exited, refr := inc.Refracted(norm.Inv(), m.refract, 1); exited {
 			if spread := refr.Cone(1-m.d.Gloss, rnd); !spread.Enters(norm) {
-				return spread, beers(dist, m.absorbance), false
+				// return spread, beers(dist, m.absorbance), false
+				return spread, rgb.Energy{1, 0, 0}, false
 			}
-			return refr, beers(dist, m.absorbance), false
+			// return refr, beers(dist, m.absorbance), false
+			return refr, rgb.Energy{1, 0, 0}, false
 		}
 	}
 	return inc.Reflected(norm.Inv()), beers(dist, m.absorbance), false

@@ -44,7 +44,7 @@ func main() {
 
 	fmt.Println("rendering shapes.png (3 minutes)...")
 	render.Start()
-	time.Sleep(time.Minute * 1)
+	time.Sleep(time.Second * 20)
 	render.Stop()
 	render.WritePngs("shapes.png", "shapes-heat.png", "shapes-noise.png", 1)
 }
