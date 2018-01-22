@@ -14,30 +14,36 @@ This is an unbiased forward path-tracer written in Go and inspired by Disney's [
 
 ### Features
 
-- [Adaptive sampling](#adaptive-sampling)
-- [Russian roulette](https://computergraphics.stackexchange.com/questions/2316/is-russian-roulette-really-the-answer)
-- Parametric shapes (spheres, cubes, triangles)
-- Transformation matrices (translate, rotate, scale)
-- Wavefront .obj files (meshes) and .mtl files (materials)
-	- [With extended physically-based material properties](http://exocortex.com/blog/extending_wavefront_mtl_to_support_pbr)
-- [Physically-based materials](https://www.marmoset.co/posts/basic-theory-of-physically-based-rendering/)
+- Geometry:
+  - Parametric shapes (spheres, cubes, triangles)
+  - Transformation matrices (translate, rotate, scale)
+  - Wavefront .obj files (meshes) and .mtl files (materials)
+- Materials:
+  - [Physically-based materials](https://www.marmoset.co/posts/basic-theory-of-physically-based-rendering/)
+	- [PBR extensions for .mtl files](http://exocortex.com/blog/extending_wavefront_mtl_to_support_pbr)
   - Fresnel reflection, transmission, absorption, diffusion
   - Color, refractive indices, gloss, transparency, separate fresnel channels, metals
-- Arbitrary light sources ('everything is a light')
-- [Environment maps](http://gl.ict.usc.edu/Data/HighResProbes/)
+- Lighting:
+  - Arbitrary light sources ('everything is a light')
+  - [Environment maps](http://gl.ict.usc.edu/Data/HighResProbes/)
 	- [Image-based lighting](https://agraphicsguy.wordpress.com/2016/09/07/image-based-lighting-in-offline-and-real-time-rendering/)
-- Physically-based cameras
+- Cameras:
+  - Physically-based cameras
   - Sensor, aperture, focal length, focus, depth-of-field
-- [K-D Tree acceleration](http://slideplayer.com/slide/7653218/)
-- [Branched path tracing](https://blender.stackexchange.com/a/3258)
-- [Supersampled anti-aliasing](https://en.wikipedia.org/wiki/Supersampling)
-- 100% Go with no system dependencies
+- Quality and speed:
+  - [Adaptive sampling](#adaptive-sampling--branched-tracing)
+  - [Branched tracing](#adaptive-sampling--branched-tracing)
+  - [Russian roulette](https://computergraphics.stackexchange.com/questions/2316/is-russian-roulette-really-the-answer)
+  - [K-D Tree acceleration](http://slideplayer.com/slide/7653218/)
+  - [Supersampled anti-aliasing](https://en.wikipedia.org/wiki/Supersampling)
+- Interface:
+  - 100% Go with no system dependencies
 	- Sequential API, concurrent execution
 	- CLI
 
 ## Try it
 
-Download:
+Install:
 
 ```
 $ go get github.com/hunterloftis/pbr
