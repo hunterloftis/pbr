@@ -54,8 +54,6 @@ $ pbr fixtures/models/falcon.obj -lat 0.5 -lon 0.5 -complete 5
 $ open falcon.png
 ```
 
-![falcon render](https://user-images.githubusercontent.com/364501/34923876-aaa1f07c-f96d-11e7-8dc2-199373bdb51e.png)
-
 ## Adaptive Sampling & Branched Tracing
 
 Adaptive sampling devotes more time to sampling noisy areas than already-resolved ones.
