@@ -1,4 +1,4 @@
-package pbr
+package geom
 
 import "math"
 
@@ -7,6 +7,7 @@ var yAxis = Direction{0, 1, 0}
 // Matrix4 handles matrix data and operations
 // Column-major (as in math and Direct3D)
 // https://fgiesen.wordpress.com/2012/02/12/row-major-vs-column-major-row-vectors-vs-column-vectors/
+// TODO: Rename to Matrix?
 type Matrix4 struct {
 	el  [4][4]float64
 	inv *Matrix4

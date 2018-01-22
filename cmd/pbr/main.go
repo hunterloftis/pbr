@@ -8,6 +8,9 @@ import (
 	"time"
 
 	"github.com/hunterloftis/pbr"
+	"github.com/hunterloftis/pbr/geom"
+	"github.com/hunterloftis/pbr/surface"
+	"github.com/hunterloftis/pbr/surface/material"
 )
 
 func main() {
@@ -18,58 +21,77 @@ func main() {
 }
 
 func run(o *Options) error {
-	scene, err := loadScene(o.Scene, o.Sky, o.Ground, o.Thin)
+	print := o.Verbose || o.Info
+	scene := pbr.NewScene()
+	if o.Ambient != nil {
+		scene.SetAmbient(*o.Ambient)
+	}
+
+	err := scene.ReadObjFile(o.Scene, o.Thin)
 	if err != nil {
 		return err
 	}
 
-	bounds, center, surfaces := scene.Info()
-	showSceneInfo(bounds, center, len(surfaces))
-	completeOptions(o, bounds, center, surfaces)
-
+	box, surfaces := scene.Info()
+	if print {
+		printSceneInfo(box, len(surfaces))
+	}
 	if o.Info {
 		return nil
 	}
 
-	err = loadEnvironment(scene, o.Env, o.Rad)
-	if err != nil {
-		return err
+	if len(o.Env) > 0 {
+		err = scene.ReadHdrFile(o.Env, o.Rad)
+		if err != nil {
+			return err
+		}
 	}
 
-	// TODO: implement a Plane surface type and use that instead of a scaled cube
 	if o.Floor {
-		p := pbr.Plastic(0.5, 0.5, 0.5, 0.1)
-		t := pbr.Trans(center.X, bounds.Min.Y-0.5, center.Z)
-		s := pbr.Scale(100000, 1, 100000)
-		floor := pbr.UnitCube(p, t, s)
+		floor := surface.UnitCube(material.Plastic(0.7, 0.7, 0.7, 0.7))
+		floor.Move(box.Center.X, box.Min.Y-0.5, box.Center.Z)
+		floor.Scale(100000, 1, 100000)
 		scene.Add(floor)
 	}
 
-	// from, to, focus := cameraOptions(o, bounds, center, surfaces)
-	camera := pbr.NewCamera(o.Width, o.Height, pbr.CameraConfig{
-		Lens:     o.Lens / 1000.0,
-		Position: o.From,
-		Target:   o.To,
-		Focus:    o.Focus,
-		FStop:    o.FStop,
-	})
-	renderer := pbr.NewRenderer(camera, scene, pbr.RenderConfig{
-		Bounces: o.Bounce,
-		Adapt:   o.Adapt,
-	})
+	camera := pbr.NewCamera(o.Width, o.Height)
+	camera.SetLens(o.Lens)
+	camera.SetStop(o.FStop)
 
-	showRenderInfo(o, camera)
-	scene.Prepare() // TODO: make this unnecessary
-	err = render(renderer, o)
+	if o.Target == nil {
+		o.Target = &box.Center
+	}
+	if o.Focus == nil {
+		f := *o.Target
+		o.Focus = &f
+	}
+	if o.Dist == 0 {
+		o.Dist = camera.FrameDistance(box)
+	}
+	pos := o.Target.Plus(geom.AngleDirection(o.Lon, o.Lat).Scaled(o.Dist))
+	camera.MoveTo(pos.X, pos.Y, pos.Z)
+	camera.LookAt(*o.Target, *o.Focus)
+
+	render := pbr.NewRender(scene, camera)
+	render.SetBounces(o.Bounce)
+	render.SetAdapt(o.Adapt)
+	render.SetDirect(o.Direct)
+	render.SetBranch(o.Branch)
+
+	if print {
+		printRenderInfo(o, camera)
+	}
+	err = iterativeRender(render, scene, o)
 	if err != nil {
 		return err
 	}
 
-	err = write(renderer, o.Out, o.Heat, o.Noise, o.Expose)
+	err = render.WritePngs(o.Out, o.Heat, o.Noise, o.Expose)
 	return err
 }
 
-func render(r *pbr.Renderer, o *Options) error {
+// TODO: this is a bit messy.
+func iterativeRender(r *pbr.Render, s *pbr.Scene, o *Options) error {
 	size := o.Width * o.Height
 	cutoff := float64(o.Width*o.Height) * o.Complete
 	interrupt := make(chan os.Signal, 2)
@@ -83,22 +105,29 @@ func render(r *pbr.Renderer, o *Options) error {
 	}
 	savePoint := uint(size)
 	start := time.Now()
-	fmt.Println()
-	for samples := range r.Start(time.Second / 4) {
+	ticker := time.NewTicker(time.Second / 10)
+	r.Start()
+Loop:
+	for range ticker.C {
+		samples := r.Count()
 		select {
 		case <-interrupt:
-			r.Stop()
-			showProgress(r, start, o.Out)
+			ticker.Stop()
+			break Loop
 		default:
 			if float64(samples) >= cutoff {
-				r.Stop()
+				ticker.Stop()
+				break Loop
 			} else if samples >= savePoint {
-				write(r, o.Out, o.Heat, o.Noise, o.Expose)
+				printProgress(r, start, s.Rays(), o.Out, samples, savePoint)
+				r.WritePngs(o.Out, o.Heat, o.Noise, o.Expose)
 				savePoint *= 2
 			}
-			showProgress(r, start, o.Out)
+			printProgress(r, start, s.Rays(), o.Out, samples, savePoint)
 		}
 	}
+	r.Stop()
+	printProgress(r, start, s.Rays(), o.Out, r.Count(), savePoint)
 	fmt.Println()
 	return nil
 }

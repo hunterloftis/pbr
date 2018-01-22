@@ -5,7 +5,8 @@ import (
 	"path/filepath"
 
 	arg "github.com/alexflint/go-arg"
-	"github.com/hunterloftis/pbr"
+	"github.com/hunterloftis/pbr/geom"
+	"github.com/hunterloftis/pbr/rgb"
 )
 
 // Options configures rendering behavior.
@@ -13,10 +14,11 @@ import (
 // TODO: --filter (per pixel samples after which to apply smoothing filters; 0 = off)
 // TODO: change polar/latitude to lat/lon
 type Options struct {
-	Scene string `arg:"positional,required" help:"input scene .obj"`
-	Info  bool   `help:"output scene information and exit"`
+	Scene   string `arg:"positional,required" help:"input scene .obj"`
+	Verbose bool   `help:"verbose output with scene information"`
+	Info    bool   `arg:"-i" help:"output scene information and exit"`
 
-	Out     string `help:"output render .png"`
+	Out     string `arg:"-o" help:"output render .png"`
 	Heat    string `help:"output heatmap as .png"`
 	Noise   string `help:"output noisemap as .png"`
 	Profile bool   `help:"record performance into profile.pprof"`
@@ -24,47 +26,42 @@ type Options struct {
 	Width  int `help:"rendering width in pixels"`
 	Height int `help:"rendering height in pixels"`
 
-	Sky      *pbr.Energy `help:"ambient sky color"`
-	Ground   *pbr.Energy `help:"ground color"`
-	Env      string      `help:"environment as a panoramic hdr radiosity map (.hdr file)"`
+	Target *geom.Vector3 `help:"camera target point"`
+	Focus  *geom.Vector3 `help:"camera focus point (if other than 'target')"`
+	Dist   float64       `help:"camera distance from target"`
+	Lat    float64       `help:"camera polar angle on target"`
+	Lon    float64       `help:"camera longitudinal angle on target"`
+
+	Lens   float64 `help:"camera focal length in mm"`
+	FStop  float64 `help:"camera f-stop"`
+	Expose float64 `help:"exposure multiplier"`
+
+	Ambient  *rgb.Energy `help:"the ambient light color"`
+	Env      string      `arg:"-e" help:"environment as a panoramic hdr radiosity map (.hdr file)"`
 	Rad      float64     `help:"exposure of the hdr (radiosity) environment map"`
 	Floor    bool        `help:"create a floor underneath the scene"`
 	Adapt    float64     `help:"adaptive sampling multiplier"`
-	Bounce   int         `help:"number of light bounces"`
-	Direct   int         `help:"number of direct rays to cast"`   // TODO: implement
-	Indirect int         `help:"number of indirect rays to cast"` // TODO: implement
-	Complete float64     `help:"number of samples-per-pixel at which to exit"`
+	Bounce   int         `arg:"-d" help:"number of light bounces (depth)"`
+	Direct   int         `arg:"-d" help:"maximum number of direct rays to cast"`
+	Branch   int         `arg:"-b" help:"maximum number of branches on first hit"`
+	Complete float64     `arg:"-c" help:"number of samples-per-pixel at which to exit"`
 	Thin     bool        `help:"treat transparent surfaces as having zero thickness"`
-
-	From      *pbr.Vector3 `help:"camera position"`
-	To        *pbr.Vector3 `help:"camera target"`
-	Focus     *pbr.Vector3 `help:"camera focus (if other than 'to')"`
-	Dist      float64      `help:"camera distance from target"`
-	Polar     float64      `help:"camera polar angle on target"`
-	Longitude float64      `help:"camera longitudinal angle on target"`
-	Lens      float64      `help:"camera focal length in mm"`
-	FStop     float64      `help:"camera f-stop"`
-	Expose    float64      `help:"exposure multiplier"`
 }
 
 func options() *Options {
 	c := &Options{
-		Width:     800,
-		Height:    600,
-		Profile:   false,
-		Sky:       &pbr.Energy{210, 230, 255},
-		Ground:    &pbr.Energy{0, 0, 0},
-		Rad:       100,
-		Adapt:     10,
-		Bounce:    8,
-		Direct:    1,
-		Indirect:  1,
-		Complete:  math.Inf(1),
-		Lens:      50,
-		Polar:     0,
-		Longitude: 0,
-		FStop:     4,
-		Expose:    1,
+		Width:    800,
+		Height:   450,
+		Ambient:  &rgb.Energy{500, 500, 500},
+		Rad:      100,
+		Adapt:    8,
+		Bounce:   8,
+		Direct:   1,
+		Branch:   32,
+		Complete: math.Inf(1),
+		Lens:     50,
+		FStop:    4,
+		Expose:   1,
 	}
 	arg.MustParse(c)
 	if c.Out == "" && !c.Info {
@@ -75,34 +72,10 @@ func options() *Options {
 	return c
 }
 
-// TODO: accept input that configures this smart behavior instead of specifying exact camera points
-// eg, -distance 5 -theta 0 -phi 3.14
-func completeOptions(o *Options, bounds *pbr.Box, center pbr.Vector3, surfaces []pbr.Surface) {
-	if o.From == nil {
-		dir := pbr.AngleDirection(o.Polar, o.Longitude)
-		ray := pbr.NewRay(center, dir)
-		theta := pbr.FieldOfView(o.Lens, 35) / 2
-		if o.Dist == 0 {
-			max := o.Dist
-			for _, s := range surfaces {
-				pt := s.Center()
-				dist0 := pt.Minus(center).Dot(pbr.Vector3(dir))
-				offset := pt.Minus(ray.Moved(dist0)).Len()
-				dist1 := offset / math.Tan(theta)
-				dist := dist0 + dist1
-				if dist > max {
-					max = dist
-				}
-			}
-			o.Dist = max * 1.1
-		}
-		from := ray.Moved(o.Dist)
-		o.From = &from
-	}
-	if o.To == nil {
-		o.To = &center
-	}
-	if o.Focus == nil {
-		o.Focus = o.To
-	}
+func (o *Options) Version() string {
+	return "1.0.0"
+}
+
+func (o *Options) Description() string {
+	return "pbr renders physically-based 3D scenes with a Monte Carlo path tracer."
 }

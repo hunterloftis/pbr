@@ -1,9 +1,22 @@
 .PHONY: fixtures
 
-test:
+help:
 	go build ./cmd/pbr
-	./pbr fixtures/models/destroyer.obj -dist 12000 -polar 0.4 -width 1200 -height 500 -complete 10
+	./pbr --help
+	
+hello:
+	go run ./examples/hello.go
+	open hello.png
+	
+destroyer:
+	go build ./cmd/pbr
+	./pbr fixtures/models/destroyer.obj -dist 12000 -lon 0.4 -width 1200 -height 500 -complete 8
 	open destroyer.png
+
+falcon:
+	go build ./cmd/pbr
+	./pbr fixtures/models/falcon.obj -dist 900 -lat 0.3 -lon=-1 -heat falcon-heat.png -complete 8
+	open falcon.png falcon-heat.png
 
 count:
 	find . -name '*.go' -not -path "./vendor/*" | xargs wc -l
@@ -11,6 +24,9 @@ count:
 fixtures:
 	@echo "download https://drive.google.com/drive/folders/1hXQfQ9bZOIt8TvyoaUrRpELMxhKzrOCG?usp=sharing into ./fixtures"
 
+doc:
+	godoc -http=":5000"
+	
 skull:
 	go build ./cmd/pbr
 	./pbr fixtures/models/skull.obj -complete 100
@@ -18,25 +34,20 @@ skull:
 
 chair:
 	go build ./cmd/pbr
-	./pbr fixtures/models/chair.obj -from 400,400,0 -to 10,75,-600 -sky 200,250,300 -lens 150 -fstop 2.8 -floor --complete 10
+	./pbr fixtures/models/chair.obj -lens 150 -fstop 2.8 -floor --complete 10
 	open chair.png
-
-lucy:
-	go build ./cmd/pbr
-	./pbr fixtures/models/lucy.obj lucy.png -from "800,400,500" -to "15,165,-4" -env fixtures/images/uffizi.hdr -lens 70 -fstop 0.01 -width 600 -height 750 -expose 2 -noise noise.png -heat heat.png -complete 200
-	open lucy.png heat.png noise.png
 
 bmw:
 	go build ./cmd/pbr
-	./pbr fixtures/models/bmw/BMW850.obj -polar=-1.2 -longitude=0.3 -width 1200 -height 500 -lens 35 -dist 85 -thin -floor -to 7.33,11,-99.21 -env fixtures/images/pisa.hdr -rad 1600 -complete 500
+	./pbr fixtures/models/bmw/BMW850.obj -lon=-1.2 -lat=0.3 -width 1200 -height 500 -lens 35 -dist 85 -thin -floor -target 7.33,11,-99.21 -env fixtures/images/pisa.hdr -rad 1600 -complete 500
 	open BMW850.png
 
 bmw2:
 	go build ./cmd/pbr
-	./pbr fixtures/models/bmw/BMW850.obj -polar=-2.1 -longitude=0.08 -width 1200 -height 500 -lens 65 -dist 120 -thin -floor -to 7.33,9,-99.21 -focus 7.33,8,-140 -env fixtures/images/glacier.hdr -rad 400 -fstop 0.1 -complete 32
+	./pbr fixtures/models/bmw/BMW850.obj -lon=-2.1 -lat=0.08 -width 1200 -height 500 -lens 65 -dist 120 -thin -floor -target 7.33,9,-99.21 -focus 7.33,8,-140 -env fixtures/images/glacier.hdr -rad 400 -fstop 0.1 -complete 32
 	open BMW850.png
 
 lambo:
 	go build ./cmd/pbr
-	./pbr fixtures/models/lambo2/lambo.obj -floor -out lambo.png -polar 3.6 -longitude 0.1 -env fixtures/images/293.hdr -rad 500 -width 1152 -height 648 -lens 60 -fstop 1.4 -to=-0.1,0.5,0.1 -dist 7.5 -focus=-2.2658,0.5542,0 -complete 512
+	./pbr fixtures/models/lambo2/lambo.obj -noise lambo-noise.png -heat lambo-heat.png -floor -lon 3.6 -lat 0.1 -env fixtures/images/293.hdr -rad 450 -lens 60 -fstop 1.4 -target=-0.1,0.5,0.1 -dist 7.5 -focus=-2.2658,0.5542,-0.7 -direct 0 -width 1920 -height 1080 -complete 512
 	open lambo.png
