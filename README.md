@@ -26,7 +26,7 @@ This is an unbiased forward path-tracer written in Go and inspired by Disney's [
 - Lighting:
   - Arbitrary light sources ('everything is a light')
   - [Environment maps](http://gl.ict.usc.edu/Data/HighResProbes/)
-	- [Image-based lighting](https://agraphicsguy.wordpress.com/2016/09/07/image-based-lighting-in-offline-and-real-time-rendering/)
+  - [Image-based lighting](https://agraphicsguy.wordpress.com/2016/09/07/image-based-lighting-in-offline-and-real-time-rendering/)
 - Cameras:
   - Physically-based cameras
   - Sensor, aperture, focal length, focus, depth-of-field
@@ -38,8 +38,8 @@ This is an unbiased forward path-tracer written in Go and inspired by Disney's [
   - [Supersampled anti-aliasing](https://en.wikipedia.org/wiki/Supersampling)
 - Interface:
   - 100% Go with no system dependencies
-	- Sequential API, concurrent execution
-	- CLI
+  - Sequential API, concurrent execution
+  - CLI
 
 ## Try it
 
