@@ -36,3 +36,7 @@
 [[constraint]]
   name = "github.com/pkg/profile"
   version = "1.2.1"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/pkg/math"

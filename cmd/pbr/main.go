@@ -91,12 +91,19 @@ func run(o *Options) error {
 	return err
 }
 
-// TODO: this is a bit messy.
 // TODO: move this iterative functionality into Render
 func iterativeRender(r *pbr.Render, s *pbr.Scene, o *Options) error {
-	size := o.Width * o.Height
+	perc := 0.0
 	cutoff := float64(o.Width*o.Height) * o.Complete
 	interrupt := make(chan os.Signal, 2)
+	start := time.Now()
+	end := start.Add(time.Second * time.Duration(o.Time))
+	write := func(n, total int) {
+		perc = float64(n) / float64(total)
+		if n == total {
+			r.WritePngs(o.Out, o.Heat, o.Noise, o.Expose)
+		}
+	}
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	if o.Profile {
 		f, err := createProfile()
@@ -105,36 +112,23 @@ func iterativeRender(r *pbr.Render, s *pbr.Scene, o *Options) error {
 		}
 		defer stopProfile(f)
 	}
-	savePoint := uint(size)
-	start := time.Now()
-	end := start.Add(time.Second * time.Duration(o.Time))
-	ticker := time.NewTicker(time.Second / 10)
-	r.Start()
+	r.Start(write)
 Loop:
-	for range ticker.C {
+	for range time.NewTicker(time.Second / 10).C {
 		samples := r.Count()
 		select {
 		case <-interrupt:
-			ticker.Stop()
 			break Loop
 		default:
-			if float64(samples) >= cutoff {
+			completeS := float64(samples) >= cutoff
+			completeT := o.Time < math.Inf(1) && time.Now().After(end)
+			printProgress(r, start, s.Rays(), o.Out, perc)
+			if completeS || completeT {
 				break Loop
 			}
-			if o.Time < math.Inf(1) && time.Now().After(end) {
-				break Loop
-			}
-			if samples >= savePoint {
-				printProgress(r, start, s.Rays(), o.Out, samples, savePoint)
-				r.WritePngs(o.Out, o.Heat, o.Noise, o.Expose)
-				savePoint *= 2
-			}
-			printProgress(r, start, s.Rays(), o.Out, samples, savePoint)
 		}
 	}
-	ticker.Stop()
 	r.Stop()
-	printProgress(r, start, s.Rays(), o.Out, r.Count(), savePoint)
 	fmt.Println()
 	return nil
 }

@@ -27,11 +27,20 @@ func UnitSphere(m ...*material.Material) *Sphere {
 	return s.transform(geom.Identity())
 }
 
-// TODO: https://tavianator.com/exact-bounding-boxes-for-spheres-ellipsoids/
-func (s *Sphere) transform(m *geom.Matrix4) *Sphere {
-	s.Pos = s.Pos.Mult(m)
-	min := s.Pos.MultPoint(geom.Vector3{-1, -1, -1})
-	max := s.Pos.MultPoint(geom.Vector3{1, 1, 1})
+// TODO: unify with cube.transform AABB calc
+func (s *Sphere) transform(t *geom.Matrix4) *Sphere {
+	s.Pos = s.Pos.Mult(t)
+	min := s.Pos.MultPoint(geom.Vector3{})
+	max := s.Pos.MultPoint(geom.Vector3{})
+	for x := -1.0; x <= 1; x += 2 {
+		for y := -1.0; y <= 1; y += 2 {
+			for z := -1.0; z <= 1; z += 2 {
+				pt := s.Pos.MultPoint(geom.Vector3{x, y, z})
+				min = min.Min(pt)
+				max = max.Max(pt)
+			}
+		}
+	}
 	s.box = NewBox(min, max)
 	return s
 }
@@ -63,9 +72,9 @@ func (s *Sphere) Box() *Box {
 // Intersect tests whether the sphere intersects a given ray.
 // http://tfpsly.free.fr/english/index.html?url=http://tfpsly.free.fr/english/3d/Raytracing.html
 func (s *Sphere) Intersect(ray *geom.Ray3) Hit {
-	// if ok, _, _ := s.box.Check(ray); !ok {
-	// 	return Miss
-	// }
+	if ok, _, _ := s.box.Check(ray); !ok {
+		return Miss
+	}
 	i := s.Pos.Inverse()
 	r := i.MultRay(ray)
 	op := geom.Vector3{}.Minus(r.Origin)

@@ -6,6 +6,10 @@ adaptive:
 	./pbr fixtures/models/falcon.obj -o adaptive.png -dist 480 -lat 0.25 -lon=-1 -target=-86,-55,-2770 -focus=-86,-18,-2682 -heat adaptive-heat.png -width 888 -height 300 -time 600
 	open adaptive.png adaptive-heat.png nonadaptive.png nonadaptive-heat.png
 
+shapes:
+	go run ./examples/shapes.go
+	open shapes.png
+	
 help:
 	go build ./cmd/pbr
 	./pbr --help

@@ -94,7 +94,7 @@ func (f *Framebuffer) heat(offset uint) image.Image {
 	return rgba
 }
 
-func (f *Framebuffer) Integrate(index uint, sample Energy) uint {
+func (f *Framebuffer) Add(index uint, sample Energy) uint {
 	p := index * stride
 	rgb := [3]float64{sample.X, sample.Y, sample.Z}
 	f.pixels[p+red] += rgb[0]
@@ -140,37 +140,4 @@ func tonemap(n float64) uint8 {
 
 func gamma(n, g float64) float64 {
 	return math.Pow(n/255, (1/g)) * 255
-}
-
-func (f *Framebuffer) bilateral(pixel uint, weightS, weightR float64, radius int) Energy {
-	e0 := f.Average(pixel).Limit(255)
-	// m0 := f.material(pixel)
-	x0, y0 := int(pixel%f.width), int(pixel/f.width)
-	eSum := Energy{}
-	norm := 0.0
-	for y := y0 - radius; y <= y0+radius; y++ {
-		for x := x0 - radius; x <= x0+radius; x++ {
-			if y < 0 || y >= int(f.height) || x < 0 || x >= int(f.width) {
-				continue
-			}
-			i := uint(y)*f.width + uint(x)
-			e := f.Average(i).Limit(255)
-			dx := x - x0
-			dy := y - y0
-			s := math.Sqrt(float64(dx*dx + dy*dy))
-			r := e.Minus(e0).Size() / 442 // size of Energy{255, 255, 255}
-			weight := gaussian(s, weightS) * gaussian(r, weightR)
-			// if f.material(i) != m0 {
-			// 	weight *= 0.3
-			// }
-			eSum = eSum.Plus(e.Amplified(weight))
-			norm += weight
-		}
-	}
-	return eSum.Amplified(1 / norm)
-}
-
-// https://dsp.stackexchange.com/questions/10057/gaussian-blur-standard-deviation-radius-and-kernel-size
-func gaussian(n, sigma float64) float64 {
-	return math.Exp(-(n*n)/(2*sigma*sigma)) / (sigma * math.Sqrt(2*math.Pi))
 }

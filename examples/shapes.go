@@ -42,9 +42,9 @@ func main() {
 		surface.UnitSphere(gold).Move(0.45, 0.05, -0.4).Scale(0.2, 0.2, 0.2),
 	)
 
-	fmt.Println("rendering shapes.png (3 minutes)...")
+	fmt.Println("rendering shapes.png (1 hour)...")
 	render.Start()
-	time.Sleep(time.Minute * 30)
+	time.Sleep(time.Hour)
 	render.Stop()
 	render.WritePngs("shapes.png", "shapes-heat.png", "shapes-noise.png", 1)
 }

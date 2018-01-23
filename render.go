@@ -3,11 +3,8 @@ package pbr
 import (
 	"image"
 	"image/png"
-	"math"
-	"math/rand"
 	"os"
 	"runtime"
-	"time"
 
 	"github.com/hunterloftis/pbr/rgb"
 )
@@ -17,31 +14,24 @@ import (
 type Render struct {
 	sampler
 
-	adapt float64
-
 	// state
-	rnd          *rand.Rand
-	active       bool
-	cursor       uint
-	meanVariance float64
-	buffer       *rgb.Framebuffer
-	samples      uint
+	active  bool
+	samples uint
+	buffer  *rgb.Framebuffer
 }
 
 // NewRender constructs a new Render from a Camera into a Scene.
 func NewRender(s *Scene, c *Camera) *Render {
 	return &Render{
 		sampler: sampler{
+			adapt:   16,
 			bounces: 8,
 			branch:  32,
 			direct:  8,
 			camera:  c,
 			scene:   s,
 		},
-		adapt:        8,
-		meanVariance: math.MaxFloat64,
-		rnd:          rand.New(rand.NewSource(time.Now().UnixNano())),
-		buffer:       rgb.NewBuffer(uint(c.Width()), uint(c.Height())),
+		buffer: rgb.NewBuffer(uint(c.Width()), uint(c.Height())),
 	}
 }
 
@@ -94,25 +84,39 @@ func (r *Render) Image(expose float64) image.Image {
 }
 
 // Start begins rendering the Scene.
-func (r *Render) Start() {
+// TODO: use callbacks to send periodic images to listeners
+func (r *Render) Start(observers ...func(n, size int)) {
 	r.active = true
 	r.scene.prepare()
-	n := runtime.NumCPU()
-	pixel := make(chan *[sampleSize]uint, n)
-	result := make(chan *[sampleSize]sample, n)
+	locks := make([]bool, r.camera.Height())
+	size := len(locks)
+	n := min(runtime.NumCPU(), size)
+	rows := make(chan int, n*4)
+	done := make(chan sample, n*4)
+	next := 0
 	for i := 0; i < n; i++ {
-		r.sampler.start(pixel, result)
-		pixel <- r.next()
+		r.sampler.start(r.buffer, rows, done)
+		locks[next] = true
+		rows <- next
+		next = (next + 1) % size
 	}
 	go func() {
-		for {
-			for _, res := range <-result {
-				r.samples++
-				r.buffer.Integrate(res.index, res.energy)
+		for s := range done {
+			locks[s.row] = false
+			r.samples += uint(s.count)
+			locks[next] = true
+			rows <- next
+			for locks[next] {
+				next = (next + 1) % size
+				if next == 0 {
+					r.buffer.UpdateVariance()
+				}
 			}
-			pixel <- r.next()
+			for _, cb := range observers {
+				cb(next, size-1)
+			}
 			if !r.active {
-				close(pixel)
+				close(rows)
 				return
 			}
 		}
@@ -150,48 +154,6 @@ func (r *Render) WritePngs(out, heat, noise string, expose float64) error {
 	return nil
 }
 
-func (r *Render) deficit(i uint) (count int) {
-	brightness := r.buffer.Average(i).Average()
-	if brightness < 255 && brightness > 0 {
-		midtones := (((255 - brightness) / 255) + 3) / 4
-		noise := r.buffer.Noise(i)
-		varMean, countMean := r.buffer.Variance()
-		ratio := (noise + 1) / (varMean + 1)
-		targetCount := ratio * countMean * midtones
-		correction := targetCount - r.buffer.Count(i)
-		adapted := math.Max(0, math.Min(r.adapt, correction))
-		count += int(adapted)
-	}
-	return count
-}
-
-func (r *Render) next() *[sampleSize]uint {
-	buffer := &[sampleSize]uint{}
-	size := uint(r.camera.Width() * r.camera.Height()) // TODO: replace most of these uints with ints for simplicity
-	if r.adapt > 0 {
-		i := 0
-		for i < sampleSize {
-			end := i + 1 + r.deficit(r.cursor)
-			for i < end && i < sampleSize {
-				buffer[i] = r.cursor
-				i++
-			}
-			if end <= sampleSize {
-				r.cursor = (r.cursor + 1) % size
-				if r.cursor == 0 {
-					r.buffer.UpdateVariance()
-				}
-			}
-		}
-		return buffer
-	}
-	for i := 0; i < sampleSize; i++ {
-		buffer[i] = r.cursor
-		r.cursor = (r.cursor + 1) % size
-	}
-	return buffer
-}
-
 func writePng(file string, i image.Image) error {
 	f, err := os.Create(file)
 	if err != nil {
@@ -200,4 +162,11 @@ func writePng(file string, i image.Image) error {
 	defer f.Close()
 	err = png.Encode(f, i)
 	return err
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

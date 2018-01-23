@@ -9,9 +9,8 @@ import (
 	"github.com/hunterloftis/pbr/rgb"
 )
 
-const sampleSize = 256
-
 type sampler struct {
+	adapt   float64
 	bounces int
 	direct  int
 	branch  int
@@ -20,31 +19,31 @@ type sampler struct {
 }
 
 type sample struct {
-	index  uint
-	energy rgb.Energy
+	row   int
+	count int
 }
 
-func (s *sampler) start(in <-chan *[sampleSize]uint, out chan<- *[sampleSize]sample) {
-	width := uint(s.camera.Width()) // TODO: change all these uints back to ints except where necessary
-	height := uint(s.camera.Height())
-	size := width * height
+func (s *sampler) start(buffer *rgb.Framebuffer, in <-chan int, done chan<- sample) {
+	width := uint(s.camera.Width())
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-	buffer := &[sampleSize]sample{}
 	go func() {
-		for pixels := range in {
-			for i, pixel := range pixels {
-				p := pixel % size
-				x, y := float64(p%width), float64(p/width)
-				e := s.tracePrimary(x, y, rnd)
-				buffer[i] = sample{p, e}
+		for y := range in {
+			total := 0
+			for x := 0; x < int(width); x++ {
+				i := uint(y*int(width) + x)
+				count := s.adapted(buffer, uint(i))
+				for c := 0; c < count; c++ {
+					buffer.Add(i, s.tracePrimary(x, y, rnd))
+				}
+				total += count
 			}
-			out <- buffer
+			done <- sample{y, total}
 		}
 	}()
 }
 
-func (s *sampler) tracePrimary(x, y float64, rnd *rand.Rand) (energy rgb.Energy) {
-	ray := s.camera.ray(x, y, rnd)
+func (s *sampler) tracePrimary(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
+	ray := s.camera.ray(float64(x), float64(y), rnd)
 	hit := s.scene.Intersect(ray)
 	if !hit.Ok {
 		return s.scene.EnvAt(ray.Dir)
@@ -113,4 +112,23 @@ func (s *sampler) traceDirect(num int, point geom.Vector3, normal geom.Direction
 		energy = energy.Plus(e)
 	}
 	return energy, coverage
+}
+
+func (s *sampler) adapted(buffer *rgb.Framebuffer, i uint) int {
+	if s.adapt == 0 {
+		return 1
+	}
+	count := 1
+	brightness := buffer.Average(i).Average()
+	if brightness < 255 && brightness > 0 {
+		midtones := (((255 - brightness) / 255) + 3) / 4
+		noise := buffer.Noise(i)
+		varMean, countMean := buffer.Variance()
+		ratio := (noise + 1) / (varMean + 1)
+		targetCount := ratio * countMean * midtones
+		correction := targetCount - buffer.Count(i)
+		adapted := math.Max(0, math.Min(s.adapt, correction))
+		count += int(adapted)
+	}
+	return count
 }
