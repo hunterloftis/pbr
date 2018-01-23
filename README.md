@@ -65,7 +65,9 @@ $ open falcon.png
 ![falcon adaptive](https://user-images.githubusercontent.com/364501/35202761-753e2d44-fef2-11e7-8d55-4893eb860144.png)
 ![falcon nonadaptive](https://user-images.githubusercontent.com/364501/35202760-752b55ca-fef2-11e7-8181-e77e137c1668.png)
 
-`$ make adaptive`
+```
+$ make adaptive
+```
 
 Adaptive sampling devotes more time to sampling noisy areas than already-resolved ones.
 Branched tracing splits primary rays into multiple branches to better sample the most important (first) bounce of each path.
@@ -78,7 +80,9 @@ The top image used naive sampling while the bottom used the default adaptive and
 
 ![shapes](https://user-images.githubusercontent.com/364501/35257181-c771dd1c-ffc5-11e7-96d9-0a576a886b3c.png)
 
-`$ make shapes`
+```
+$ make shapes
+```
 
 The renderer supports Spheres, Cubes, and Triangles that can be moved, scaled, and rotated.
 
