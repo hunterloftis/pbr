@@ -29,7 +29,7 @@ func printRenderInfo(o *Options, c *pbr.Camera) {
 // https://stackoverflow.com/a/15442704/1911432
 // TODO: clean up, this is messy
 // TODO: hide this in --silent mode
-func printProgress(r *pbr.Render, start time.Time, rays uint64, filename string, current, next uint) {
+func printProgress(r *pbr.Render, start time.Time, rays uint64, filename string, perc float64) {
 	var pp, pms uint
 	var mil, mRays, rayPerSample float64
 	samples := r.Count()
@@ -44,8 +44,6 @@ func printProgress(r *pbr.Render, start time.Time, rays uint64, filename string,
 		mRays = float64(rays) / 1e6
 		rayPerSample = float64(rays) / float64(samples)
 	}
-	last := next / 2
-	perc := math.Max((float64(current)-float64(last))/(float64(next)-float64(last)), 0)
 	progress := ""
 	count := int(math.Min(math.Ceil(perc*8), 8))
 	for i := 0; i < count; i++ {

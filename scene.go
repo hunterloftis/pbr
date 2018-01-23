@@ -48,8 +48,8 @@ func NewScene(surfaces ...surface.Surface) *Scene {
 // Intersect tests whether a ray hits any objects in the scene
 func (s *Scene) Intersect(ray *geom.Ray3) surface.Hit {
 	atomic.AddUint64(&s.rays, 1)
-	// return s.tree.Intersect(ray)
-	return s.tree.IntersectSurfaces(ray, math.Inf(1))
+	return s.tree.Intersect(ray)
+	// return s.tree.IntersectSurfaces(ray, math.Inf(1))
 }
 
 // Rays returns the total count of Ray/Scene intersections tested since the Scene was created.

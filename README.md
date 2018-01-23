@@ -10,13 +10,13 @@ Package pbr implements Physically-Based Rendering with a Monte Carlo path tracer
 $ pbr lambo.obj -floor -polar 3.6 -longitude 0.1 -env 293.hdr -rad 500 -lens 60 -fstop 1.4 -to=-0.1,0.5,0.1 -dist 7.5 -focus=-2.2658,0.5542,0
 ```
 
-This is an unbiased forward path-tracer written in Go and inspired by Disney's [Hyperion video](https://www.disneyanimation.com/technology/innovations/hyperion). It uses a single [BSDF](https://en.wikipedia.org/wiki/Bidirectional_scattering_distribution_function) to simulate realistic materials like plastic, aluminum, glass, rubber, and chalk with intuitive parameters like "color," "gloss," "metalness," and "opacity." It traces rays from physically-based cameras with focal lengths, apertures, and sensors. It has a simple API to create procedural scenes and also includes a robust CLI for rendering photorealistic images from the command line.
+This is an unbiased forward path-tracer written in Go and inspired by Disney's [Hyperion video](https://www.disneyanimation.com/technology/innovations/hyperion). It uses a single [BSDF](https://en.wikipedia.org/wiki/Bidirectional_scattering_distribution_function) to simulate realistic materials like plastic, aluminum, glass, rubber, and chalk with intuitive parameters like "color," "gloss," and "metalness." It traces rays from physically-based cameras with focal lengths, apertures, and realistic sensors. It includes a simple API for creating scenes in code and a CLI for rendering photorealistic images from the command line.
 
 ### Features
 
 - Geometry:
-  - Parametric shapes (spheres, cubes, triangles)
-  - Transformation matrices (translate, rotate, scale)
+  - [Parametric shapes (spheres, cubes, triangles)](#shapes--transforms)
+  - [Transformation matrices (translate, rotate, scale)](#shapes--transforms)
   - Wavefront .obj files (meshes) and .mtl files (materials)
 - Materials:
   - [Physically-based materials](https://www.marmoset.co/posts/basic-theory-of-physically-based-rendering/)
@@ -24,15 +24,15 @@ This is an unbiased forward path-tracer written in Go and inspired by Disney's [
   - Fresnel reflection, transmission, absorption, diffusion
   - Color, refractive indices, gloss, transparency, separate fresnel channels, metals
 - Lighting:
+  - [Direct lighting]()
   - Arbitrary light sources ('everything is a light')
-  - [Environment maps](http://gl.ict.usc.edu/Data/HighResProbes/)
   - [Image-based lighting](https://agraphicsguy.wordpress.com/2016/09/07/image-based-lighting-in-offline-and-real-time-rendering/)
 - Cameras:
   - Physically-based cameras
   - Sensor, aperture, focal length, focus, depth-of-field
 - Quality and speed:
-  - [Adaptive sampling](#adaptive-sampling--branched-tracing)
-  - [Branched tracing](#adaptive-sampling--branched-tracing)
+  - [Adaptive sampling](#sampling--branching)
+  - [Branched tracing](#sampling--branching)
   - [Russian roulette](https://computergraphics.stackexchange.com/questions/2316/is-russian-roulette-really-the-answer)
   - [K-D Tree acceleration](http://slideplayer.com/slide/7653218/)
   - [Supersampled anti-aliasing](https://en.wikipedia.org/wiki/Supersampling)
@@ -60,25 +60,27 @@ $ pbr fixtures/models/falcon.obj -lat 0.5 -lon 0.5 -complete 5
 $ open falcon.png
 ```
 
-## Adaptive Sampling & Branched Tracing
+## Sampling & Branching
+
+![falcon adaptive](https://user-images.githubusercontent.com/364501/35202761-753e2d44-fef2-11e7-8d55-4893eb860144.png)
+![falcon nonadaptive](https://user-images.githubusercontent.com/364501/35202760-752b55ca-fef2-11e7-8181-e77e137c1668.png)
+
+`$ make adaptive`
 
 Adaptive sampling devotes more time to sampling noisy areas than already-resolved ones.
 Branched tracing splits primary rays into multiple branches to better sample the most important (first) bounce of each path.
 Both of these techniques allow the renderer to spend its Ray-Scene intersection budget more effectively.
 
 Both closeups of the Millennium Falcon were rendered in 10 minutes.
-The top image used naive sampling while the bottom used the default adaptive and branching settings:
+The top image used naive sampling while the bottom used the default adaptive and branching settings.
 
-![falcon adaptive](https://user-images.githubusercontent.com/364501/35202761-753e2d44-fef2-11e7-8d55-4893eb860144.png)
-![falcon nonadaptive](https://user-images.githubusercontent.com/364501/35202760-752b55ca-fef2-11e7-8181-e77e137c1668.png)
+## Shapes & Transforms
 
-This is a heatmap of where the sampler chose to spend more time evaluating noisy pixels:
+![shapes](https://user-images.githubusercontent.com/364501/35257181-c771dd1c-ffc5-11e7-96d9-0a576a886b3c.png)
 
-![falcon heatmap](https://user-images.githubusercontent.com/364501/35202759-7519367e-fef2-11e7-8cf9-62ad27d378c8.png)
+`$ make shapes`
 
-## Parametric Shapes
-
-## Transformational Matrices
+The renderer supports Spheres, Cubes, and Triangles that can be moved, scaled, and rotated.
 
 ## Wavefront .obj files
 

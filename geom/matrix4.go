@@ -179,3 +179,17 @@ func (a *Matrix4) Inverse() *Matrix4 {
 	a.inv, i.inv = i, a
 	return i
 }
+
+func (a *Matrix4) At(col, row int) float64 {
+	return a.el[col-1][row-1]
+}
+
+func (a *Matrix4) Transpose() *Matrix4 {
+	m := &Matrix4{}
+	for col := 0; col < 4; col++ {
+		for row := 0; row < 4; row++ {
+			m.el[row][col] = a.el[col][row]
+		}
+	}
+	return m
+}

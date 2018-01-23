@@ -20,14 +20,14 @@
   revision = "e80c3b7ed292b052c7083b6fd7154a8422c33f65"
 
 [[projects]]
-  name = "github.com/pkg/profile"
+  branch = "master"
+  name = "github.com/pkg/math"
   packages = ["."]
-  revision = "5b67d428864e92711fcbd2f8629456121a56d91f"
-  version = "v1.2.1"
+  revision = "f2ed9e40e245cdeec72c4b642d27ed4553f90667"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cc79d354fcab1fe8ae1e891dc447f8e9a31dcc21e2dd87a2a2ff4d2558909cbc"
+  inputs-digest = "cd92795cabd8e4cfe4ac52b1d69c8d8c3151b9305e3753892619b42a6bf25d1d"
   solver-name = "gps-cdcl"
   solver-version = 1
