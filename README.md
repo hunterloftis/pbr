@@ -84,7 +84,7 @@ The top image used naive sampling while the bottom used the default adaptive and
 $ make shapes
 ```
 
-The renderer supports Spheres, Cubes, and Triangles that can be moved, scaled, and rotated.
+The renderer supports spheres, cubes, and triangles that can be moved, scaled, and rotated.
 
 ## Wavefront .obj files
 
