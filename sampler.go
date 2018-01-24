@@ -51,7 +51,7 @@ func (s *sampler) tracePrimary(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	point := ray.Moved(hit.Dist)
 	normal, mat := hit.Surface.At(point)
 	energy = energy.Plus(mat.Emit())
-	branch := 1 + int(float64(s.branch)*(mat.Roughness()+0.25)/1.25)
+	branch := 1 + int(float64(s.branch)*(mat.Diffuse()+0.25)/1.25)
 	sum := rgb.Energy{}
 	lights := s.scene.Lights()
 	for i := 0; i < branch; i++ {
@@ -114,21 +114,25 @@ func (s *sampler) traceDirect(num int, point geom.Vector3, normal geom.Direction
 	return energy, coverage
 }
 
+// http://gfx.cs.princeton.edu/pubs/DeCoro_2010_DOR/outliers.pdf
+// TODO: backgrounds should be basically completely black on the heatmap
 func (s *sampler) adapted(buffer *rgb.Framebuffer, i uint) int {
 	if s.adapt == 0 {
 		return 1
 	}
-	count := 1
-	brightness := buffer.Average(i).Average()
-	if brightness < 255 && brightness > 0 {
-		midtones := (((255 - brightness) / 255) + 3) / 4
-		noise := buffer.Noise(i)
-		varMean, countMean := buffer.Variance()
-		ratio := (noise + 1) / (varMean + 1)
-		targetCount := ratio * countMean * midtones
-		correction := targetCount - buffer.Count(i)
-		adapted := math.Max(0, math.Min(s.adapt, correction))
-		count += int(adapted)
+	count := buffer.Count(i)
+	if count < 3 {
+		return 1
 	}
-	return count
+	needs := 1
+	brightness := buffer.Average(i).Average()
+	midtones := (((255 - math.Min(brightness, 255)) / 255) + 3) / 4
+	noise := buffer.Noise(i)
+	varMean, countMean := buffer.Variance()
+	ratio := (noise + 1) / (varMean + 1)
+	targetCount := math.Ceil(ratio * countMean * midtones)
+	correction := targetCount - count
+	limited := math.Max(0, math.Min(s.adapt, correction))
+	needs += int(limited)
+	return needs
 }

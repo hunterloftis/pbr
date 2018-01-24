@@ -11,6 +11,8 @@ import (
 // TODO: replace all Energy instances with Vector3 (simpler, less duplication)
 type Energy geom.Vector3
 
+// TODO: type Energy struct { geom.Vector3 }
+
 var Full, White = Energy{1, 1, 1}, Energy{1, 1, 1}
 var Empty, Black = Energy{0, 0, 0}, Energy{0, 0, 0}
 
@@ -72,6 +74,7 @@ func (a Energy) Average() float64 {
 	return (a.X + a.Y + a.Z) / 3
 }
 
+// TODO: rename to Lerp
 func (a Energy) Blend(b Energy, n float64) Energy {
 	return Energy(geom.Vector3(a).Lerp(geom.Vector3(b), n))
 }

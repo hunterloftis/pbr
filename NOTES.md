@@ -112,6 +112,7 @@
 
 ## refs
 
+- profiling: https://medium.com/@hackintoshrao/daily-code-optimization-using-benchmarks-and-profiling-in-golang-gophercon-india-2016-talk-874c8b4dc3c5
 - noise: https://support.solidangle.com/display/ARP/Removing+Noise
 - sampling: https://support.solidangle.com/display/AFMUG/Samples
 - class notes: http://www.cs.cornell.edu/courses/cs6630/2012sp/notes/07pathtr-notes.pdf
@@ -173,3 +174,5 @@ $ pbr -branch 8 -direct 8 -complete 16
 1. You optimize the ray intersection tests
 2. You budget your rays more intelligently
 3. You parallelize the system and scale out
+
+Reference image for white lambo render: https://i.ytimg.com/vi/JhEf4QI8HZU/hqdefault.jpg

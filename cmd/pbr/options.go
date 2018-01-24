@@ -55,7 +55,7 @@ func options() *Options {
 		Height:   450,
 		Ambient:  &rgb.Energy{500, 500, 500},
 		Rad:      100,
-		Adapt:    8,
+		Adapt:    32,
 		Bounce:   8,
 		Direct:   1,
 		Branch:   32,

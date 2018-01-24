@@ -59,7 +59,7 @@ bmw2:
 
 lambo:
 	go build ./cmd/pbr
-	./pbr fixtures/models/lambo2/lambo.obj -noise lambo-noise.png -heat lambo-heat.png -floor -lon 3.6 -lat 0.1 -env fixtures/images/293.hdr -rad 450 -lens 60 -fstop 1.4 -target=-0.1,0.5,0.1 -dist 7.5 -focus=-2.2658,0.5542,-0.7 -direct 0 -width 1920 -height 1080 -complete 512
+	./pbr fixtures/models/lambo2/lambo.obj -heat lambo-heat.png -floor -lon 4 -lat 0.1 -env fixtures/images/306.hdr -rad 700 -lens 50 -fstop 1.4 -target=-0.2,0.5,0.4 -dist 6.5 -focus=-1,0.67,-0.56 -direct 0 -width 1920 -height 1080 -complete 512
 	open lambo.png
 
 profile:

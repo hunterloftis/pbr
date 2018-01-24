@@ -14,12 +14,12 @@ import (
 
 func main() {
 	light := material.Light(1500, 1500, 1500)
-	redPlastic := material.Plastic(0.9, 0, 0, 1)
-	whitePlastic := material.Plastic(1, 1, 1, 0.8)
-	bluePlastic := material.Plastic(0, 0, 0.9, 1)
-	greenPlastic := material.Plastic(0, 0.9, 0, 1)
-	gold := material.Metal(1.022, 0.782, 0.344, 0.9, 1)
-	greenGlass := material.Glass(0.2, 1, 0.1, 0.95)
+	redPlastic := material.Plastic(0.9, 0, 0, 0)
+	whitePlastic := material.Plastic(1, 1, 1, 0.2)
+	bluePlastic := material.Plastic(0, 0, 0.9, 0)
+	greenPlastic := material.Plastic(0, 0.9, 0, 0)
+	gold := material.Metal(1.022, 0.782, 0.344, 0.9, 0)
+	greenGlass := material.Glass(0.2, 1, 0.1, 0.05)
 
 	scene := pbr.NewScene()
 	scene.SetAmbient(rgb.Energy{40, 50, 60})

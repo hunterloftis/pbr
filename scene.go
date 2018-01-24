@@ -16,6 +16,8 @@ import (
 	"github.com/hunterloftis/pbr/surface"
 )
 
+const maxEnvEnergy = 10000
+
 // Scene contains the elements that compose a 3D scene (Surfaces, lights, an environment map).
 // A Scene can test for intersections with a Ray to see if any Scene objects were hit.
 // Scene objects can be added programmatically or loaded from files.
@@ -71,7 +73,8 @@ func (s *Scene) EnvAt(dir geom.Direction) rgb.Energy {
 		r := float64(s.env.data[index])
 		g := float64(s.env.data[index+1])
 		b := float64(s.env.data[index+2])
-		return rgb.Energy(geom.Vector3{r, g, b}.Scaled(s.env.expose))
+		e := rgb.Energy(geom.Vector3{r, g, b}.Scaled(s.env.expose))
+		return e.Limit(maxEnvEnergy)
 	}
 	vertical := math.Max(0, (dir.Cos(geom.Direction{0, 1, 0})+0.5)/1.5)
 	return rgb.Energy{}.Blend(s.ambient, vertical)
