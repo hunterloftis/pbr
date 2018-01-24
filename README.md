@@ -4,7 +4,7 @@ Package pbr implements Physically-Based Rendering with a Monte Carlo path tracer
 [[ Documentation ]](https://godoc.org/github.com/hunterloftis/pbr)
 [[ Github ]](https://github.com/hunterloftis/pbr)
 
-![Lambo Render](https://user-images.githubusercontent.com/364501/35333613-596fc950-00dd-11e8-939c-b8e66a98a293.png)
+![Lambo Render](https://user-images.githubusercontent.com/364501/35333804-1b9ee43e-00de-11e8-994d-91ef5d3e7c81.png)
 
 ```
 $ make lambo
