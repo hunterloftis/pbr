@@ -7,10 +7,12 @@ Package pbr implements Physically-Based Rendering with a Monte Carlo path tracer
 ![Render](https://user-images.githubusercontent.com/364501/34923521-c39b132c-f96a-11e7-9a27-f79f67268079.png)
 
 ```
-$ pbr lambo.obj -floor -polar 3.6 -longitude 0.1 -env 293.hdr -rad 500 -lens 60 -fstop 1.4 -to=-0.1,0.5,0.1 -dist 7.5 -focus=-2.2658,0.5542,0
+$ make lambo
 ```
 
-This is an unbiased forward path-tracer written in Go and inspired by Disney's [Hyperion video](https://www.disneyanimation.com/technology/innovations/hyperion). It uses a single [BSDF](https://en.wikipedia.org/wiki/Bidirectional_scattering_distribution_function) to simulate realistic materials like plastic, aluminum, glass, rubber, and chalk with intuitive parameters like "color," "gloss," and "metalness." It traces rays from physically-based cameras with focal lengths, apertures, and realistic sensors. It includes a simple API for creating scenes in code and a CLI for rendering photorealistic images from the command line.
+This is an unbiased forward path-tracer written in Go and inspired by Disney's [Hyperion video](https://www.disneyanimation.com/technology/innovations/hyperion). It traces rays from physically-based cameras
+onto realistic materials specified by a small set of intuitive paramters. It includes a simple API for creating
+scenes in code and a CLI for rendering photorealistic images from the command line.
 
 ### Features
 

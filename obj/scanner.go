@@ -105,11 +105,12 @@ type phong struct {
 	name string
 	kd   rgb.Energy // diffuse color
 	tr   float64    // transmission
-	ns   float64    // specular exponent
+	ns   float64    // specular exponent (1 - roughness)
 	ks   rgb.Energy // specular color
 	ke   rgb.Energy // emissive color
-	ni   float64    // refractive index
+	ni   float64    // refractive index (TODO: implement)
 	pm   float64    // metal percent
+	pc   float64    // clear-coat percent
 }
 
 func (s *Scanner) ReadMaterials(r io.Reader, thin bool) (err error) {
@@ -161,6 +162,10 @@ func (s *Scanner) ReadMaterials(r io.Reader, thin bool) (err error) {
 			if mat.pm, err = strconv.ParseFloat(args[0], 64); err != nil {
 				return err
 			}
+		case "Pc":
+			if mat.pc, err = strconv.ParseFloat(args[0], 64); err != nil {
+				return err
+			}
 		}
 	}
 	s.addMaterial(mat, thin)
@@ -177,12 +182,13 @@ func (s *Scanner) addMaterial(mat phong, thin bool) {
 	d := material.MaterialDesc{
 		Color:    mat.kd,
 		Transmit: mat.tr,
-		Gloss:    mat.ns / 1000,
+		Rough:    1 - (mat.ns / 1000),
 		Light:    mat.ke,
 		Metal:    mat.pm,
 		Thin:     thin,
+		Coat:     mat.pc,
 	}
-	if mat.tr > 0 { // TODO: don't assume all transparent objects are glass?
+	if mat.tr > 0 {
 		if d.Thin {
 			d.Transmit = mat.tr
 		} else {
@@ -191,8 +197,7 @@ func (s *Scanner) addMaterial(mat phong, thin bool) {
 		}
 		d.Fresnel = rgb.Energy{0.042, 0.042, 0.042} // Glass
 	} else if d.Metal > 0 {
-		d.Fresnel = mat.kd
-		d.Color = mat.ks
+		d.Fresnel = rgb.Energy{0.2, 0.2, 0.2}.Blend(mat.ks, d.Metal)
 	}
 	s.lib[mat.name] = material.New(d)
 }

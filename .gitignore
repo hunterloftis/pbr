@@ -4,6 +4,7 @@ bin/*
 profile.*
 *.pprof
 *.png
+*.jpg
 *.hdr
 *.obj
 *.mtl

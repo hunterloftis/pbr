@@ -24,7 +24,7 @@ type Render struct {
 func NewRender(s *Scene, c *Camera) *Render {
 	return &Render{
 		sampler: sampler{
-			adapt:   16,
+			adapt:   32,
 			bounces: 8,
 			branch:  32,
 			direct:  8,

@@ -49,7 +49,7 @@ func run(o *Options) error {
 	}
 
 	if o.Floor {
-		floor := surface.UnitCube(material.Plastic(0.7, 0.7, 0.7, 0.7))
+		floor := surface.UnitCube(material.Plastic(0, 0, 0, 1))
 		floor.Move(box.Center.X, box.Min.Y-0.5, box.Center.Z)
 		floor.Scale(100000, 1, 100000)
 		scene.Add(floor)
