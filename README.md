@@ -23,12 +23,13 @@ It has a simple API for creating scenes in code and a CLI for rendering photorea
 - Materials:
   - [Physically-based materials](https://www.marmoset.co/posts/basic-theory-of-physically-based-rendering/)
   - [PBR extensions for .mtl files](http://exocortex.com/blog/extending_wavefront_mtl_to_support_pbr)
-  - Fresnel reflection, transmission, absorption, diffusion
-  - Color, refractive indices, gloss, transparency, separate fresnel channels, metals
+  - Reflection, transmission, absorption, diffusion
+  - Color, refractive index, roughness, transparency, fresnel channels, metalness, clear coat
+  - Texture maps (.jpg, .png)
 - Lighting:
   - [Direct lighting]()
   - Arbitrary light sources ('everything is a light')
-  - [Image-based lighting](https://agraphicsguy.wordpress.com/2016/09/07/image-based-lighting-in-offline-and-real-time-rendering/)
+  - [Image-based lighting](#image-based-lighting)
 - Cameras:
   - Physically-based cameras
   - Sensor, aperture, focal length, focus, depth-of-field
