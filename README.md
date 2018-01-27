@@ -96,6 +96,18 @@ The renderer supports spheres, cubes, and triangles that can be moved, scaled, a
 
 ## Image-based lighting
 
+![ibl](https://user-images.githubusercontent.com/364501/35469825-8193e67a-030b-11e8-9eaa-385da0ca35eb.png)
+
+```
+$ make ibl
+```
+
+The renderer can use high dynamic range (HDR) panoramic images as complex, omnidirectional light sources.
+This allows highly detailed real-world lighting to illuminate the scene's surfaces for greater realism and visual interest.
+
+All the above images were rendered with an identical model and identical materials;
+the only difference between them is the image used for lighting.
+
 ## Direct lighting
 
 ## Thin surfaces
