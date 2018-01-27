@@ -10,9 +10,9 @@ Package pbr implements Physically-Based Rendering with a Monte Carlo path tracer
 $ make lambo
 ```
 
-This is an unbiased forward path-tracer written in Go and inspired by Disney's [Hyperion video](https://www.disneyanimation.com/technology/innovations/hyperion). It traces rays from physically-based cameras
-onto realistic materials specified by a small set of intuitive paramters. It includes a simple API for creating
-scenes in code and a CLI for rendering photorealistic images from the command line.
+This is an unbiased forward path-tracer written in Go and inspired by Disney's [Hyperion video](https://www.disneyanimation.com/technology/innovations/hyperion). It traces light rays from
+physically-based cameras to surfaces with realistic materials and simulates how the rays should bounce around the scene.
+It has a simple API for creating scenes in code and a CLI for rendering photorealistic images from the command line.
 
 ### Features
 
