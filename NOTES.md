@@ -100,6 +100,10 @@
 
 ## .obj models & environments
 
+- https://sketchfab.com/geoffreymarchal
+- try to find materials for: https://sketchfab.com/models/27f75fa94c384000bb6a79a3000f8e80
+- https://sketchfab.com/models?features=downloadable&sort_by=-likeCount&cursor=cD04MDY%3D
+- https://3d.si.edu/explorer/cosmic-buddha-laser-scan
 - https://hdrihaven.com/hdris/category/?c=outdoor
 - https://benedikt-bitterli.me/resources/
 - https://grabcad.com/library?page=1&time=all_time&sort=popular
@@ -130,22 +134,21 @@
 
 ## features to try
 
-- instead of pixel indices, send closures? (https://archive.fosdem.org/2014/schedule/event/hpc_devroom_go/attachments/slides/486/export/events/attachments/hpc_devroom_go/slides/486/FOSDEM14_HPC_devroom_14_GoCUDA.pdf)
+- gltf support (https://www.khronos.org/gltf/)
 - importance sampling (http://blog.yiningkarlli.com/2015/02/multiple-importance-sampling.html)
 - wireframe renders
 - displacement maps (http://blog.yiningkarlli.com/2017/05/subdivision-and-displacement.html)
 - bidirectional path tracing
-- car paint (http://www.msawtell.com/research/carpaint/carpaint.shtml)
 - metropolis light transport
 - GPU acceleration
   - (https://archive.fosdem.org/2014/schedule/event/hpc_devroom_go/)
   - https://github.com/go-gl/cl
   - https://godoc.org/github.com/samuel/go-opencl/cl
-- bilateral smoothing filter
+- bilateral smoothing filter (tried - wasn't great. lossy.)
 - more abstract Material interface to support things like atmosphere, hair, smooth coat, participating media (smoke), etc.
 - shaped bokeh
 - STL support
-- materials: texture maps, normal maps
+- materials: texture maps (working!), normal maps
 - layered materials
 - distributed/networked rendering
 - chromatic aberration

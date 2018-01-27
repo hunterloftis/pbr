@@ -74,4 +74,5 @@ ibl:
 	./pbr fixtures/models/mario/mario-sculpture.obj -o mario-beach.png -lon 1 -lat 0.1 -floor -env fixtures/images/beach.hdr -rad 350 -width 888 -height 500 -complete 50
 	./pbr fixtures/models/mario/mario-sculpture.obj -o mario-misty.png -lon 1 -lat 0.1 -floor -env fixtures/images/misty.hdr -rad 300 -width 888 -height 500 -complete 70
 	./pbr fixtures/models/mario/mario-sculpture.obj -o mario-lobe.png -lon 1 -lat 0.1 -floor -env fixtures/images/lobe.hdr -rad 400 -width 888 -height 500 -complete 60
-	open mario-249.png mario-beach.png mario-misty.png mario-lobe.png
+	./pbr fixtures/models/mario/mario-sculpture.obj -o mario-ambient.png -lon 1 -lat 0.1 -floor -width 888 -height 500 -complete 50
+	open mario-249.png mario-beach.png mario-misty.png mario-lobe.png mario-ambient.png
