@@ -7,8 +7,8 @@ import (
 	"syscall"
 
 	"github.com/hunterloftis/pbr"
+	"github.com/hunterloftis/pbr/material"
 	"github.com/hunterloftis/pbr/surface"
-	"github.com/hunterloftis/pbr/surface/material"
 )
 
 func main() {

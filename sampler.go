@@ -50,15 +50,15 @@ func (s *sampler) tracePrimary(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	}
 	point := ray.Moved(hit.Dist)
 	normal, mat := hit.Surface.At(point)
-	energy = energy.Plus(mat.Emit())
-	branch := 1 + int(float64(s.branch)*(mat.Diffuse()+0.25)/1.25)
+	energy = energy.Plus(mat.Light)
+	branch := 1 + int(float64(s.branch)*(mat.Rough+0.25)/1.25)
 	sum := rgb.Energy{}
 	lights := s.scene.Lights()
 	for i := 0; i < branch; i++ {
 		dir, signal, diffused := mat.Bsdf(normal, ray.Dir, hit.Dist, rnd)
 		if diffused && lights > 0 {
 			direct, coverage := s.traceDirect(lights, point, normal, rnd)
-			sum = sum.Plus(direct.Strength(mat.Color()))
+			sum = sum.Plus(direct.Strength(mat.Color))
 			signal = signal.Amplified(1 - coverage)
 		}
 		next := geom.NewRay(point, dir)
@@ -82,12 +82,12 @@ func (s *sampler) traceIndirect(ray *geom.Ray3, depth int, signal rgb.Energy, rn
 	}
 	point := ray.Moved(hit.Dist)
 	normal, mat := hit.Surface.At(point)
-	energy = energy.Merged(mat.Emit(), signal)
+	energy = energy.Merged(mat.Light, signal)
 	dir, strength, diffused := mat.Bsdf(normal, ray.Dir, hit.Dist, rnd)
 	lights := s.scene.Lights()
 	if diffused && lights > 0 {
 		direct, coverage := s.traceDirect(lights, point, normal, rnd)
-		energy = energy.Merged(direct.Strength(mat.Color()), signal)
+		energy = energy.Merged(direct.Strength(mat.Color), signal)
 		signal = signal.Amplified(1 - coverage)
 	}
 	next := geom.NewRay(point, dir)
@@ -98,13 +98,13 @@ func (s *sampler) traceDirect(num int, point geom.Vector3, normal geom.Direction
 	limit := int(math.Min(float64(s.direct), float64(num)))
 	for i := 0; i < limit; i++ {
 		light := s.scene.Light(rnd)
-		shadow, solidAngle := light.Box().ShadowRay(point, rnd)
-		cos := shadow.Dir.Cos(normal)
+		ray, solidAngle := light.Box().ShadowRay(point, rnd)
+		cos := ray.Dir.Cos(normal)
 		if cos <= 0 {
 			break
 		}
 		coverage += solidAngle
-		hit := s.scene.Intersect(shadow)
+		hit := s.scene.Intersect(ray)
 		if !hit.Ok {
 			break
 		}

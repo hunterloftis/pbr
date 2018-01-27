@@ -10,8 +10,8 @@ import (
 
 	"github.com/hunterloftis/pbr"
 	"github.com/hunterloftis/pbr/geom"
+	"github.com/hunterloftis/pbr/material"
 	"github.com/hunterloftis/pbr/surface"
-	"github.com/hunterloftis/pbr/surface/material"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func run(o *Options) error {
 		scene.SetAmbient(*o.Ambient)
 	}
 
-	err := scene.ReadObjFile(o.Scene, o.Thin)
+	err := scene.ReadObj(o.Scene, o.Thin)
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func run(o *Options) error {
 	}
 
 	if len(o.Env) > 0 {
-		err = scene.ReadHdrFile(o.Env, o.Rad)
+		err = scene.ReadHdr(o.Env, o.Rad)
 		if err != nil {
 			return err
 		}
@@ -50,8 +50,9 @@ func run(o *Options) error {
 
 	if o.Floor {
 		floor := surface.UnitCube(material.Plastic(0, 0, 0, 1))
-		floor.Move(box.Center.X, box.Min.Y-0.5, box.Center.Z)
-		floor.Scale(100000, 1, 100000)
+		dims := box.Max.Minus(box.Min).Scaled(1.1)
+		floor.Move(box.Center.X, box.Min.Y-50, box.Center.Z)
+		floor.Scale(dims.X, 100, dims.Z)
 		scene.Add(floor)
 	}
 

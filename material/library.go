@@ -11,7 +11,7 @@ var (
 
 // Light constructs a new light
 // r, g, b (0-Inf) specifies the light color
-func Light(r, g, b float64) *Material {
+func Light(r, g, b float64) *Map {
 	return New(MaterialDesc{
 		Light: rgb.Energy{r, g, b},
 	})
@@ -20,7 +20,7 @@ func Light(r, g, b float64) *Material {
 // Plastic constructs a new plastic material
 // r, g, b (0-1) controls the color
 // gloss (0-1) controls the microfacet roughness (how polished the surface looks)
-func Plastic(r, g, b float64, rough float64) *Material {
+func Plastic(r, g, b float64, rough float64) *Map {
 	return New(MaterialDesc{
 		Color:   rgb.Energy{r, g, b},
 		Fresnel: rgb.Energy{0.04, 0.04, 0.04},
@@ -30,7 +30,7 @@ func Plastic(r, g, b float64, rough float64) *Material {
 
 // Lambert constructs a new lambert material
 // r, g, b (0-1) controls the color
-func Lambert(r, g, b float64) *Material {
+func Lambert(r, g, b float64) *Map {
 	return New(MaterialDesc{
 		Color:   rgb.Energy{r, g, b},
 		Fresnel: rgb.Energy{0.02, 0.02, 0.02},
@@ -40,7 +40,7 @@ func Lambert(r, g, b float64) *Material {
 // Metal constructs a new metal material
 // r, g, b (0-1) controls the fresnel color
 // gloss (0-1) controls the microfacet roughness (how polished the surface looks)
-func Metal(r, g, b, rough, metal float64) *Material {
+func Metal(r, g, b, rough, metal float64) *Map {
 	return New(MaterialDesc{
 		Fresnel: rgb.Energy{r, g, b},
 		Color:   rgb.Energy{r, g, b},
@@ -52,7 +52,7 @@ func Metal(r, g, b, rough, metal float64) *Material {
 // Glass constructs a new glass material
 // r, g, b (0-1) controls the transmission of the glass (beer-lambert)
 // gloss (0-1) controls the microfacet roughness (how polished the surface looks)
-func Glass(r, g, b, rough float64) *Material {
+func Glass(r, g, b, rough float64) *Map {
 	return New(MaterialDesc{
 		Color:    rgb.Energy{r, g, b},
 		Fresnel:  rgb.Energy{0.042, 0.042, 0.042},

@@ -2,7 +2,7 @@ package surface
 
 import (
 	"github.com/hunterloftis/pbr/geom"
-	"github.com/hunterloftis/pbr/surface/material"
+	"github.com/hunterloftis/pbr/material"
 )
 
 // Triangle describes a triangle
@@ -10,14 +10,15 @@ import (
 type Triangle struct {
 	Points  [3]geom.Vector3
 	Normals [3]geom.Direction
-	Mat     *material.Material
+	Texture [3]geom.Vector3
+	Mat     *material.Map
 	edge1   geom.Vector3
 	edge2   geom.Vector3
 	box     *Box
 }
 
 // NewTriangle creates a new triangle
-func NewTriangle(a, b, c geom.Vector3, m *material.Material) *Triangle {
+func NewTriangle(a, b, c geom.Vector3, m *material.Map) *Triangle {
 	edge1 := b.Minus(a)
 	edge2 := c.Minus(a)
 	n := edge1.Cross(edge2).Unit()
@@ -38,7 +39,7 @@ func (t *Triangle) Box() *Box {
 	return t.box
 }
 
-func (t *Triangle) Material() *material.Material {
+func (t *Triangle) Material() *material.Map {
 	return t.Mat
 }
 
@@ -80,8 +81,12 @@ func (t *Triangle) Center() geom.Vector3 {
 }
 
 // At returns the material at a point on the Triangle
-func (t *Triangle) At(v geom.Vector3) (norm geom.Direction, mat *material.Material) {
-	return t.Normal(v), t.Mat
+func (t *Triangle) At(pt geom.Vector3) (normal geom.Direction, material *material.Sample) {
+	u, v, w := t.Bary(pt)
+	normal = t.normal(u, v, w)
+	texture := t.texture(u, v, w)
+	material = t.Mat.At(texture.X, texture.Y)
+	return normal, material
 }
 
 // SetNormals sets values for each vertex normal
@@ -97,13 +102,25 @@ func (t *Triangle) SetNormals(a, b, c *geom.Direction) {
 	}
 }
 
+func (t *Triangle) SetTexture(a, b, c geom.Vector3) {
+	t.Texture[0] = a
+	t.Texture[1] = b
+	t.Texture[2] = c
+}
+
 // Normal computes the smoothed normal
-func (t *Triangle) Normal(p geom.Vector3) geom.Direction {
-	u, v, w := t.Bary(p)
+func (t *Triangle) normal(u, v, w float64) geom.Direction { // TODO: instead of separate u, v, w just use a Vector3 and multiply
 	n0 := t.Normals[0].Scaled(u)
 	n1 := t.Normals[1].Scaled(v)
 	n2 := t.Normals[2].Scaled(w)
 	return n0.Plus(n1).Plus(n2).Unit()
+}
+
+func (t *Triangle) texture(u, v, w float64) geom.Vector3 {
+	tex0 := t.Texture[0].Scaled(u)
+	tex1 := t.Texture[1].Scaled(v)
+	tex2 := t.Texture[2].Scaled(w)
+	return tex0.Plus(tex1).Plus(tex2)
 }
 
 // Bary returns the Barycentric coords of Vector p on Triangle t
