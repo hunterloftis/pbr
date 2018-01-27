@@ -14,7 +14,84 @@ This is an unbiased forward path-tracer written in Go and inspired by Disney's [
 physically-based cameras to surfaces with realistic materials and simulates how the rays should bounce around the scene.
 It has a simple API for creating scenes in code and a CLI for rendering photorealistic images from the command line.
 
-### Features
+## Try it
+
+Install:
+
+```
+$ go get github.com/hunterloftis/pbr
+$ cd $GOPATH/src/github.com/hunterloftis/pbr
+$ dep ensure
+```
+
+Run:
+
+```
+$ cd $GOPATH/src/github.com/hunterloftis/pbr
+$ go build ./cmd/pbr
+$ pbr fixtures/models/falcon.obj -lat 0.5 -lon 0.5 -complete 5
+$ open falcon.png
+```
+
+## Features
+
+### Shapes & Transforms
+
+![shapes](https://user-images.githubusercontent.com/364501/35257181-c771dd1c-ffc5-11e7-96d9-0a576a886b3c.png)
+
+```
+$ make shapes
+```
+
+The renderer supports spheres, cubes, and triangles that can be moved, scaled, and rotated.
+
+### Image-based lighting
+
+![ibl](https://user-images.githubusercontent.com/364501/35474229-60806258-0359-11e8-8af8-a67901ae9720.png)
+
+```
+$ make ibl
+```
+
+The renderer can use high dynamic range (HDR) panoramic images as complex, omnidirectional light sources.
+This allows highly detailed real-world lighting to illuminate the scene's surfaces for greater realism and visual interest.
+
+All the above images were rendered with an identical model and identical materials;
+the only difference between them is the image used for lighting.
+
+### Sampling & Branching
+
+![falcon adaptive](https://user-images.githubusercontent.com/364501/35202761-753e2d44-fef2-11e7-8d55-4893eb860144.png)
+![falcon nonadaptive](https://user-images.githubusercontent.com/364501/35202760-752b55ca-fef2-11e7-8181-e77e137c1668.png)
+
+```
+$ make adaptive
+```
+
+Adaptive sampling devotes more time to sampling noisy areas than already-resolved ones.
+Branched tracing splits primary rays into multiple branches to better sample the most important (first) bounce of each path.
+Both of these techniques allow the renderer to spend its Ray-Scene intersection budget more effectively.
+
+Both closeups of the Millennium Falcon were rendered in 10 minutes.
+The top image used naive sampling while the bottom used the default adaptive and branching settings.
+
+### Wavefront .obj files
+
+### Physically-based materials
+
+### Arbitrary light sources
+
+### Direct lighting
+
+### Thin surfaces
+
+### Physically-based cameras
+
+### Supersampled anti-aliasing
+
+### K-D Tree acceleration
+
+### Summary
 
 - Geometry:
   - [Parametric shapes (spheres, cubes, triangles)](#shapes--transforms)
@@ -43,81 +120,6 @@ It has a simple API for creating scenes in code and a CLI for rendering photorea
   - 100% Go with no system dependencies
   - Sequential API, concurrent execution
   - CLI
-
-## Try it
-
-Install:
-
-```
-$ go get github.com/hunterloftis/pbr
-$ cd $GOPATH/src/github.com/hunterloftis/pbr
-$ dep ensure
-```
-
-Run:
-
-```
-$ cd $GOPATH/src/github.com/hunterloftis/pbr
-$ go build ./cmd/pbr
-$ pbr fixtures/models/falcon.obj -lat 0.5 -lon 0.5 -complete 5
-$ open falcon.png
-```
-
-## Sampling & Branching
-
-![falcon adaptive](https://user-images.githubusercontent.com/364501/35202761-753e2d44-fef2-11e7-8d55-4893eb860144.png)
-![falcon nonadaptive](https://user-images.githubusercontent.com/364501/35202760-752b55ca-fef2-11e7-8181-e77e137c1668.png)
-
-```
-$ make adaptive
-```
-
-Adaptive sampling devotes more time to sampling noisy areas than already-resolved ones.
-Branched tracing splits primary rays into multiple branches to better sample the most important (first) bounce of each path.
-Both of these techniques allow the renderer to spend its Ray-Scene intersection budget more effectively.
-
-Both closeups of the Millennium Falcon were rendered in 10 minutes.
-The top image used naive sampling while the bottom used the default adaptive and branching settings.
-
-## Shapes & Transforms
-
-![shapes](https://user-images.githubusercontent.com/364501/35257181-c771dd1c-ffc5-11e7-96d9-0a576a886b3c.png)
-
-```
-$ make shapes
-```
-
-The renderer supports spheres, cubes, and triangles that can be moved, scaled, and rotated.
-
-## Wavefront .obj files
-
-## Physically-based materials
-
-## Arbitrary light sources
-
-## Image-based lighting
-
-![ibl](https://user-images.githubusercontent.com/364501/35474229-60806258-0359-11e8-8af8-a67901ae9720.png)
-
-```
-$ make ibl
-```
-
-The renderer can use high dynamic range (HDR) panoramic images as complex, omnidirectional light sources.
-This allows highly detailed real-world lighting to illuminate the scene's surfaces for greater realism and visual interest.
-
-All the above images were rendered with an identical model and identical materials;
-the only difference between them is the image used for lighting.
-
-## Direct lighting
-
-## Thin surfaces
-
-## Physically-based cameras
-
-## Supersampled anti-aliasing
-
-## K-D Tree acceleration
 
 ## More examples
 
