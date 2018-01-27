@@ -1,17 +1,14 @@
 package pbr
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"sync/atomic"
 
 	"github.com/Opioid/rgbe"
-	"github.com/hunterloftis/pbr/obj"
-
 	"github.com/hunterloftis/pbr/geom"
+	"github.com/hunterloftis/pbr/obj"
 	"github.com/hunterloftis/pbr/rgb"
 	"github.com/hunterloftis/pbr/surface"
 )
@@ -63,6 +60,7 @@ func (s *Scene) Rays() uint64 {
 // http://gl.ict.usc.edu/Data/HighResProbes/
 // http://cseweb.ucsd.edu/~wychang/cse168/
 // http://www.pauldebevec.com/Probes/
+// TODO: correct for (aspect ratio?) so it doesn't get bendy
 func (s *Scene) EnvAt(dir geom.Direction) rgb.Energy {
 	if s.env != nil {
 		u := 1 + math.Atan2(dir.X, -dir.Z)/math.Pi
@@ -91,9 +89,9 @@ func (s *Scene) SetAmbient(a rgb.Energy) *Scene {
 	return s
 }
 
-// ReadHdrFile opens and reads a panoramic HDR image to be used as the environment map.
+// ReadHdr opens and reads a panoramic HDR image to be used as the environment map.
 // You can alternatively directly set the HDR data with SetEnv().
-func (s *Scene) ReadHdrFile(file string, expose float64) error {
+func (s *Scene) ReadHdr(file string, expose float64) error {
 	f, err := os.Open(file)
 	if err != nil {
 		return err
@@ -107,34 +105,13 @@ func (s *Scene) ReadHdrFile(file string, expose float64) error {
 	return nil
 }
 
-// ReadObjFile reads the 3D geometry data from a Wavefront .obj file.
-// It automatically reads material data from any referenced .mtl files.
-// Missing material data is not an error; missing .mtl files are skipped.
-// TODO: implement an obj.Reader that simplifies this?
-func (s *Scene) ReadObjFile(file string, thin bool) error {
-	f, err := os.Open(file)
+func (s *Scene) ReadObj(file string, thin bool) error {
+	surfaces, err := obj.ReadFile(file, thin)
 	if err != nil {
-		return fmt.Errorf("unable to open scene %v, %v", file, err)
+		return err
 	}
-	defer f.Close()
-	scanner := obj.NewScanner(f)
-	for scanner.Scan() {
-		if m := scanner.Material(); len(m) > 0 {
-			matfile := filepath.Join(filepath.Dir(file), m)
-			f, err := os.Open(matfile)
-			if err != nil {
-				continue
-			}
-			defer f.Close()
-			err = scanner.ReadMaterials(f, thin)
-			if err != nil {
-				return err
-			}
-			continue
-		}
-		s.Add(scanner.Surface())
-	}
-	return scanner.Err()
+	s.Add(surfaces...)
+	return nil
 }
 
 // Info returns a bounding Box of all the scene's Surfaces and a list of those Surfaces.
@@ -159,7 +136,7 @@ func (s *Scene) Lights() int {
 func (s *Scene) prepare() {
 	s.tree = surface.NewTree(s.surfaces)
 	s.lights = make([]surface.Surface, 0)
-	for _, surf := range s.surfaces {
+	for _, surf := range s.surfaces { // TODO: change this to a Light interface
 		if surf.Material().Emit().Average() > 0 {
 			s.lights = append(s.lights, surf)
 		}

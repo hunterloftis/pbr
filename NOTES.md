@@ -100,6 +100,7 @@
 
 ## .obj models & environments
 
+- https://hdrihaven.com/hdris/category/?c=outdoor
 - https://benedikt-bitterli.me/resources/
 - https://grabcad.com/library?page=1&time=all_time&sort=popular
 - https://clara.io/library

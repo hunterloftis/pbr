@@ -4,19 +4,19 @@ import (
 	"math"
 
 	"github.com/hunterloftis/pbr/geom"
-	"github.com/hunterloftis/pbr/surface/material"
+	"github.com/hunterloftis/pbr/material"
 )
 
 // Sphere describes a 3d sphere
 // TODO: make all of these private, this is accessed through interfaces anyway
 type Sphere struct {
 	Pos *geom.Matrix4
-	Mat *material.Material
+	Mat *material.Map
 	box *Box
 }
 
 // UnitSphere returns a pointer to a new 1x1x1 Sphere Surface with a given material and optional transforms.
-func UnitSphere(m ...*material.Material) *Sphere {
+func UnitSphere(m ...*material.Map) *Sphere {
 	s := &Sphere{
 		Pos: geom.Identity(),
 		Mat: material.Default,
@@ -45,7 +45,7 @@ func (s *Sphere) transform(t *geom.Matrix4) *Sphere {
 	return s
 }
 
-func (s *Sphere) Material() *material.Material {
+func (s *Sphere) Material() *material.Map {
 	return s.Mat
 }
 
@@ -102,8 +102,8 @@ func (s *Sphere) Intersect(ray *geom.Ray3) Hit {
 }
 
 // At returns the surface normal given a point on the surface.
-func (s *Sphere) At(point geom.Vector3) (geom.Direction, *material.Material) {
+func (s *Sphere) At(pt geom.Vector3) (normal geom.Direction, material *material.Sample) {
 	i := s.Pos.Inverse()
-	p := i.MultPoint(point)
-	return s.Pos.MultDir(p.Unit()), s.Mat
+	p := i.MultPoint(pt)
+	return s.Pos.MultDir(p.Unit()), s.Mat.At(0, 0)
 }

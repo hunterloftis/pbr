@@ -7,9 +7,9 @@ import (
 
 	"github.com/hunterloftis/pbr"
 	"github.com/hunterloftis/pbr/geom"
+	"github.com/hunterloftis/pbr/material"
 	"github.com/hunterloftis/pbr/rgb"
 	"github.com/hunterloftis/pbr/surface"
-	"github.com/hunterloftis/pbr/surface/material"
 )
 
 func main() {

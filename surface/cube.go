@@ -4,20 +4,20 @@ import (
 	"math"
 
 	"github.com/hunterloftis/pbr/geom"
-	"github.com/hunterloftis/pbr/surface/material"
+	"github.com/hunterloftis/pbr/material"
 )
 
 // Cube describes the orientation and material of a unit cube
 type Cube struct {
 	Pos      *geom.Matrix4
-	Mat      *material.Material
-	GridMat  *material.Material
+	Mat      *material.Map
+	GridMat  *material.Map
 	GridSize float64
 	box      *Box
 }
 
 // UnitCube returns a pointer to a new 1x1x1 Cube Surface with material and optional transforms.
-func UnitCube(m ...*material.Material) *Cube {
+func UnitCube(m ...*material.Map) *Cube {
 	c := &Cube{
 		Pos: geom.Identity(),
 		Mat: material.Default,
@@ -58,7 +58,7 @@ func (c *Cube) Rotate(x, y, z float64) *Cube {
 }
 
 // SetGrid adds a second material to the cube which is applied as a grid across its surface
-func (c *Cube) SetGrid(mat *material.Material, size float64) *Cube {
+func (c *Cube) SetGrid(mat *material.Map, size float64) *Cube {
 	c.GridMat = mat
 	c.GridSize = size
 	return c
@@ -105,14 +105,15 @@ func (c *Cube) Center() geom.Vector3 {
 	return c.Pos.MultPoint(geom.Vector3{})
 }
 
-func (c *Cube) Material() *material.Material {
+func (c *Cube) Material() *material.Map {
 	return c.Mat
 }
 
 // At returns the normal geom.Vector3 at this point on the Surface
-func (c *Cube) At(p geom.Vector3) (normal geom.Direction, mat *material.Material) {
-	i := c.Pos.Inverse() // global to local transform
-	p1 := i.MultPoint(p) // translate point into local space
+func (c *Cube) At(pt geom.Vector3) (normal geom.Direction, material *material.Sample) {
+	normal = geom.Direction{}
+	i := c.Pos.Inverse()  // global to local transform
+	p1 := i.MultPoint(pt) // translate point into local space
 	abs := p1.Abs()
 	switch {
 	case abs.X > abs.Y && abs.X > abs.Z:
@@ -122,17 +123,7 @@ func (c *Cube) At(p geom.Vector3) (normal geom.Direction, mat *material.Material
 	default:
 		normal = geom.Direction{0, 0, math.Copysign(1, p1.Z)}
 	}
-	// translate normal from local to global space
-	mat = c.Mat
-	if c.GridMat != nil && c.GridSize > 0 {
-		x, z := p.X/c.GridSize, p.Z/c.GridSize
-		if dx := math.Abs(x - math.Floor(x)); dx < 0.08 { // TODO: this should not be a magic number
-			mat = c.GridMat
-		} else if dz := math.Abs(z - math.Floor(z)); dz < 0.08 {
-			mat = c.GridMat
-		}
-	}
-	return c.Pos.MultDir(normal), mat
+	return c.Pos.MultDir(normal), c.Mat.At(0, 0)
 }
 
 func (c *Cube) Box() *Box {
