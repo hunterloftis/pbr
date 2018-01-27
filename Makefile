@@ -67,3 +67,11 @@ profile:
 	./pbr fixtures/models/lambo2/lambo.obj -floor -lon 3.6 -lat 0.1 -env fixtures/images/293.hdr -rad 450 -lens 60 -fstop 1.4 -target=-0.1,0.5,0.1 -dist 7.5 -focus=-2.2658,0.5542,-0.7 -direct 0 -width 960 -height 540 -profile -complete 1
 	go tool pprof --pdf ./pbr ./cpu.pprof > cpu.pdf
 	open cpu.pdf
+
+ibl:
+	go build ./cmd/pbr
+	./pbr fixtures/models/mario/mario-sculpture.obj -o mario-249.png -lon 1 -lat 0.1 -floor -env fixtures/images/249.hdr -rad 600 -complete 50
+	./pbr fixtures/models/mario/mario-sculpture.obj -o mario-beach.png -lon 1 -lat 0.1 -floor -env fixtures/images/beach.hdr -rad 300 -complete 50
+	./pbr fixtures/models/mario/mario-sculpture.obj -o mario-misty.png -lon 1 -lat 0.1 -floor -env fixtures/images/misty.hdr -rad 300 -complete 50
+	./pbr fixtures/models/mario/mario-sculpture.obj -o mario-lobe.png -lon 1 -lat 0.1 -floor -env fixtures/images/lobe.hdr -rad 300 -complete 50
+	open mario-249.png mario-beach.png mario-misty.png mario-lobe.png
