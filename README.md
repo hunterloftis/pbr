@@ -97,7 +97,7 @@ The renderer supports spheres, cubes, and triangles that can be moved, scaled, a
 
 ## Image-based lighting
 
-![ibl](https://user-images.githubusercontent.com/364501/35469825-8193e67a-030b-11e8-9eaa-385da0ca35eb.png)
+![ibl](https://user-images.githubusercontent.com/364501/35474229-60806258-0359-11e8-8af8-a67901ae9720.png)
 
 ```
 $ make ibl
