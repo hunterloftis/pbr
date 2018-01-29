@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"image"
+	"math"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -130,6 +131,11 @@ func adapt(props mtl, thin bool) *material.Map {
 		d.Fresnel = rgb.Energy{0.042, 0.042, 0.042} // Glass
 	} else {
 		d.Fresnel = rgb.Energy{0.02, 0.02, 0.02}.Blend(props.ks, d.Metal)
+	}
+	if props.ni > 1 {
+		// https://docs.blender.org/manual/en/dev/render/cycles/nodes/types/shaders/principled.html
+		f := math.Pow((props.ni-1)/(props.ni+1), 2)
+		d.Fresnel = rgb.Energy{f, f, f}
 	}
 	return material.New(d)
 }
