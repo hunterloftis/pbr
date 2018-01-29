@@ -62,6 +62,11 @@ lambo:
 	./pbr fixtures/models/lambo2/lambo.obj -heat lambo-heat.png -floor -lon 4 -lat 0.1 -env fixtures/images/306.hdr -rad 700 -lens 50 -fstop 1.4 -target=-0.2,0.5,0.4 -dist 6.5 -focus=-1,0.67,-0.56 -direct 0 -width 1920 -height 1080 -complete 512
 	open lambo.png
 
+lambo3:
+	go build ./cmd/pbr
+	./pbr fixtures/models/lambo3/lambo.obj -heat lambo-heat.png -lon 4 -lat 0.1 -env fixtures/images/river.hdr -rad 2500 -lens 50 -fstop 1.4 -target=-0.2,0.5,0.4 -dist 6.6 -focus=-1,0.67,-0.56 -direct 0 -width 640 -height 360 --verbose -branch 1 -complete 128
+	open lambo.png
+
 profile:
 	go build ./cmd/pbr
 	./pbr fixtures/models/lambo2/lambo.obj -floor -lon 3.6 -lat 0.1 -env fixtures/images/293.hdr -rad 450 -lens 60 -fstop 1.4 -target=-0.1,0.5,0.1 -dist 7.5 -focus=-2.2658,0.5542,-0.7 -direct 0 -width 960 -height 540 -profile -complete 1
