@@ -100,6 +100,7 @@
 
 ## .obj models & environments
 
+- https://sketchfab.com/models?features=staffpicked+downloadable&sort_by=-publishedAt
 - https://sketchfab.com/geoffreymarchal
 - try to find materials for: https://sketchfab.com/models/27f75fa94c384000bb6a79a3000f8e80
 - https://sketchfab.com/models?features=downloadable&sort_by=-likeCount&cursor=cD04MDY%3D
@@ -180,3 +181,29 @@ $ pbr -branch 8 -direct 8 -complete 16
 3. You parallelize the system and scale out
 
 Reference image for white lambo render: https://i.ytimg.com/vi/JhEf4QI8HZU/hqdefault.jpg
+
+## Models to try:
+
+- https://sketchfab.com/models/62653ee3bd234d208c47b9c6a7e3fb63 (obj)
+- https://sketchfab.com/models/7830358a83ac427cbdd515ddb027ca52
+- https://sketchfab.com/models/adbe88dcf04d4a87a4c2f62ed6ca0880 (obj)
+- https://sketchfab.com/models/b2a844e983054139af0d2bae3c5abf16
+- https://sketchfab.com/models/3c214f97f48042848afd7e13d7acdad5
+- https://sketchfab.com/models/8b6cca104a2742af93244b60fa03b402
+- https://sketchfab.com/models/109b3c7bfc09474cbd9ba0ddde45e3d6
+- https://sketchfab.com/models/b7b32eaca80d460c9338197e2c9d1408
+- https://sketchfab.com/models/ac65e0168e8c423db9c9fdc71397c84e
+- https://sketchfab.com/models/aee77bd30eeb4415b915350f5b25dbcd
+- https://sketchfab.com/models/f912289e43a8413dad360cdddc2c3230
+- https://sketchfab.com/models/4c08d29e78c84ca1950963061d51bddc
+- https://sketchfab.com/models/ec8286fe454a4912805fbc2d80e3e739 (obj)
+- https://sketchfab.com/models/9c97d319c4754b1ba0465ccd9dcc1b77
+- https://sketchfab.com/models/d5e6b6a11da646f68a5fcba661dcae99 (obj)
+- https://sketchfab.com/models/27f75fa94c384000bb6a79a3000f8e80
+- https://sketchfab.com/models/30f43907f7814582b5dacbbadbabbe6d (obj)
+- https://sketchfab.com/models/65880617586342db903f9236c014aeab
+- https://sketchfab.com/models/af3e37a0868742d3b756e784adc060ae
+- https://sketchfab.com/models/cbcf188a01f54d63a10f10c227c5a6ff
+- https://sketchfab.com/models/c2a5343bf18949fc8d6815034ec7f87d
+- https://sketchfab.com/models/dd8ede596d044655bb6bd0abf35577a5
+- https://sketchfab.com/models/77afa26a76614fc2b8ed845024af0b58 (obj)
