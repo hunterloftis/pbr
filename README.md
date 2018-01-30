@@ -138,6 +138,9 @@ Positional arguments:
 Options:
   --verbose              verbose output with scene information
   --info, -i             output scene information and exit
+  --complete COMPLETE, -c COMPLETE
+                         number of samples-per-pixel at which to exit [default: +Inf]
+  --time TIME, -t TIME   time to run before exiting (seconds) [default: +Inf]
   --out OUT, -o OUT      output render .png
   --heat HEAT            output heatmap as .png
   --noise NOISE          output noisemap as .png
@@ -152,19 +155,17 @@ Options:
   --lens LENS            camera focal length in mm [default: 50]
   --fstop FSTOP          camera f-stop [default: 4]
   --expose EXPOSE        exposure multiplier [default: 1]
-  --ambient AMBIENT      the ambient light color [default: &{500 500 500}]
+  --ambient AMBIENT      the ambient light color [default: &{600 600 600}]
   --env ENV, -e ENV      environment as a panoramic hdr radiosity map (.hdr file)
   --rad RAD              exposure of the hdr (radiosity) environment map [default: 100]
   --floor                create a floor underneath the scene
-  --adapt ADAPT          adaptive sampling multiplier [default: 8]
+  --adapt ADAPT          adaptive sampling multiplier [default: 32]
   --bounce BOUNCE, -d BOUNCE
                          number of light bounces (depth) [default: 8]
   --direct DIRECT, -d DIRECT
                          maximum number of direct rays to cast [default: 1]
   --branch BRANCH, -b BRANCH
                          maximum number of branches on first hit [default: 32]
-  --complete COMPLETE, -c COMPLETE
-                         number of samples-per-pixel at which to exit [default: +Inf]
   --thin                 treat transparent surfaces as having zero thickness
   --help, -h             display this help and exit
   --version              display version and exit
