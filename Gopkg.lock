@@ -19,15 +19,9 @@
   packages = ["."]
   revision = "e80c3b7ed292b052c7083b6fd7154a8422c33f65"
 
-[[projects]]
-  branch = "master"
-  name = "github.com/pkg/math"
-  packages = ["."]
-  revision = "f2ed9e40e245cdeec72c4b642d27ed4553f90667"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cd92795cabd8e4cfe4ac52b1d69c8d8c3151b9305e3753892619b42a6bf25d1d"
+  inputs-digest = "5a5168774d09652146566c376ef521bcdec5750224e367faf008150daa1f206d"
   solver-name = "gps-cdcl"
   solver-version = 1
