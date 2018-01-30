@@ -9,6 +9,7 @@ profile.*
 *.obj
 *.mtl
 *.pdf
+*.zip
 /vendor
 /fixtures
 /pbr
