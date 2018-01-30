@@ -8,7 +8,7 @@ count:
 
 fixtures:
 	curl -L -o fixtures.zip https://www.dropbox.com/sh/ik2vfz1qhtsupgt/AADeLgXNSrcjkhqbY64ng5bRa?dl=1
-	unzip -n fixtures.zip -d fixtures
+	unzip -n fixtures.zip -d fixtures -x /
 
 doc:
 	godoc -http=":5000"
