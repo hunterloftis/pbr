@@ -1,5 +1,8 @@
 .PHONY: fixtures
 
+clean:
+	rm -f *.png *.pdf *.zip
+
 count:
 	find . -name '*.go' -not -path "./vendor/*" | xargs wc -l
 

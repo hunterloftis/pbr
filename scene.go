@@ -101,8 +101,12 @@ func (s *Scene) ReadHdr(file string, expose float64) error {
 	if err != nil {
 		return err
 	}
-	s.env = &rgbae{width: width, height: height, data: data, expose: expose}
+	s.SetEnv(width, height, data, expose)
 	return nil
+}
+
+func (s *Scene) SetEnv(width, height int, data []float32, expose float64) {
+	s.env = &rgbae{width: width, height: height, data: data, expose: expose}
 }
 
 func (s *Scene) ReadObj(file string, thin bool) error {
