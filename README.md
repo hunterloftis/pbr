@@ -30,9 +30,11 @@ Run:
 ```
 $ cd $GOPATH/src/github.com/hunterloftis/pbr
 $ go build ./cmd/pbr
-$ ./pbr fixtures/models/falcon.obj -lat 0.3 -lon=-0.6 -dist 1200 -complete 5
-$ open falcon.png
+$ ./pbr fixtures/models/lucy.obj -complete 8
+$ open lucy.png
 ```
+
+![lucy](https://user-images.githubusercontent.com/364501/35577182-e895f80e-05ae-11e8-8698-9f423771a31d.png)
 
 ## Features
 
@@ -67,6 +69,7 @@ the only difference between them is the image used for lighting.
 ![falcon nonadaptive](https://user-images.githubusercontent.com/364501/35202760-752b55ca-fef2-11e7-8181-e77e137c1668.png)
 
 ```
+$ make fixtures
 $ make adaptive
 ```
 
