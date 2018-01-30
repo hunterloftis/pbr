@@ -26,17 +26,5 @@
   name = "github.com/Opioid/rgbe"
 
 [[constraint]]
-  name = "github.com/jessevdk/go-flags"
-  version = "1.3.0"
-
-[[constraint]]
   branch = "master"
   name = "github.com/alexflint/go-arg"
-
-[[constraint]]
-  name = "github.com/pkg/profile"
-  version = "1.2.1"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/pkg/math"
