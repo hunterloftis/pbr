@@ -26,6 +26,7 @@ type Sample struct {
 // then pass incident & resulting directions into the bsdf to find the signal strength
 // https://docs.blender.org/manual/en/dev/render/cycles/nodes/types/shaders/principled.html
 // https://github.Com/wdas/brdf/blob/master/src/brdfs/disney.brdf#L131
+// TODO: https://github.com/KhronosGroup/glTF-WebGL-PBR
 func (s *Sample) Bsdf(norm, inc geom.Direction, dist float64, rnd *rand.Rand) (geom.Direction, rgb.Energy, bool) {
 	if inc.Enters(norm) {
 		// clear coat TODO: I don't think this is working. Try a red car.
