@@ -118,6 +118,8 @@
 
 ## refs
 
+- gltf, pbr, brdf computation: https://github.com/KhronosGroup/glTF-WebGL-PBR
+- pbr, brdf, unreal: http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
 - profiling: https://medium.com/@hackintoshrao/daily-code-optimization-using-benchmarks-and-profiling-in-golang-gophercon-india-2016-talk-874c8b4dc3c5
 - noise: https://support.solidangle.com/display/ARP/Removing+Noise
 - sampling: https://support.solidangle.com/display/AFMUG/Samples
@@ -207,3 +209,35 @@ Reference image for white lambo render: https://i.ytimg.com/vi/JhEf4QI8HZU/hqdef
 - https://sketchfab.com/models/c2a5343bf18949fc8d6815034ec7f87d
 - https://sketchfab.com/models/dd8ede596d044655bb6bd0abf35577a5
 - https://sketchfab.com/models/77afa26a76614fc2b8ed845024af0b58 (obj)
+
+Road accent models:
+
+- https://sketchfab.com/models/f0dfd8023cc949f4b6049e9d09f1dd89
+- https://sketchfab.com/models/e7d7e838f51e4e46bc85393da2e459c4
+- https://sketchfab.com/models/4b3c79ccdbdb4b61bc85b378394be145
+- https://sketchfab.com/models/c34d4b2091e94ee6a5e6af2960f84e4a
+- https://sketchfab.com/models/b0d0304c927b450d904163fa43978519
+- https://sketchfab.com/models/210d05ab6d2f49c99d851263c5294358
+- https://sketchfab.com/models/03d0cc3565344b9ab8a0f65d49bdbe6f
+- https://sketchfab.com/models/bec79069a75046459e2b86f76e50867c
+- https://sketchfab.com/models/ae68a6ab5a724d33b1adbee86a774527
+- https://sketchfab.com/models/51c797ff95c44da28b2d072bcc79befd
+- https://sketchfab.com/models/8d2f9eb1dda54668b6bdddaf761667b4
+- https://sketchfab.com/models/c89f1e5311914840a5e777d548301e29
+- https://sketchfab.com/models/bb2d84015680424997654b36460025dd
+- https://sketchfab.com/models/4319605711c54a968ad8b43ede42ea50
+- https://sketchfab.com/models/6e3edc1f27fa489e82f521b00ab79b4d !!
+- https://sketchfab.com/models/90cdaeb807dd46efb7b481a34c396fb3
+- https://sketchfab.com/models/7c64664412604d1fb6c0745d6ee60c1f
+- https://sketchfab.com/models/1776a0fe6e7d42189f3d30c4a318710d !!
+
+Backdrops:
+
+- https://sketchfab.com/models/2ca7b3f063284089a12225a3a5ce671e
+- https://sketchfab.com/models/bef1d49e13fd4e6e9743568d608477f7
+- https://sketchfab.com/models/d2b69c58066a423db9fda0f1fa4e98dc
+- https://sketchfab.com/models/39c924d4aa584580bda4a39e94cdc558
+- https://sketchfab.com/models/c39fb0fd122b490a9e9703ffc1f5f382
+- https://sketchfab.com/models/c9d813df756a42c3a97a7b56d0705069
+- https://sketchfab.com/models/7dfb633ca4d8430f914d20a5213cfc6f
+- https://sketchfab.com/models/32362f5484f341c79f0feb91fa19af96
