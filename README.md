@@ -30,7 +30,7 @@ Run:
 ```
 $ cd $GOPATH/src/github.com/hunterloftis/pbr
 $ go build ./cmd/pbr
-$ pbr fixtures/models/falcon.obj -lat 0.5 -lon 0.5 -complete 5
+$ ./pbr fixtures/models/falcon.obj -lat 0.5 -lon 0.5 -complete 5
 $ open falcon.png
 ```
 
