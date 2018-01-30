@@ -7,6 +7,7 @@ Package pbr implements Physically-Based Rendering with a Monte Carlo path tracer
 ![Lambo Render](https://user-images.githubusercontent.com/364501/35541108-27ce146c-0527-11e8-83e2-1af8aee2c0e2.png)
 
 ```
+$ make fixtures
 $ make lambo
 ```
 
@@ -50,6 +51,7 @@ The renderer supports spheres, cubes, and triangles that can be moved, scaled, a
 ![ibl](https://user-images.githubusercontent.com/364501/35474229-60806258-0359-11e8-8af8-a67901ae9720.png)
 
 ```
+$ make fixtures
 $ make ibl
 ```
 
@@ -120,11 +122,6 @@ The top image used naive sampling while the bottom used the default adaptive and
   - 100% Go with no system dependencies
   - Sequential API, concurrent execution
   - CLI
-
-## More examples
-
-I've gitignored the /fixtures directory to keep large binaries out of the repository.
-You can download the Makefile fixtures from [Google Drive](https://drive.google.com/drive/folders/1hXQfQ9bZOIt8TvyoaUrRpELMxhKzrOCG?usp=sharing) for a library of models, materials, and HDR environments to play with.
 
 ## API
 

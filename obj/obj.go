@@ -23,11 +23,9 @@ func ReadFile(filename string, thin bool) ([]surface.Surface, error) {
 		switch n := scanner.Next().(type) {
 		case MatName:
 			mfile := filepath.Join(filepath.Dir(filename), string(n))
-			mats, err := ReadMtl(mfile, thin)
-			if err != nil {
-				return nil, err
+			if mats, err := ReadMtl(mfile, thin); err == nil {
+				scanner.AddMaterials(mats)
 			}
-			scanner.AddMaterials(mats)
 		case TexName:
 		case surface.Surface:
 			s = append(s, n)

@@ -34,7 +34,7 @@ func main() {
 		surface.UnitCube(gold).Move(0, 0, -0.4).Rotate(0, 0.1*math.Pi, 0).Scale(0.1, 0.1, 0.1),
 		surface.UnitCube(greenGlass).Move(-0.3, 0, 0.3).Rotate(0, -0.1*math.Pi, 0).Scale(0.1, 0.1, 0.1),
 		surface.UnitCube(greenGlass).Move(0.175, 0.05, 0.18).Rotate(0, 0.55*math.Pi, 0).Scale(0.02, 0.2, 0.2),
-		surface.UnitCube(whitePlastic).Move(0, -0.55, 0).Scale(1000, 1, 1000).SetGrid(bluePlastic, 1.0/20.0),
+		surface.UnitCube(whitePlastic).Move(0, -0.55, 0).Scale(1000, 1, 1000),
 		surface.UnitSphere(greenGlass).Move(-0.2, 0.001, -0.2).Scale(0.1, 0.1, 0.1),
 		surface.UnitSphere(bluePlastic).Move(0.3, 0.05, 0).Scale(0.2, 0.2, 0.2),
 		surface.UnitSphere(light).Move(7, 30, 6).Scale(30, 30, 30),
@@ -42,9 +42,9 @@ func main() {
 		surface.UnitSphere(gold).Move(0.45, 0.05, -0.4).Scale(0.2, 0.2, 0.2),
 	)
 
-	fmt.Println("rendering shapes.png (1 hour)...")
+	fmt.Println("rendering shapes.png (15 mins)...")
 	render.Start()
-	time.Sleep(time.Hour)
+	time.Sleep(time.Minute * 15)
 	render.Stop()
 	render.WritePngs("shapes.png", "shapes-heat.png", "shapes-noise.png", 1)
 }
