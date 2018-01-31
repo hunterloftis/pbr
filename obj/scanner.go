@@ -36,7 +36,7 @@ func NewScanner(r io.Reader) *Scanner {
 		vn:      make([]geom.Direction, 0),
 		vt:      make([]geom.Vector3, 0),
 		lib:     make(map[string]*material.Map),
-		mat:     material.Plastic(1, 1, 1, 0.7),
+		mat:     material.Default,
 	}
 }
 

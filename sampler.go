@@ -42,6 +42,8 @@ func (s *sampler) start(buffer *rgb.Framebuffer, in <-chan int, done chan<- samp
 	}()
 }
 
+// TODO: sample Specular reflections from direct light sources and weight results by their BSDF towards the light
+// Or, better, sample lights directly in general and pass that through a unified BSDF
 func (s *sampler) tracePrimary(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	ray := s.camera.ray(float64(x), float64(y), rnd)
 	hit := s.scene.Intersect(ray)
@@ -84,8 +86,7 @@ func (s *sampler) traceIndirect(ray *geom.Ray3, depth int, signal rgb.Energy, rn
 	normal, mat := hit.Surface.At(point)
 	energy = energy.Merged(mat.Light, signal)
 	dir, strength, diffused := mat.Bsdf(normal, ray.Dir, hit.Dist, rnd)
-	lights := s.scene.Lights()
-	if diffused && lights > 0 {
+	if lights := s.scene.Lights(); diffused && lights > 0 {
 		direct, coverage := s.traceDirect(lights, point, normal, rnd)
 		energy = energy.Merged(direct.Strength(mat.Color), signal)
 		signal = signal.Amplified(1 - coverage)
@@ -98,9 +99,8 @@ func (s *sampler) traceDirect(num int, point geom.Vector3, normal geom.Direction
 	limit := int(math.Min(float64(s.direct), float64(num)))
 	for i := 0; i < limit; i++ {
 		light := s.scene.Light(rnd)
-		ray, solidAngle := light.Box().ShadowRay(point, rnd)
-		cos := ray.Dir.Cos(normal)
-		if cos <= 0 {
+		ray, solidAngle := light.Box().ShadowRay(point, normal, rnd)
+		if solidAngle <= 0 {
 			break
 		}
 		coverage += solidAngle
@@ -108,7 +108,7 @@ func (s *sampler) traceDirect(num int, point geom.Vector3, normal geom.Direction
 		if !hit.Ok {
 			break
 		}
-		e := hit.Surface.Material().Emit().Amplified(solidAngle * cos / math.Pi)
+		e := hit.Surface.Material().Emit().Amplified(solidAngle / math.Pi)
 		energy = energy.Plus(e)
 	}
 	return energy, coverage

@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"math"
-	"time"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/hunterloftis/pbr"
 	"github.com/hunterloftis/pbr/geom"
@@ -18,7 +20,7 @@ func main() {
 	whitePlastic := material.Plastic(1, 1, 1, 0.2)
 	bluePlastic := material.Plastic(0, 0, 0.9, 0)
 	greenPlastic := material.Plastic(0, 0.9, 0, 0)
-	gold := material.Metal(1.022, 0.782, 0.344, 0.9, 0)
+	gold := material.Metal(1.022, 0.782, 0.344, 0.1, 1)
 	greenGlass := material.Glass(0.2, 1, 0.1, 0.05)
 
 	scene := pbr.NewScene()
@@ -42,9 +44,11 @@ func main() {
 		surface.UnitSphere(gold).Move(0.45, 0.05, -0.4).Scale(0.2, 0.2, 0.2),
 	)
 
-	fmt.Println("rendering shapes.png (15 mins)...")
+	interrupt := make(chan os.Signal, 2)
+	fmt.Println("rendering shapes.png (press Ctrl+C to finish)...")
+	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	render.Start()
-	time.Sleep(time.Minute * 15)
+	<-interrupt
 	render.Stop()
 	render.WritePngs("shapes.png", "shapes-heat.png", "shapes-noise.png", 1)
 }

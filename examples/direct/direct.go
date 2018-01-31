@@ -11,6 +11,7 @@ import (
 	"github.com/hunterloftis/pbr/surface"
 )
 
+// The pathological case for indirect lighting: a small, very bright light at a large distance
 func main() {
 	floor := surface.UnitCube().Move(0, -1, 0).Scale(100, 1, 100)
 	halogen := material.Light(10000000, 10000000, 10000000)

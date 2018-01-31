@@ -32,9 +32,9 @@ func (s *Sphere) transform(t *geom.Matrix4) *Sphere {
 	s.Pos = s.Pos.Mult(t)
 	min := s.Pos.MultPoint(geom.Vector3{})
 	max := s.Pos.MultPoint(geom.Vector3{})
-	for x := -1.0; x <= 1; x += 2 {
-		for y := -1.0; y <= 1; y += 2 {
-			for z := -1.0; z <= 1; z += 2 {
+	for x := -0.5; x <= 0.5; x += 1 {
+		for y := -0.5; y <= 0.5; y += 1 {
+			for z := -0.5; z <= 0.5; z += 1 {
 				pt := s.Pos.MultPoint(geom.Vector3{x, y, z})
 				min = min.Min(pt)
 				max = max.Max(pt)
@@ -71,6 +71,7 @@ func (s *Sphere) Box() *Box {
 
 // Intersect tests whether the sphere intersects a given ray.
 // http://tfpsly.free.fr/english/index.html?url=http://tfpsly.free.fr/english/3d/Raytracing.html
+// TODO: http://kylehalladay.com/blog/tutorial/math/2013/12/24/Ray-Sphere-Intersection.html
 func (s *Sphere) Intersect(ray *geom.Ray3) Hit {
 	if ok, _, _ := s.box.Check(ray); !ok {
 		return Miss

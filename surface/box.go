@@ -95,15 +95,15 @@ func (b *Box) Contains(p geom.Vector3) bool {
 // chooses a random point within that disc,
 // and returns a Ray3 from the origin to the random point.
 // https://marine.rutgers.edu/dmcs/ms552/2009/solidangle.pdf
-func (b *Box) ShadowRay(origin geom.Vector3, rnd *rand.Rand) (*geom.Ray3, float64) {
-	norm := origin.Minus(b.Center).Unit()
-	center2 := b.Center.Plus(norm.Scaled(-b.Radius))
-	x, y := geom.RandPointInCircle(b.Radius, rnd)
-	right := norm.Cross(geom.Up)
-	up := right.Cross(norm)
-	point := center2.Plus(right.Scaled(x)).Plus(up.Scaled(y))
+func (b *Box) ShadowRay(origin geom.Vector3, normal geom.Direction, rnd *rand.Rand) (*geom.Ray3, float64) {
+	forward := origin.Minus(b.Center).Unit()
+	x, y := geom.RandPointInCircle(b.Radius, rnd) // TODO: push center back along "forward" axis, away from origin
+	right := forward.Cross(geom.Up)
+	up := right.Cross(forward)
+	point := b.Center.Plus(right.Scaled(x)).Plus(up.Scaled(y))
 	ray := geom.NewRay(origin, point.Minus(origin).Unit()) // TODO: this should be a convenience method
-	dist := center2.Minus(origin).Len()
-	weight := (b.Radius * b.Radius) / (2 * dist * dist) // cosine-weighted ratio of disc surface area to hemisphere surface area
-	return ray, weight
+	dist := b.Center.Minus(origin).Len()
+	cos := ray.Dir.Cos(normal)
+	solidAngle := cos * (b.Radius * b.Radius) / (2 * dist * dist) // cosine-weighted ratio of disc surface area to hemisphere surface area
+	return ray, solidAngle
 }
