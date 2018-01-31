@@ -32,9 +32,9 @@ func (c *Cube) transform(m *geom.Matrix4) *Cube {
 	c.Pos = c.Pos.Mult(m)
 	min := c.Pos.MultPoint(geom.Vector3{})
 	max := c.Pos.MultPoint(geom.Vector3{})
-	for x := -1.0; x <= 1; x += 2 {
-		for y := -1.0; y <= 1; y += 2 {
-			for z := -1.0; z <= 1; z += 2 {
+	for x := -0.5; x <= 0.5; x += 1 {
+		for y := -0.5; y <= 0.5; y += 1 {
+			for z := -0.5; z <= 0.5; z += 1 {
 				pt := c.Pos.MultPoint(geom.Vector3{x, y, z})
 				min = min.Min(pt)
 				max = max.Max(pt)

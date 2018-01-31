@@ -95,9 +95,8 @@ func (m *Map) At(u, v float64) *Sample {
 			y += height
 		}
 		r, g, b, a := m.d.Texture.At(x, y).RGBA()
-		// fmt.Println("rgb:", r, g, b, a)
-		// panic("ok")
 		s.Color = rgb.Energy{float64(r), float64(g), float64(b)}.Amplified(1 / float64(a))
+		// TODO: deal with metals; s.Fresnel = s.Fresnel.Blend(s.Color, s.Metal)?
 	}
 	return s
 }
