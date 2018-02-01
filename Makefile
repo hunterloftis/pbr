@@ -16,7 +16,7 @@ doc:
 pbr:
 	go build ./cmd/pbr
 
-help:
+help: pbr
 	./pbr --help
 
 hello:
