@@ -2,7 +2,6 @@ package surface
 
 import "math"
 
-// TODO: these should all be public
 type Hit struct {
 	Ok      bool
 	Surface Surface

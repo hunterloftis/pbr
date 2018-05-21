@@ -30,12 +30,12 @@ func Plastic(r, g, b float64, rough float64) *Map {
 
 // Lambert constructs a new lambert material
 // r, g, b (0-1) controls the color
-func Lambert(r, g, b float64) *Map {
-	return New(MaterialDesc{
-		Color:   rgb.Energy{r, g, b},
-		Fresnel: rgb.Energy{0.02, 0.02, 0.02},
-	})
-}
+// func Lambert(r, g, b float64) *Map {
+// 	return New(MaterialDesc{
+// 		Color:   rgb.Energy{r, g, b},
+// 		Fresnel: rgb.Energy{0.02, 0.02, 0.02},
+// 	})
+// }
 
 // Metal constructs a new metal material
 // r, g, b (0-1) controls the fresnel color

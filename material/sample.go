@@ -20,6 +20,16 @@ type Sample struct {
 	Thin     bool
 }
 
+type BSDF interface {
+	Sample(in, normal geom.Direction, rnd *rand.Rand) (out geom.Direction)
+	PDF(out, normal geom.Direction) float64
+	Radiance(in, out, normal geom.Direction) rgb.Energy
+}
+
+func (s *Sample) BSDF() BSDF {
+	return Lambert{1, 1, 1}
+}
+
 // Bsdf is an attempt at a new bsdf
 // TODO: a real BSDF instead of this procedural one.
 // at each hit: choose between transmission, absorption, specular, or diffuse & generate next ray

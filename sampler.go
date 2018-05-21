@@ -33,7 +33,7 @@ func (s *sampler) start(buffer *rgb.Framebuffer, in <-chan int, done chan<- samp
 				i := uint(y*int(width) + x)
 				count := s.adapted(buffer, uint(i))
 				for c := 0; c < count; c++ {
-					buffer.Add(i, s.tracePrimary(x, y, rnd))
+					buffer.Add(i, s.trace(x, y, rnd))
 				}
 				total += count
 			}
@@ -42,9 +42,35 @@ func (s *sampler) start(buffer *rgb.Framebuffer, in <-chan int, done chan<- samp
 	}()
 }
 
+func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
+	ray := s.camera.ray(float64(x), float64(y), rnd)
+	strength := rgb.Energy{1, 1, 1}
+	// lights := s.scene.Lights() TODO: direct lighting
+
+	for i := 0; i < 9; i++ {
+		hit := s.scene.Intersect(ray)
+		if !hit.Ok {
+			energy = energy.Plus(s.scene.EnvAt(ray.Dir).Strength(strength))
+			break
+		}
+		point := ray.Moved(hit.Dist)
+		normal, mat := hit.Surface.At(point)
+		if !mat.Light.Zero() {
+			energy = energy.Plus(mat.Light.Strength(strength))
+			break
+		}
+		bsdf := mat.BSDF()
+		outDir := bsdf.Sample(ray.Dir, normal, rnd)
+		weight := 1.0 / bsdf.PDF(outDir, normal)
+		strength = strength.Strength(bsdf.Radiance(ray.Dir, outDir, normal)).Amplified(weight)
+		ray = geom.NewRay(point, outDir)
+	}
+	return energy
+}
+
 // TODO: sample Specular reflections from direct light sources and weight results by their BSDF towards the light
 // Or, better, sample lights directly in general and pass that through a unified BSDF
-func (s *sampler) tracePrimary(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
+func (s *sampler) tracePrimary2(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	ray := s.camera.ray(float64(x), float64(y), rnd)
 	hit := s.scene.Intersect(ray)
 	if !hit.Ok {
