@@ -30,7 +30,7 @@ func (s *Sample) BSDF() BSDF {
 	if s.Metal == 1 {
 		return Microfacet{
 			F0:        rgb.Energy{0.98, 0.82, 0.76},
-			Roughness: 0.1,
+			Roughness: 0.5,
 		}
 	}
 	return Lambert{1, 1, 1}
