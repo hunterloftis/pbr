@@ -13,17 +13,17 @@ type Microfacet struct {
 	Roughness float64
 }
 
-func (m Microfacet) Sample(out, normal geom.Direction, rnd *rand.Rand) geom.Direction {
-
+func (m Microfacet) Sample(out geom.Direction, rnd *rand.Rand) geom.Direction {
+	normal := geom.Up
 	return normal.RandHemi(rnd)
 }
 
-func (m Microfacet) PDF(in, out, normal geom.Direction) float64 {
-
+func (m Microfacet) PDF(in, out geom.Direction) float64 {
 	return 1 / (2 * math.Pi)
 }
 
-func (m Microfacet) Eval(in, out, normal geom.Direction) rgb.Energy {
+func (m Microfacet) Eval(in, out geom.Direction) rgb.Energy {
+	normal := geom.Up
 	F := schlick2(in, normal, m.F0.Mean())  // The Fresnel function
 	D := ggx(in, out, normal, m.Roughness)  // The NDF (Normal Distribution Function)
 	G := smithGGX(out, normal, m.Roughness) // The Geometric Shadowing function

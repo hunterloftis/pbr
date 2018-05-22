@@ -12,14 +12,17 @@ type Lambert struct {
 	R, G, B float64
 }
 
-func (l Lambert) Sample(out, normal geom.Direction, rnd *rand.Rand) geom.Direction {
+func (l Lambert) Sample(out geom.Direction, rnd *rand.Rand) geom.Direction {
+	normal := geom.Up
 	return normal.RandHemiCos(rnd)
 }
 
-func (l Lambert) PDF(in, out, normal geom.Direction) float64 {
+func (l Lambert) PDF(in, out geom.Direction) float64 {
+	normal := geom.Up
 	return in.Dot(normal) * math.Pi
 }
 
-func (l Lambert) Eval(in, out, normal geom.Direction) rgb.Energy {
+func (l Lambert) Eval(in, out geom.Direction) rgb.Energy {
+	normal := geom.Up
 	return rgb.Energy{l.R, l.G, l.B}.Scaled(math.Pi * in.Dot(normal))
 }

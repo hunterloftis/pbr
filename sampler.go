@@ -42,6 +42,19 @@ func (s *sampler) start(buffer *rgb.Framebuffer, in <-chan int, done chan<- samp
 	}()
 }
 
+func tangentMatrix(view, normal geom.Direction) (to, from *geom.Matrix4) {
+	t := view.Cross(normal)
+	b := t.Cross(normal)
+	n := normal
+	m := geom.NewMatrix4(
+		t.X, b.X, n.X, 0,
+		t.Y, b.Y, n.Y, 0,
+		t.Z, b.Z, n.Z, 0,
+		0, 0, 0, 1,
+	)
+	return m, m.Inverse()
+}
+
 func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	ray := s.camera.ray(float64(x), float64(y), rnd)
 	strength := rgb.Energy{1, 1, 1}
@@ -60,11 +73,13 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 			break
 		}
 		bsdf := mat.BSDF()
-		wo := ray.Dir.Inv()
-		wi := bsdf.Sample(wo, normal, rnd)
-		weight := wi.Dot(normal) / bsdf.PDF(wi, wo, normal)
-		strength = strength.Times(bsdf.Eval(wi, wo, normal)).Scaled(weight)
-		ray = geom.NewRay(point, wi)
+		view := ray.Dir.Inv()
+		toTangent, fromTangent := tangentMatrix(view, normal)
+		wo := toTangent.MultDir(view)
+		wi := bsdf.Sample(wo, rnd)
+		weight := wi.Dot(geom.Up) / bsdf.PDF(wi, wo)
+		strength = strength.Times(bsdf.Eval(wi, wo)).Scaled(weight)
+		ray = geom.NewRay(point, fromTangent.MultDir(wi))
 	}
 	return energy
 }

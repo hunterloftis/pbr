@@ -21,9 +21,9 @@ type Sample struct {
 }
 
 type BSDF interface {
-	Sample(out, normal geom.Direction, rnd *rand.Rand) (in geom.Direction)
-	PDF(in, out, normal geom.Direction) float64
-	Eval(in, out, normal geom.Direction) rgb.Energy
+	Sample(out geom.Direction, rnd *rand.Rand) (in geom.Direction)
+	PDF(in, out geom.Direction) float64
+	Eval(in, out geom.Direction) rgb.Energy
 }
 
 func (s *Sample) BSDF() BSDF {
