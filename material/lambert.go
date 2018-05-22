@@ -16,10 +16,10 @@ func (l Lambert) Sample(out, normal geom.Direction, rnd *rand.Rand) geom.Directi
 	return normal.RandHemiCos(rnd)
 }
 
-func (l Lambert) Probability(in, normal geom.Direction) float64 {
-	return 1 / (in.Cos(normal) * math.Pi)
+func (l Lambert) PDF(in, normal geom.Direction) float64 {
+	return in.Cos(normal) * math.Pi
 }
 
-func (l Lambert) Radiance(in, out, normal geom.Direction) rgb.Energy {
+func (l Lambert) Eval(in, out, normal geom.Direction) rgb.Energy {
 	return rgb.Energy{l.R, l.G, l.B}.Amplified(math.Pi * in.Cos(normal))
 }

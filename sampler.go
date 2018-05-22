@@ -62,8 +62,8 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		bsdf := mat.BSDF()
 		wo := ray.Dir.Inv()
 		wi := bsdf.Sample(wo, normal, rnd)
-		weight := wi.Cos(normal) * bsdf.Probability(wi, normal) // TODO: should divide, right?
-		strength = strength.Strength(bsdf.Radiance(wi, wo, normal)).Amplified(weight)
+		weight := wi.Cos(normal) / bsdf.PDF(wi, normal)
+		strength = strength.Strength(bsdf.Eval(wi, wo, normal)).Amplified(weight)
 		ray = geom.NewRay(point, wi)
 	}
 	return energy

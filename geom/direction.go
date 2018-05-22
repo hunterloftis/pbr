@@ -111,6 +111,23 @@ func (a Direction) RandHemiCos(rnd *rand.Rand) Direction {
 	return d.Unit()
 }
 
+// https://stackoverflow.com/questions/5531827/random-point-on-a-given-sphere
+// http://www.leadinglesson.com/dot-product-is-positive-for-vectors-in-the-same-general-direction
+func (a Direction) RandHemi(rnd *rand.Rand) Direction {
+	u := rnd.Float64()
+	v := rnd.Float64()
+	theta := 2 * math.Pi * u
+	phi := math.Acos(2*v - 1)
+	x := math.Sin(phi) * math.Cos(theta)
+	y := math.Sin(phi) * math.Sin(theta)
+	z := math.Cos(phi)
+	dir := Vector3{x, y, z}.Unit()
+	if a.Cos(dir) < 0 {
+		return dir.Inv()
+	}
+	return dir
+}
+
 func ParseDirection(s string) (d Direction, err error) {
 	v, err := ParseVector3(s)
 	if err != nil {
