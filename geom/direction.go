@@ -18,12 +18,11 @@ func (a Direction) Inv() Direction {
 
 // Enters returns whether this Vector is entering the plane represented by a normal Vector.
 func (a Direction) Enters(normal Direction) bool {
-	return normal.Cos(a) < 0
+	return normal.Dot(a) < 0
 }
 
-// Cos returns the dot product of two unit vectors, which is also the cosine of the angle between them.
-// TODO: rename to Dot
-func (a Direction) Cos(b Direction) float64 {
+// Dot returns the dot product of two unit vectors, which is also the cosine of the angle between them.
+func (a Direction) Dot(b Direction) float64 {
 	return a.X*b.X + a.Y*b.Y + a.Z*b.Z
 }
 
@@ -35,7 +34,7 @@ func (a Direction) Half(b Direction) Direction {
 // https://www.bramz.net/data/writings/reflection_transmission.pdf
 func (a Direction) Refracted(normal Direction, indexA, indexB float64) (bool, Direction) {
 	ratio := indexA / indexB
-	cos := normal.Cos(a)
+	cos := normal.Dot(a)
 	k := 1 - ratio*ratio*(1-cos*cos)
 	if k < 0 {
 		return false, a
@@ -47,7 +46,7 @@ func (a Direction) Refracted(normal Direction, indexA, indexB float64) (bool, Di
 // Reflected reflects the vector about a normal.
 // https://www.bramz.net/data/writings/reflection_transmission.pdf
 func (a Direction) Reflected(normal Direction) Direction {
-	cos := normal.Cos(a)
+	cos := normal.Dot(a)
 	return Vector3(a).Minus(normal.Scaled(2 * cos)).Unit()
 }
 
@@ -122,7 +121,7 @@ func (a Direction) RandHemi(rnd *rand.Rand) Direction {
 	y := math.Sin(phi) * math.Sin(theta)
 	z := math.Cos(phi)
 	dir := Vector3{x, y, z}.Unit()
-	if a.Cos(dir) < 0 {
+	if a.Dot(dir) < 0 {
 		return dir.Inv()
 	}
 	return dir

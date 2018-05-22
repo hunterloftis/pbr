@@ -73,7 +73,7 @@ func (s *Scene) EnvAt(dir geom.Direction) rgb.Energy {
 		e := rgb.Energy(geom.Vector3{r, g, b}.Scaled(s.env.expose))
 		return e.Limit(maxEnvEnergy)
 	}
-	vertical := math.Max(0, (dir.Cos(geom.Direction{0, 1, 0})+0.5)/1.5)
+	vertical := math.Max(0, (dir.Dot(geom.Direction{0, 1, 0})+0.5)/1.5)
 	return rgb.Energy{}.Blend(s.ambient, vertical)
 }
 
@@ -140,7 +140,7 @@ func (s *Scene) prepare() {
 	s.tree = surface.NewTree(s.surfaces)
 	s.lights = make([]surface.Surface, 0)
 	for _, surf := range s.surfaces { // TODO: change this to a Light interface
-		if surf.Material().Emit().Average() > 0 {
+		if surf.Material().Emit().Mean() > 0 {
 			s.lights = append(s.lights, surf)
 		}
 	}

@@ -38,7 +38,7 @@ func New(d MaterialDesc) *Map {
 	m := Map{d: d}
 	m.fresnel = math.Max(geom.Vector3(d.Fresnel).Ave(), 0.02)
 	if d.Thin {
-		m.transmission = d.Color.Amplified(d.Transmit)
+		m.transmission = d.Color.Scaled(d.Transmit)
 		m.absorbance = rgb.Energy{0, 0, 0} // TODO: This is confusingly named (has nothing to do with m.absorb())
 		m.refract = 1
 	} else {
@@ -69,7 +69,7 @@ func (m *Map) Emit() rgb.Energy {
 // http://images.slideplayer.com/42/11344425/slides/slide_97.jpg
 // https://www.opengl.org/discussion_boards/showthread.php/169451-negative-texture-coords-in-wavefront-obj-format
 func (m *Map) At(u, v float64) *Sample {
-	f := m.d.Fresnel.Average()
+	f := m.d.Fresnel.Mean()
 	s := &Sample{
 		Color:    m.d.Color,
 		Light:    m.d.Light,
@@ -95,7 +95,7 @@ func (m *Map) At(u, v float64) *Sample {
 			y += height
 		}
 		r, g, b, a := m.d.Texture.At(x, y).RGBA()
-		s.Color = rgb.Energy{float64(r), float64(g), float64(b)}.Amplified(1 / float64(a))
+		s.Color = rgb.Energy{float64(r), float64(g), float64(b)}.Scaled(1 / float64(a))
 		// TODO: deal with metals; s.Fresnel = s.Fresnel.Blend(s.Color, s.Metal)?
 	}
 	return s

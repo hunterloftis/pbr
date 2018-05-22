@@ -104,7 +104,7 @@ func (f *Framebuffer) Add(index uint, sample Energy) uint {
 
 	// noise
 	mean := f.Average(index)
-	variance := (sample.Variance(mean) + 1) / (mean.Average() + 1)
+	variance := (sample.Variance(mean) + 1) / (mean.Mean() + 1)
 	c := f.pixels[p+count]
 	oldNoise := f.pixels[p+noise] * (c - 1) / c
 	newNoise := variance / c

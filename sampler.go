@@ -50,20 +50,20 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	for i := 0; i < 9; i++ {
 		hit := s.scene.Intersect(ray)
 		if !hit.Ok {
-			energy = energy.Plus(s.scene.EnvAt(ray.Dir).Strength(strength))
+			energy = energy.Plus(s.scene.EnvAt(ray.Dir).Times(strength))
 			break
 		}
 		point := ray.Moved(hit.Dist)
 		normal, mat := hit.Surface.At(point)
 		if !mat.Light.Zero() {
-			energy = energy.Plus(mat.Light.Strength(strength))
+			energy = energy.Plus(mat.Light.Times(strength))
 			break
 		}
 		bsdf := mat.BSDF()
 		wo := ray.Dir.Inv()
 		wi := bsdf.Sample(wo, normal, rnd)
-		weight := wi.Cos(normal) / bsdf.PDF(wi, normal)
-		strength = strength.Strength(bsdf.Eval(wi, wo, normal)).Amplified(weight)
+		weight := wi.Dot(normal) / bsdf.PDF(wi, normal)
+		strength = strength.Times(bsdf.Eval(wi, wo, normal)).Scaled(weight)
 		ray = geom.NewRay(point, wi)
 	}
 	return energy
@@ -87,13 +87,13 @@ func (s *sampler) tracePrimary2(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		dir, signal, diffused := mat.Bsdf2(normal, ray.Dir, hit.Dist, rnd)
 		if diffused && lights > 0 {
 			direct, coverage := s.traceDirect(lights, point, normal, rnd)
-			sum = sum.Plus(direct.Strength(mat.Color))
-			signal = signal.Amplified(1 - coverage)
+			sum = sum.Plus(direct.Times(mat.Color))
+			signal = signal.Scaled(1 - coverage)
 		}
 		next := geom.NewRay(point, dir)
 		sum = sum.Plus(s.traceIndirect(next, 1, signal, rnd))
 	}
-	average := sum.Amplified(1 / float64(branch))
+	average := sum.Scaled(1 / float64(branch))
 	return energy.Plus(average)
 }
 
@@ -115,11 +115,11 @@ func (s *sampler) traceIndirect(ray *geom.Ray3, depth int, signal rgb.Energy, rn
 	dir, strength, diffused := mat.Bsdf2(normal, ray.Dir, hit.Dist, rnd)
 	if lights := s.scene.Lights(); diffused && lights > 0 {
 		direct, coverage := s.traceDirect(lights, point, normal, rnd)
-		energy = energy.Merged(direct.Strength(mat.Color), signal)
-		signal = signal.Amplified(1 - coverage)
+		energy = energy.Merged(direct.Times(mat.Color), signal)
+		signal = signal.Scaled(1 - coverage)
 	}
 	next := geom.NewRay(point, dir)
-	return energy.Plus(s.traceIndirect(next, depth+1, signal.Strength(strength), rnd))
+	return energy.Plus(s.traceIndirect(next, depth+1, signal.Times(strength), rnd))
 }
 
 func (s *sampler) traceDirect(num int, point geom.Vector3, normal geom.Direction, rnd *rand.Rand) (energy rgb.Energy, coverage float64) {
@@ -135,7 +135,7 @@ func (s *sampler) traceDirect(num int, point geom.Vector3, normal geom.Direction
 		if !hit.Ok {
 			break
 		}
-		e := hit.Surface.Material().Emit().Amplified(solidAngle / math.Pi)
+		e := hit.Surface.Material().Emit().Scaled(solidAngle / math.Pi)
 		energy = energy.Plus(e)
 	}
 	return energy, coverage
@@ -152,7 +152,7 @@ func (s *sampler) adapted(buffer *rgb.Framebuffer, i uint) int {
 		return 1
 	}
 	needs := 1
-	brightness := buffer.Average(i).Average()
+	brightness := buffer.Average(i).Mean()
 	midtones := (((255 - math.Min(brightness, 255)) / 255) + 3) / 4
 	noise := buffer.Noise(i)
 	varMean, countMean := buffer.Variance()

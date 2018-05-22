@@ -14,7 +14,7 @@ import (
 // http://blog.selfshadow.com/publications/s2015-shading-course/hoffman/s2015_pbs_physics_math_slides.pdf
 // http://graphics.stanford.edu/courses/cs348b-10/lectures/reflection_i/reflection_i.pdf
 func schlick(incident, normal geom.Direction, r0, n1, n2 float64) float64 {
-	cosX := -normal.Cos(incident)
+	cosX := -normal.Dot(incident)
 	if r0 == 0 {
 		r0 = (n1 - n2) / (n1 + n2)
 		r0 *= r0
@@ -42,7 +42,7 @@ func beers(dist float64, absorb rgb.Energy) rgb.Energy {
 
 // Schlick's approximation of Fresnel
 func schlick2(in, normal geom.Direction, f0 float64) float64 {
-	return f0 + (1-f0)*math.Pow(1-normal.Cos(in), 5)
+	return f0 + (1-f0)*math.Pow(1-normal.Dot(in), 5)
 }
 
 // GGX Normal Distribution Function
@@ -50,7 +50,7 @@ func schlick2(in, normal geom.Direction, f0 float64) float64 {
 func ggx(in, out, normal geom.Direction, roughness float64) float64 {
 	m := in.Half(out)
 	a := roughness * roughness
-	nm2 := math.Pow(normal.Cos(m), 2)
+	nm2 := math.Pow(normal.Dot(m), 2)
 	return (a * a) / (math.Pi * math.Pow(nm2*(a*a-1)+1, 2))
 }
 
@@ -58,7 +58,7 @@ func ggx(in, out, normal geom.Direction, roughness float64) float64 {
 // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
 func smithGGX(out, normal geom.Direction, roughness float64) float64 {
 	a := roughness * roughness
-	nv := normal.Cos(out)
+	nv := normal.Dot(out)
 	return (2 * nv) / (nv + math.Sqrt(a*a+(1-a*a)*nv*nv))
 }
 

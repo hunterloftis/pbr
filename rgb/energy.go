@@ -21,9 +21,8 @@ func (a Energy) Merged(b Energy, signal Energy) Energy {
 	return Energy{a.X + b.X*signal.X, a.Y + b.Y*signal.Y, a.Z + b.Z*signal.Z}
 }
 
-// Amplified returns energy a scaled by n.
-// TODO: "amplified" is misleading, should be "scaled"
-func (a Energy) Amplified(n float64) Energy {
+// Scaled returns energy a scaled by n.
+func (a Energy) Scaled(n float64) Energy {
 	return Energy{a.X * n, a.Y * n, a.Z * n}
 }
 
@@ -56,11 +55,11 @@ func (a Energy) RandomGain(rnd *rand.Rand) Energy {
 	if rnd.Float64() > greatest {
 		return Energy{}
 	}
-	return a.Amplified(1 / greatest)
+	return a.Scaled(1 / greatest)
 }
 
-// Strength returns energy a multiplied by energy b.
-func (a Energy) Strength(b Energy) Energy {
+// Times returns energy a multiplied by energy b.
+func (a Energy) Times(b Energy) Energy {
 	return Energy{a.X * b.X, a.Y * b.Y, a.Z * b.Z}
 }
 
@@ -70,7 +69,7 @@ func (a Energy) Variance(b Energy) float64 {
 	return d.X*d.X + d.Y*d.Y + d.Z*d.Z
 }
 
-func (a Energy) Average() float64 {
+func (a Energy) Mean() float64 {
 	return (a.X + a.Y + a.Z) / 3
 }
 

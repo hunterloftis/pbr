@@ -103,7 +103,7 @@ func (b *Box) ShadowRay(origin geom.Vector3, normal geom.Direction, rnd *rand.Ra
 	point := b.Center.Plus(right.Scaled(x)).Plus(up.Scaled(y))
 	ray := geom.NewRay(origin, point.Minus(origin).Unit()) // TODO: this should be a convenience method
 	dist := b.Center.Minus(origin).Len()
-	cos := ray.Dir.Cos(normal)
+	cos := ray.Dir.Dot(normal)
 	solidAngle := cos * (b.Radius * b.Radius) / (2 * dist * dist) // cosine-weighted ratio of disc surface area to hemisphere surface area
 	return ray, solidAngle
 }

@@ -51,7 +51,7 @@ func (s *Sample) Bsdf2(norm, inc geom.Direction, dist float64, rnd *rand.Rand) (
 				return s.shine(norm, inc, rnd)
 			}
 		}
-		reflect := schlick(norm, inc, s.Fresnel.Average(), 0, 0)
+		reflect := schlick(norm, inc, s.Fresnel.Mean(), 0, 0)
 		switch {
 		// reflect
 		case rnd.Float64() < reflect:
@@ -110,7 +110,7 @@ func (s *Sample) exit(norm, inc geom.Direction, dist float64, rnd *rand.Rand) (g
 		// isn't really an intersection, so just keep the ray moving
 		return inc, rgb.Full, false
 	}
-	tint := s.Color.Amplified(s.Transmit)
+	tint := s.Color.Scaled(s.Transmit)
 	absorb := rgb.Energy{
 		X: 2 - math.Log10(tint.X*100),
 		Y: 2 - math.Log10(tint.Y*100),
@@ -128,7 +128,7 @@ func (s *Sample) exit(norm, inc geom.Direction, dist float64, rnd *rand.Rand) (g
 }
 
 func (s *Sample) diffuse(norm, inc geom.Direction, rnd *rand.Rand) (geom.Direction, rgb.Energy, bool) {
-	return norm.RandHemiCos(rnd), s.Color.Amplified(1 / math.Pi), true
+	return norm.RandHemiCos(rnd), s.Color.Scaled(1 / math.Pi), true
 }
 
 func (s *Sample) absorb(inc geom.Direction) (geom.Direction, rgb.Energy, bool) {

@@ -17,9 +17,9 @@ func (l Lambert) Sample(out, normal geom.Direction, rnd *rand.Rand) geom.Directi
 }
 
 func (l Lambert) PDF(in, normal geom.Direction) float64 {
-	return in.Cos(normal) * math.Pi
+	return in.Dot(normal) * math.Pi
 }
 
 func (l Lambert) Eval(in, out, normal geom.Direction) rgb.Energy {
-	return rgb.Energy{l.R, l.G, l.B}.Amplified(math.Pi * in.Cos(normal))
+	return rgb.Energy{l.R, l.G, l.B}.Scaled(math.Pi * in.Dot(normal))
 }

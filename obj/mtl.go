@@ -126,7 +126,7 @@ func adapt(props mtl, thin bool) *material.Map {
 			d.Transmit = props.tr
 		} else {
 			d.Transmit = 1
-			d.Color = d.Color.Amplified(props.tr)
+			d.Color = d.Color.Scaled(props.tr)
 		}
 		d.Fresnel = rgb.Energy{0.042, 0.042, 0.042} // Glass
 	} else {
