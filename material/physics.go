@@ -39,3 +39,25 @@ func beers(dist float64, absorb rgb.Energy) rgb.Energy {
 	blue := math.Exp(-absorb.Z * dist)
 	return rgb.Energy{red, green, blue}
 }
+
+// Schlick's approximation of Fresnel
+func schlick2(in, normal geom.Direction, f0 float64) float64 {
+	return f0 + (1-f0)*math.Pow(1-normal.Cos(in), 5)
+}
+
+// GGX Normal Distribution Function
+// http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
+func ggx(in, out, normal geom.Direction, roughness float64) float64 {
+	m := in.Half(out)
+	a := roughness * roughness
+	nm2 := math.Pow(normal.Cos(m), 2)
+	return (a * a) / (math.Pi * math.Pow(nm2*(a*a-1)+1, 2))
+}
+
+// Smith geometric shadowing for a GGX distribution
+// http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
+func smithGGX(out, normal geom.Direction, roughness float64) float64 {
+	a := roughness * roughness
+	nv := normal.Cos(out)
+	return (2 * nv) / (nv + math.Sqrt(a*a+(1-a*a)*nv*nv))
+}

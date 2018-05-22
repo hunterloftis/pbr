@@ -9,19 +9,17 @@ import (
 )
 
 type Lambert struct {
-	r, g, b float64
+	R, G, B float64
 }
 
-// TODO: remove both cosine weights if this doesn't work
-
-func (l Lambert) Sample(in, normal geom.Direction, rnd *rand.Rand) geom.Direction {
+func (l Lambert) Sample(out, normal geom.Direction, rnd *rand.Rand) geom.Direction {
 	return normal.RandHemiCos(rnd)
 }
 
-func (l Lambert) Probability(out, normal geom.Direction) float64 {
-	return 1 / (out.Cos(normal) * math.Pi)
+func (l Lambert) Probability(in, normal geom.Direction) float64 {
+	return 1 / (in.Cos(normal) * math.Pi)
 }
 
 func (l Lambert) Radiance(in, out, normal geom.Direction) rgb.Energy {
-	return rgb.Energy{l.r, l.g, l.b}.Amplified(math.Pi * out.Cos(normal))
+	return rgb.Energy{l.R, l.G, l.B}.Amplified(math.Pi * in.Cos(normal))
 }

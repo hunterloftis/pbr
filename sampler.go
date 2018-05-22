@@ -60,10 +60,11 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 			break
 		}
 		bsdf := mat.BSDF()
-		outDir := bsdf.Sample(ray.Dir, normal, rnd)
-		weight := outDir.Cos(normal) * bsdf.Probability(outDir, normal)
-		strength = strength.Strength(bsdf.Radiance(ray.Dir, outDir, normal)).Amplified(weight)
-		ray = geom.NewRay(point, outDir)
+		wo := ray.Dir.Inv()
+		wi := bsdf.Sample(wo, normal, rnd)
+		weight := wi.Cos(normal) * bsdf.Probability(wi, normal) // TODO: should divide, right?
+		strength = strength.Strength(bsdf.Radiance(wi, wo, normal)).Amplified(weight)
+		ray = geom.NewRay(point, wi)
 	}
 	return energy
 }
@@ -83,7 +84,7 @@ func (s *sampler) tracePrimary2(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	sum := rgb.Energy{}
 	lights := s.scene.Lights()
 	for i := 0; i < branch; i++ {
-		dir, signal, diffused := mat.Bsdf(normal, ray.Dir, hit.Dist, rnd)
+		dir, signal, diffused := mat.Bsdf2(normal, ray.Dir, hit.Dist, rnd)
 		if diffused && lights > 0 {
 			direct, coverage := s.traceDirect(lights, point, normal, rnd)
 			sum = sum.Plus(direct.Strength(mat.Color))
@@ -111,7 +112,7 @@ func (s *sampler) traceIndirect(ray *geom.Ray3, depth int, signal rgb.Energy, rn
 	point := ray.Moved(hit.Dist)
 	normal, mat := hit.Surface.At(point)
 	energy = energy.Merged(mat.Light, signal)
-	dir, strength, diffused := mat.Bsdf(normal, ray.Dir, hit.Dist, rnd)
+	dir, strength, diffused := mat.Bsdf2(normal, ray.Dir, hit.Dist, rnd)
 	if lights := s.scene.Lights(); diffused && lights > 0 {
 		direct, coverage := s.traceDirect(lights, point, normal, rnd)
 		energy = energy.Merged(direct.Strength(mat.Color), signal)

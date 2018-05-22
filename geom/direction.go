@@ -22,8 +22,13 @@ func (a Direction) Enters(normal Direction) bool {
 }
 
 // Cos returns the dot product of two unit vectors, which is also the cosine of the angle between them.
+// TODO: rename to Dot
 func (a Direction) Cos(b Direction) float64 {
 	return a.X*b.X + a.Y*b.Y + a.Z*b.Z
+}
+
+func (a Direction) Half(b Direction) Direction {
+	return Vector3(a).Plus(Vector3(b)).Unit()
 }
 
 // Refracted refracts a vector through the plane represented by a normal, based on the ratio of refraction indices.

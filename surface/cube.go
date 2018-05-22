@@ -13,6 +13,7 @@ type Cube struct {
 	Mat      *material.Map
 	GridMat  *material.Map
 	GridSize float64
+	BSDF     *material.BSDF
 	box      *Box
 }
 

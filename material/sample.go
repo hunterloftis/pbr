@@ -21,12 +21,18 @@ type Sample struct {
 }
 
 type BSDF interface {
-	Sample(in, normal geom.Direction, rnd *rand.Rand) (out geom.Direction)
-	Probability(out, normal geom.Direction) float64
+	Sample(out, normal geom.Direction, rnd *rand.Rand) (in geom.Direction)
+	Probability(in, normal geom.Direction) float64
 	Radiance(in, out, normal geom.Direction) rgb.Energy
 }
 
 func (s *Sample) BSDF() BSDF {
+	if s.Metal == 1 {
+		return Microfacet{
+			F0:        rgb.Energy{0.98, 0.82, 0.76},
+			Roughness: 0.1,
+		}
+	}
 	return Lambert{1, 1, 1}
 }
 
@@ -37,7 +43,7 @@ func (s *Sample) BSDF() BSDF {
 // https://docs.blender.org/manual/en/dev/render/cycles/nodes/types/shaders/principled.html
 // https://github.Com/wdas/brdf/blob/master/src/brdfs/disney.brdf#L131
 // TODO: https://github.com/KhronosGroup/glTF-WebGL-PBR
-func (s *Sample) Bsdf(norm, inc geom.Direction, dist float64, rnd *rand.Rand) (geom.Direction, rgb.Energy, bool) {
+func (s *Sample) Bsdf2(norm, inc geom.Direction, dist float64, rnd *rand.Rand) (geom.Direction, rgb.Energy, bool) {
 	if inc.Enters(norm) {
 		// clear coat TODO: I don't think this is working. Try a red car.
 		if rnd.Float64() < s.Coat {
@@ -62,7 +68,7 @@ func (s *Sample) Bsdf(norm, inc geom.Direction, dist float64, rnd *rand.Rand) (g
 		}
 	}
 	if s.Thin {
-		return s.Bsdf(norm.Inv(), inc, dist, rnd)
+		return s.Bsdf2(norm.Inv(), inc, dist, rnd)
 	}
 	// transmit (out)
 	return s.exit(norm, inc, dist, rnd)
