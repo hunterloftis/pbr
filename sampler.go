@@ -62,7 +62,7 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		bsdf := mat.BSDF()
 		wo := ray.Dir.Inv()
 		wi := bsdf.Sample(wo, normal, rnd)
-		weight := wi.Dot(normal) / bsdf.PDF(wi, normal)
+		weight := wi.Dot(normal) / bsdf.PDF(wi, wo, normal)
 		strength = strength.Times(bsdf.Eval(wi, wo, normal)).Scaled(weight)
 		ray = geom.NewRay(point, wi)
 	}

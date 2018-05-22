@@ -16,7 +16,7 @@ func (l Lambert) Sample(out, normal geom.Direction, rnd *rand.Rand) geom.Directi
 	return normal.RandHemiCos(rnd)
 }
 
-func (l Lambert) PDF(in, normal geom.Direction) float64 {
+func (l Lambert) PDF(in, out, normal geom.Direction) float64 {
 	return in.Dot(normal) * math.Pi
 }
 

@@ -61,9 +61,3 @@ func smithGGX(out, normal geom.Direction, roughness float64) float64 {
 	nv := normal.Dot(out)
 	return (2 * nv) / (nv + math.Sqrt(a*a+(1-a*a)*nv*nv))
 }
-
-// Heitz GGX Visible Normal Distribution Function
-// https://schuttejoe.github.io/post/ggximportancesamplingpart2/
-func ggxVNDF(out geom.Direction, roughness, r0, r1 float64) geom.Direction {
-	return geom.Direction{}
-}

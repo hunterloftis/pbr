@@ -22,14 +22,15 @@ type Sample struct {
 
 type BSDF interface {
 	Sample(out, normal geom.Direction, rnd *rand.Rand) (in geom.Direction)
-	PDF(in, normal geom.Direction) float64
+	PDF(in, out, normal geom.Direction) float64
 	Eval(in, out, normal geom.Direction) rgb.Energy
 }
 
 func (s *Sample) BSDF() BSDF {
 	if s.Metal == 1 {
+		// copper: http://www.cs.cornell.edu/courses/cs5625/2013sp/lectures/Lec2ShadingModelsWeb.pdf
 		return Microfacet{
-			F0:        rgb.Energy{0.98, 0.82, 0.76},
+			F0:        rgb.Energy{0.95, 0.64, 0.54},
 			Roughness: 0.5,
 		}
 	}

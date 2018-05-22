@@ -14,17 +14,15 @@ type Microfacet struct {
 }
 
 func (m Microfacet) Sample(out, normal geom.Direction, rnd *rand.Rand) geom.Direction {
-	// TODO: better sampling
+
 	return normal.RandHemi(rnd)
 }
 
-func (m Microfacet) PDF(in, normal geom.Direction) float64 {
-	// TODO: PDF that matches a better sampling distribution
+func (m Microfacet) PDF(in, out, normal geom.Direction) float64 {
+
 	return 1 / (2 * math.Pi)
 }
 
-// https://computergraphics.stackexchange.com/questions/130/trying-to-implement-microfacet-brdf-but-my-result-images-are-wrong
-// https://schuttejoe.github.io/post/ggximportancesamplingpart2/
 func (m Microfacet) Eval(in, out, normal geom.Direction) rgb.Energy {
 	F := schlick2(in, normal, m.F0.Mean())  // The Fresnel function
 	D := ggx(in, out, normal, m.Roughness)  // The NDF (Normal Distribution Function)
@@ -32,3 +30,19 @@ func (m Microfacet) Eval(in, out, normal geom.Direction) rgb.Energy {
 	r := (F * D * G) / (4 * normal.Dot(in) * normal.Dot(out))
 	return m.F0.Scaled(r)
 }
+
+// https://github.com/jeremypaton/wombleman/blob/master/src/bsdfs/microfacet.cpp
+// func (m Microfacet) Eval(in, out, normal geom.Direction) rgb.Energy {
+// 	if out.Dot(normal) <= 0 {
+// 		return rgb.Energy{0, 0, 0}
+// 	}
+// 	a := m.Roughness // squared?
+// 	wh := in.Half(out)
+// 	ci := in.Z
+// 	co := out.Z
+// 	ho := wh.Dot(wo)
+// 	term1 := m.F0.Scaled(1 / math.Pi)
+// 	denom := 4 * ci * co
+// 	num := beckmann(wh, a) * schlick2(ho)
+
+// }
