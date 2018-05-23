@@ -75,13 +75,8 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		toTangent, fromTangent := tangentMatrix(normal)
 
 		wo := toTangent.MultDir(ray.Dir.Inv())
-		wi, _ := bsdf.Sample(wo, rnd)
-		pdf, _ := bsdf.PDF(wi, wo)
-		// if theta != theta2 {
-		// 	fmt.Println("thetas:", theta, theta2)
-		// 	panic("wtf")
-		// }
-		weight := wi.Dot(geom.Up) / pdf //bsdf.PDF(wi, wo)
+		wi := bsdf.Sample(wo, rnd)
+		weight := wi.Dot(geom.Up) / bsdf.PDF(wi, wo)
 		strength = strength.Times(bsdf.Eval(wi, wo)).Scaled(weight)
 
 		ray = geom.NewRay(point, fromTangent.MultDir(wi))
@@ -89,62 +84,8 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	return energy
 }
 
-// TODO: sample Specular reflections from direct light sources and weight results by their BSDF towards the light
-// Or, better, sample lights directly in general and pass that through a unified BSDF
-func (s *sampler) tracePrimary2(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
-	ray := s.camera.ray(float64(x), float64(y), rnd)
-	hit := s.scene.Intersect(ray)
-	if !hit.Ok {
-		return s.scene.EnvAt(ray.Dir)
-	}
-	point := ray.Moved(hit.Dist)
-	normal, mat := hit.Surface.At(point)
-	energy = energy.Plus(mat.Light)
-	branch := 1 + int(float64(s.branch)*(mat.Rough+0.25)/1.25)
-	sum := rgb.Energy{}
-	lights := s.scene.Lights()
-	for i := 0; i < branch; i++ {
-		dir, signal, diffused := mat.Bsdf2(normal, ray.Dir, hit.Dist, rnd)
-		if diffused && lights > 0 {
-			direct, coverage := s.traceDirect(lights, point, normal, rnd)
-			sum = sum.Plus(direct.Times(mat.Color))
-			signal = signal.Scaled(1 - coverage)
-		}
-		next := geom.NewRay(point, dir)
-		sum = sum.Plus(s.traceIndirect(next, 1, signal, rnd))
-	}
-	average := sum.Scaled(1 / float64(branch))
-	return energy.Plus(average)
-}
-
-func (s *sampler) traceIndirect(ray *geom.Ray3, depth int, signal rgb.Energy, rnd *rand.Rand) (energy rgb.Energy) {
-	if depth >= s.bounces {
-		return energy
-	}
-	if signal = signal.RandomGain(rnd); signal.Zero() {
-		return energy
-	}
-	hit := s.scene.Intersect(ray)
-	if !hit.Ok {
-		energy = energy.Merged(s.scene.EnvAt(ray.Dir), signal)
-		return energy
-	}
-	point := ray.Moved(hit.Dist)
-	normal, mat := hit.Surface.At(point)
-	energy = energy.Merged(mat.Light, signal)
-	dir, strength, diffused := mat.Bsdf2(normal, ray.Dir, hit.Dist, rnd)
-	if lights := s.scene.Lights(); diffused && lights > 0 {
-		direct, coverage := s.traceDirect(lights, point, normal, rnd)
-		energy = energy.Merged(direct.Times(mat.Color), signal)
-		signal = signal.Scaled(1 - coverage)
-	}
-	next := geom.NewRay(point, dir)
-	return energy.Plus(s.traceIndirect(next, depth+1, signal.Times(strength), rnd))
-}
-
-func (s *sampler) traceDirect(num int, point geom.Vector3, normal geom.Direction, rnd *rand.Rand) (energy rgb.Energy, coverage float64) {
-	limit := int(math.Min(float64(s.direct), float64(num)))
-	for i := 0; i < limit; i++ {
+func (s *sampler) traceDirect(point geom.Vector3, normal geom.Direction, rnd *rand.Rand) (energy rgb.Energy, coverage float64) {
+	for i := 0; i < 1; i++ {
 		light := s.scene.Light(rnd)
 		ray, solidAngle := light.Box().ShadowRay(point, normal, rnd)
 		if solidAngle <= 0 {
