@@ -49,7 +49,7 @@ func (m Microfacet) PDF(wi, wo geom.Direction) (float64, float64) {
 func (m Microfacet) Eval(wi, wo geom.Direction) rgb.Energy {
 	normal := geom.Up
 	wm := wo.Half(wi)
-	if wi.Y <= 0 || wi.Dot(wm) >= 0 {
+	if wi.Y <= 0 || wi.Dot(wm) <= 0 {
 		return rgb.Energy{0, 0, 0}
 	}
 	F := schlick2(wi, normal, m.F0.Mean()) // The Fresnel function
