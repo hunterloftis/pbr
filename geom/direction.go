@@ -50,6 +50,11 @@ func (a Direction) Reflected(normal Direction) Direction {
 	return Vector3(a).Minus(normal.Scaled(2 * cos)).Unit()
 }
 
+// To ensure that both face outward
+func (a Direction) Reflect2(normal Direction) Direction {
+	return Vector3(a).Minus(Vector3(normal)).Scaled(2 * normal.Dot(a)).Unit()
+}
+
 // Scaled multiplies a Direction by a scalar to produce a Vector3.
 func (a Direction) Scaled(n float64) Vector3 {
 	return Vector3(a).Scaled(n)

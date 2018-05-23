@@ -42,6 +42,7 @@ func (s *sampler) start(buffer *rgb.Framebuffer, in <-chan int, done chan<- samp
 	}()
 }
 
+// TODO: precompute on surfaces?
 func tangentMatrix(normal geom.Direction) (to, from *geom.Matrix4) {
 	if geom.Vector3(normal).Equals(geom.Vector3(geom.Up)) {
 		return geom.Identity(), geom.Identity()
