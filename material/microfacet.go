@@ -16,6 +16,7 @@ type Microfacet struct {
 // https://schuttejoe.github.io/post/ggximportancesamplingpart1/
 // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 func (m Microfacet) Sample(wo geom.Direction, rnd *rand.Rand) geom.Direction {
+	return geom.Direction{0, 1, 0}.RandHemi(rnd)
 	r0 := rnd.Float64()
 	r1 := rnd.Float64()
 	a := m.Roughness
@@ -34,6 +35,7 @@ func (m Microfacet) Sample(wo geom.Direction, rnd *rand.Rand) geom.Direction {
 // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 // https://en.wikipedia.org/wiki/List_of_common_coordinate_transformations#From_Cartesian_coordinates_2
 func (m Microfacet) PDF(wi, wo geom.Direction) float64 {
+	return 1 / (math.Pi * 2)
 	wm := wo.Half(wi)
 	a := m.Roughness
 	a2 := a * a
