@@ -20,7 +20,7 @@ func (m Microfacet) Sample(wo geom.Direction, rnd *rand.Rand) geom.Direction {
 	// return geom.Direction{0, 1, 0}.RandHemi(rnd)
 	r0 := rnd.Float64()
 	r1 := rnd.Float64()
-	a := m.Roughness
+	a := m.Roughness * m.Roughness
 	a2 := a * a
 	theta := math.Acos(math.Sqrt((1 - r0) / ((a2-1)*r0 + 1)))
 	phi := 2 * math.Pi * r1
@@ -38,15 +38,12 @@ func (m Microfacet) Sample(wo geom.Direction, rnd *rand.Rand) geom.Direction {
 func (m Microfacet) PDF(wi, wo geom.Direction) float64 {
 	// return 1 / (math.Pi * 2)
 	wm := wo.Half(wi)
-	a := m.Roughness
+	a := m.Roughness * m.Roughness
 	a2 := a * a
-	theta := math.Atan2(math.Sqrt(wm.X*wm.X+wm.Z*wm.Z), wm.Y)
-	cosTheta := math.Cos(theta)
-	sinTheta := math.Sin(theta)
-	num := 2 * a2 * cosTheta * sinTheta
+	cosTheta := geom.Up.Dot(wm)
 	exp := (a2-1)*cosTheta*cosTheta + 1
-	pdfM := num / (exp * exp)
-	return pdfM / (4 * math.Abs(wo.Dot(wm)))
+	D := a2 / (math.Pi * exp * exp)
+	return (D * wm.Dot(geom.Up)) / (4 * wo.Dot(wm))
 }
 
 // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
