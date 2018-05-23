@@ -56,9 +56,8 @@ func (a Direction) Scaled(n float64) Vector3 {
 }
 
 // Cross returns the cross product of unit vectors a and b.
-// TODO: Has floating point error - acceptable?
 func (a Direction) Cross(b Direction) Direction {
-	return Direction{a.Y*b.Z - a.Z*b.Y, a.Z*b.X - a.X*b.Z, a.X*b.Y - a.Y*b.X}
+	return Vector3(a).Cross(Vector3(b)).Unit()
 }
 
 // Cone returns a random vector within a cone about Direction a.
