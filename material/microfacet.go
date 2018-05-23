@@ -18,7 +18,7 @@ type Microfacet struct {
 func (m Microfacet) Sample(wo geom.Direction, rnd *rand.Rand) (geom.Direction, float64) {
 	r0 := rnd.Float64()
 	r1 := rnd.Float64()
-	a := m.Roughness * m.Roughness
+	a := m.Roughness
 	a2 := a * a
 	theta := math.Acos(math.Sqrt((1 - r0) / ((a2-1)*r0 + 1)))
 	phi := 2 * math.Pi * r1
@@ -35,7 +35,7 @@ func (m Microfacet) Sample(wo geom.Direction, rnd *rand.Rand) (geom.Direction, f
 // https://en.wikipedia.org/wiki/List_of_common_coordinate_transformations#From_Cartesian_coordinates_2
 func (m Microfacet) PDF(wi, wo geom.Direction) (float64, float64) {
 	wm := wo.Half(wi)
-	a := m.Roughness * m.Roughness
+	a := m.Roughness
 	a2 := a * a
 	theta := math.Atan2(math.Sqrt(wm.X*wm.X+wm.Z*wm.Z), wm.Y)
 	cosTheta := math.Cos(theta)
