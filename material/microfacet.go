@@ -15,7 +15,7 @@ type Microfacet struct {
 
 // https://schuttejoe.github.io/post/ggximportancesamplingpart1/
 // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
-func (m Microfacet) Sample(wo geom.Direction, rnd *rand.Rand) geom.Direction {
+func (m Microfacet) Sample(wo geom.Direction, rnd *rand.Rand) (geom.Direction, float64) {
 	r0 := rnd.Float64()
 	r1 := rnd.Float64()
 	a := m.Roughness * m.Roughness
@@ -26,15 +26,14 @@ func (m Microfacet) Sample(wo geom.Direction, rnd *rand.Rand) geom.Direction {
 	y := math.Cos(theta)
 	z := math.Sin(theta) * math.Sin(phi)
 	wm := geom.Vector3{x, y, z}.Unit()
-
-	return geom.Vector3(wm).Minus(geom.Vector3(wo)).Scaled(2 * wo.Dot(wm)).Unit()
-	// return wo.Reflected(wm)
+	wi := wo.Reflect2(wm)
+	return wi, theta
 }
 
 // https://schuttejoe.github.io/post/ggximportancesamplingpart1/
 // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 // https://en.wikipedia.org/wiki/List_of_common_coordinate_transformations#From_Cartesian_coordinates_2
-func (m Microfacet) PDF(wi, wo geom.Direction) float64 {
+func (m Microfacet) PDF(wi, wo geom.Direction) (float64, float64) {
 	wm := wo.Half(wi)
 	a := m.Roughness * m.Roughness
 	a2 := a * a
@@ -43,14 +42,14 @@ func (m Microfacet) PDF(wi, wo geom.Direction) float64 {
 	num := a2 * cosTheta * math.Sin(theta)
 	exp := (a2-1)*cosTheta*cosTheta + 1
 	den := math.Pi * (exp * exp)
-	return num / den
+	return num / den, theta
 }
 
 // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
 func (m Microfacet) Eval(wi, wo geom.Direction) rgb.Energy {
 	normal := geom.Up
 	wm := wo.Half(wi)
-	if wi.Y <= 0 || wi.Dot(wm) <= 0 {
+	if wi.Y <= 0 || wi.Dot(wm) >= 0 {
 		return rgb.Energy{0, 0, 0}
 	}
 	F := schlick2(wi, normal, m.F0.Mean()) // The Fresnel function

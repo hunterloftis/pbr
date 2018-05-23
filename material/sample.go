@@ -21,8 +21,8 @@ type Sample struct {
 }
 
 type BSDF interface {
-	Sample(out geom.Direction, rnd *rand.Rand) (in geom.Direction)
-	PDF(in, out geom.Direction) float64
+	Sample(out geom.Direction, rnd *rand.Rand) (in geom.Direction, theta float64)
+	PDF(in, out geom.Direction) (float64, float64)
 	Eval(in, out geom.Direction) rgb.Energy
 }
 

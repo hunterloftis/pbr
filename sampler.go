@@ -75,8 +75,13 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		toTangent, fromTangent := tangentMatrix(normal)
 
 		wo := toTangent.MultDir(ray.Dir.Inv())
-		wi := bsdf.Sample(wo, rnd)
-		weight := wi.Dot(geom.Up) / bsdf.PDF(wi, wo)
+		wi, _ := bsdf.Sample(wo, rnd)
+		pdf, _ := bsdf.PDF(wi, wo)
+		// if theta != theta2 {
+		// 	fmt.Println("thetas:", theta, theta2)
+		// 	panic("wtf")
+		// }
+		weight := wi.Dot(geom.Up) / pdf //bsdf.PDF(wi, wo)
 		strength = strength.Times(bsdf.Eval(wi, wo)).Scaled(weight)
 
 		ray = geom.NewRay(point, fromTangent.MultDir(wi))

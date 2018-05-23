@@ -52,7 +52,7 @@ func (a Direction) Reflected(normal Direction) Direction {
 
 // To ensure that both face outward
 func (a Direction) Reflect2(normal Direction) Direction {
-	return Vector3(a).Minus(Vector3(normal)).Scaled(2 * normal.Dot(a)).Unit()
+	return normal.Scaled(2).Scaled(a.Dot(normal)).Minus(Vector3(a)).Unit()
 }
 
 // Scaled multiplies a Direction by a scalar to produce a Vector3.
