@@ -24,16 +24,19 @@ func fresnelSchlick(in, normal geom.Direction, f0 float64) float64 {
 // GGX Normal Distribution Function
 // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
 func ggx(in, out, normal geom.Direction, roughness float64) float64 {
-	m := in.Half(out)
+	wm := in.Half(out)
 	a := roughness * roughness
-	nm2 := math.Pow(normal.Dot(m), 2)
-	return (a * a) / (math.Pi * math.Pow(nm2*(a*a-1)+1, 2))
+	a2 := a * a
+	cosTheta := normal.Dot(wm)
+	exp := (a2-1)*cosTheta*cosTheta + 1
+	return a2 / (math.Pi * exp * exp)
 }
 
 // Smith geometric shadowing for a GGX distribution
 // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
 func smithGGX(out, normal geom.Direction, roughness float64) float64 {
 	a := roughness * roughness
+	a2 := a * a
 	nv := normal.Dot(out)
-	return (2 * nv) / (nv + math.Sqrt(a*a+(1-a*a)*nv*nv))
+	return (2 * nv) / (nv + math.Sqrt(a2+(1-a2)*nv*nv))
 }
