@@ -48,6 +48,11 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	// lights := s.scene.Lights() TODO: direct lighting
 
 	for i := 0; i < 9; i++ {
+		if i > 3 {
+			if strength = strength.RandomGain(rnd); strength.Zero() {
+				break
+			}
+		}
 		hit := s.scene.Intersect(ray)
 		if !hit.Ok {
 			energy = energy.Plus(s.scene.EnvAt(ray.Dir).Times(strength))

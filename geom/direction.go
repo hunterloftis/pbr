@@ -11,6 +11,13 @@ type Direction Vector3
 // Up is the positive Direction on the vertical (Y) axis.
 var Up = Direction{0, 1, 0}
 
+func SphericalDirection(theta, phi float64) Direction {
+	x := math.Sin(theta) * math.Cos(phi)
+	y := math.Cos(theta)
+	z := math.Sin(theta) * math.Sin(phi)
+	return Vector3{x, y, z}.Unit()
+}
+
 // Inv inverts a Direction.
 func (a Direction) Inv() Direction {
 	return Direction{-a.X, -a.Y, -a.Z}

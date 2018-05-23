@@ -25,7 +25,7 @@ func fresnelSchlick(in, normal geom.Direction, f0 float64) float64 {
 // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
 func ggx(in, out, normal geom.Direction, roughness float64) float64 {
 	wm := in.Half(out)
-	a := roughness * roughness
+	a := roughness
 	a2 := a * a
 	cosTheta := normal.Dot(wm)
 	exp := (a2-1)*cosTheta*cosTheta + 1
