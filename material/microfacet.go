@@ -36,17 +36,17 @@ func (m Microfacet) Sample(wo geom.Direction, rnd *rand.Rand) geom.Direction {
 // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
 // https://en.wikipedia.org/wiki/List_of_common_coordinate_transformations#From_Cartesian_coordinates_2
 func (m Microfacet) PDF(wi, wo geom.Direction) float64 {
+	// return 1 / (math.Pi * 2)
 	wm := wo.Half(wi)
 	a := m.Roughness
 	a2 := a * a
 	theta := math.Atan2(math.Sqrt(wm.X*wm.X+wm.Z*wm.Z), wm.Y)
 	cosTheta := math.Cos(theta)
+	sinTheta := math.Sin(theta)
+	num := 2 * a2 * cosTheta * sinTheta
 	exp := (a2-1)*cosTheta*cosTheta + 1
-
-	num := a2 * cosTheta // * math.Sin(theta)
-
-	den := 4 * math.Abs(wi.Dot(wm)) * math.Pi * (exp * exp)
-	return num / den
+	pdfM := num / (exp * exp)
+	return pdfM / (4 * math.Abs(wo.Dot(wm)))
 }
 
 // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
