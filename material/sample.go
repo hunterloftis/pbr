@@ -31,7 +31,7 @@ func (s *Sample) BSDF() BSDF {
 		// copper: http://www.cs.cornell.edu/courses/cs5625/2013sp/lectures/Lec2ShadingModelsWeb.pdf
 		return Microfacet{
 			F0:        rgb.Energy{0.95, 0.64, 0.54},
-			Roughness: 0.01,
+			Roughness: 1,
 		}
 	}
 	return Lambert{1, 1, 1}
