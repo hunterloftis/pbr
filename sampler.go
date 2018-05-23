@@ -42,18 +42,6 @@ func (s *sampler) start(buffer *rgb.Framebuffer, in <-chan int, done chan<- samp
 	}()
 }
 
-// TODO: precompute on surfaces?
-func tangentMatrix(normal geom.Direction) (to, from *geom.Matrix4) {
-	if geom.Vector3(normal).Equals(geom.Vector3(geom.Up)) {
-		return geom.Identity(), geom.Identity()
-	}
-	angle := math.Acos(normal.Dot(geom.Up))
-	axis := normal.Cross(geom.Up)
-	angleAxis := axis.Scaled(angle)
-	m := geom.Rot(angleAxis)
-	return m, m.Inverse()
-}
-
 func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	ray := s.camera.ray(float64(x), float64(y), rnd)
 	strength := rgb.Energy{1, 1, 1}
@@ -82,6 +70,18 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		ray = geom.NewRay(point, fromTangent.MultDir(wi))
 	}
 	return energy
+}
+
+// TODO: precompute on surfaces?
+func tangentMatrix(normal geom.Direction) (to, from *geom.Matrix4) {
+	if geom.Vector3(normal).Equals(geom.Vector3(geom.Up)) {
+		return geom.Identity(), geom.Identity()
+	}
+	angle := math.Acos(normal.Dot(geom.Up))
+	axis := normal.Cross(geom.Up)
+	angleAxis := axis.Scaled(angle)
+	m := geom.Rot(angleAxis)
+	return m, m.Inverse()
 }
 
 func (s *sampler) traceDirect(point geom.Vector3, normal geom.Direction, rnd *rand.Rand) (energy rgb.Energy, coverage float64) {

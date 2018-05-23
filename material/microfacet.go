@@ -8,6 +8,7 @@ import (
 	"github.com/hunterloftis/pbr/rgb"
 )
 
+// Cook-Torrance microfacet model
 type Microfacet struct {
 	F0        rgb.Energy
 	Roughness float64
@@ -40,6 +41,7 @@ func (m Microfacet) PDF(wi, wo geom.Direction) float64 {
 	a := m.Roughness
 	a2 := a * a
 	theta := math.Atan2(math.Sqrt(wm.X*wm.X+wm.Z*wm.Z), wm.Y)
+
 	cosTheta := math.Cos(theta)
 	num := a2 * cosTheta * math.Sin(theta)
 	exp := (a2-1)*cosTheta*cosTheta + 1
