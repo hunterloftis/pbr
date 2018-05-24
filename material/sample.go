@@ -1,10 +1,21 @@
 package material
 
-import "github.com/hunterloftis/pbr/rgb"
+import (
+	"math/rand"
+
+	"github.com/hunterloftis/pbr/geom"
+	"github.com/hunterloftis/pbr/rgb"
+)
 
 type Description interface {
 	At(u, v float64) *Sample
 	Emits() bool
+}
+
+type BSDF interface {
+	Sample(out geom.Direction, rnd *rand.Rand) (in geom.Direction)
+	PDF(in, out geom.Direction) float64
+	Eval(in, out geom.Direction) rgb.Energy
 }
 
 type Sample struct {
