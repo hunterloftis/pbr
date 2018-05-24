@@ -14,13 +14,19 @@ var Default = UniformMaterial(Sample{
 var Copper = UniformMaterial(Sample{
 	Color:     rgb.Energy{0.95, 0.64, 0.54},
 	Metalness: 1,
-	Roughness: 0.2,
+	Roughness: 0.1,
+})
+
+var WhiteLambert = UniformMaterial(Sample{
+	Color:       rgb.Energy{1, 1, 1},
+	Roughness:   1,
+	Specularity: 0,
 })
 
 var RedLambert = UniformMaterial(Sample{
 	Color:       rgb.Energy{1, 0.5, 0.5},
 	Roughness:   1,
-	Specularity: 0.01,
+	Specularity: 0,
 })
 
 func Halogen(brightness float64) *Uniform {
