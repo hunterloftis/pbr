@@ -9,7 +9,7 @@ import (
 )
 
 type Lambert struct {
-	R, G, B float64
+	Color rgb.Energy
 }
 
 func (l Lambert) Sample(out geom.Direction, rnd *rand.Rand) geom.Direction {
@@ -24,5 +24,5 @@ func (l Lambert) PDF(in, out geom.Direction) float64 {
 
 func (l Lambert) Eval(in, out geom.Direction) rgb.Energy {
 	normal := geom.Up
-	return rgb.Energy{l.R, l.G, l.B}.Scaled(math.Pi * in.Dot(normal))
+	return l.Color.Scaled(math.Pi * in.Dot(normal))
 }

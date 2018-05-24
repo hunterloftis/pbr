@@ -79,8 +79,7 @@ func (a Energy) Mean() float64 {
 	return (a.X + a.Y + a.Z) / 3
 }
 
-// TODO: rename to Lerp
-func (a Energy) Blend(b Energy, n float64) Energy {
+func (a Energy) Lerp(b Energy, n float64) Energy {
 	return Energy(geom.Vector3(a).Lerp(geom.Vector3(b), n))
 }
 

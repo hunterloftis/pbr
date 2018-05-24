@@ -73,7 +73,7 @@ func (s *Scene) EnvAt(dir geom.Direction) rgb.Energy {
 		return e.Limit(maxEnvEnergy)
 	}
 	vertical := math.Max(0, (dir.Dot(geom.Direction{0, 1, 0})+0.5)/1.5)
-	return rgb.Energy{}.Blend(s.ambient, vertical)
+	return rgb.Energy{}.Lerp(s.ambient, vertical)
 }
 
 // Add adds Surfaces to the scene.

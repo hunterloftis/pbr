@@ -20,7 +20,7 @@ var Copper = UniformMaterial(Sample{
 var RedLambert = UniformMaterial(Sample{
 	Color:       rgb.Energy{1, 0.5, 0.5},
 	Roughness:   1,
-	Specularity: 0,
+	Specularity: 0.01,
 })
 
 func Halogen(brightness float64) *Uniform {

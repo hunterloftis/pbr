@@ -31,13 +31,13 @@ func (s *Sample) Light() rgb.Energy {
 	return s.Color.Scaled(s.Emission)
 }
 
-var layered = Layered{}
-
-func (s *Sample) BSDF(rnd *rand.Rand) BSDF {
-
-	//F := fresnelSchlick(wi, wg, m.F0.Mean()) // The Fresnel function
-	if s.Metalness > 0 {
-		return Microfacet{F0: s.Color, Roughness: s.Roughness}
+func (s *Sample) BSDF(wo geom.Direction, rnd *rand.Rand) BSDF {
+	spec := rgb.Energy{s.Specularity, s.Specularity, s.Specularity}
+	F0 := spec.Lerp(s.Color, s.Metalness)
+	F := fresnelSchlick(wo, geom.Up, F0.Mean())
+	c := s.Color.Lerp(rgb.Black, s.Metalness)
+	if rnd.Float64() < F {
+		return Microfacet{F0: F0, Roughness: s.Roughness}
 	}
-	return Lambert{R: s.Color.X, G: s.Color.Y, B: s.Color.Z}
+	return Lambert{Color: c}
 }

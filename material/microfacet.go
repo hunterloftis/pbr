@@ -51,6 +51,7 @@ func (m Microfacet) Eval(wi, wo geom.Direction) rgb.Energy {
 	}
 	D := ggx(wi, wo, wg, m.Roughness)  // The NDF (Normal Distribution Function)
 	G := smithGGX(wo, wg, m.Roughness) // The Geometric Shadowing function
-	r := (D * G) / (4 * wg.Dot(wi) * wg.Dot(wo))
+	F := 1.0                           // Instead of calculating Fresnel here, it's done externally and stochastically
+	r := (F * D * G) / (4 * wg.Dot(wi) * wg.Dot(wo))
 	return m.F0.Scaled(r)
 }
