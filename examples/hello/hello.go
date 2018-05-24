@@ -22,7 +22,7 @@ func main() {
 
 	fmt.Println("rendering hello.png (3 minutes)...")
 	render.Start()
-	time.Sleep(time.Minute * 15)
+	time.Sleep(time.Minute * 1)
 	render.Stop()
 	render.WritePngs("hello.png", "hello-heat.png", "hello-noise.png", 1)
 }

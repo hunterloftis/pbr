@@ -70,7 +70,8 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		wo := toTangent.MultDir(ray.Dir.Inv())
 		wi := bsdf.Sample(wo, rnd)
 		weight := wi.Dot(geom.Up) / bsdf.PDF(wi, wo)
-		strength = strength.Times(bsdf.Eval(wi, wo)).Scaled(weight)
+		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
+		strength = strength.Times(reflectance)
 
 		ray = geom.NewRay(point, fromTangent.MultDir(wi))
 	}
