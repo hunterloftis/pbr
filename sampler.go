@@ -66,6 +66,7 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		}
 		bsdf := mat.BSDF()
 		toTangent, fromTangent := tangentMatrix(normal)
+		wo := toTangent.MultDir(ray.Dir.Inv())
 
 		coverage := 0.0
 		for j := 0; j < len(lights); j++ {
@@ -79,14 +80,16 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 			if !hit.Ok {
 				continue
 			}
-			weightD := solidAngle / math.Pi * strength
-			energy = energy.Plus(light.Energy().Times(strength))
+			wid := toTangent.MultDir(direct)
+			weightD := solidAngle / math.Pi
+			reflectance := bsdf.Eval(wid, wo).Scaled(weightD * strength)
+			energy = energy.Plus(light.Energy().Scaled(reflectance))
 		}
 
-		wo := toTangent.MultDir(ray.Dir.Inv())
 		wi := bsdf.Sample(wo, rnd)
-		weight := wi.Dot(geom.Up) / bsdf.PDF(wi, wo)
-		strength = strength.Times(bsdf.Eval(wi, wo)).Scaled(weight) // TODO: is this order of operations correct?
+		weight := (1 - coverage) * wi.Dot(geom.Up) / bsdf.PDF(wi, wo)
+		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
+		strength = strength.Times(reflectance)
 
 		ray = geom.NewRay(point, fromTangent.MultDir(wi))
 	}
