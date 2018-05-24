@@ -49,9 +49,8 @@ func (m Microfacet) Eval(wi, wo geom.Direction) rgb.Energy {
 	if wi.Y <= 0 || wi.Dot(wm) <= 0 {
 		return rgb.Energy{0, 0, 0}
 	}
-	F := fresnelSchlick(wi, wg, m.F0.Mean()) // The Fresnel function
-	D := ggx(wi, wo, wg, m.Roughness)        // The NDF (Normal Distribution Function)
-	G := smithGGX(wo, wg, m.Roughness)       // The Geometric Shadowing function
-	r := (F * D * G) / (4 * wg.Dot(wi) * wg.Dot(wo))
+	D := ggx(wi, wo, wg, m.Roughness)  // The NDF (Normal Distribution Function)
+	G := smithGGX(wo, wg, m.Roughness) // The Geometric Shadowing function
+	r := (D * G) / (4 * wg.Dot(wi) * wg.Dot(wo))
 	return m.F0.Scaled(r)
 }

@@ -64,7 +64,7 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 			energy = energy.Plus(mat.Light().Times(strength))
 			break
 		}
-		bsdf := mat.BSDF()
+		bsdf := mat.BSDF(rnd)
 		toTangent, fromTangent := tangentMatrix(normal)
 		wo := toTangent.MultDir(ray.Dir.Inv())
 

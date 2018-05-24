@@ -31,7 +31,11 @@ func (s *Sample) Light() rgb.Energy {
 	return s.Color.Scaled(s.Emission)
 }
 
-func (s *Sample) BSDF() BSDF {
+var layered = Layered{}
+
+func (s *Sample) BSDF(rnd *rand.Rand) BSDF {
+
+	//F := fresnelSchlick(wi, wg, m.F0.Mean()) // The Fresnel function
 	if s.Metalness > 0 {
 		return Microfacet{F0: s.Color, Roughness: s.Roughness}
 	}
