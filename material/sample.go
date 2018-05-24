@@ -1,40 +1,28 @@
 package material
 
-import (
-	"math/rand"
+import "github.com/hunterloftis/pbr/rgb"
 
-	"github.com/hunterloftis/pbr/geom"
-	"github.com/hunterloftis/pbr/rgb"
-)
-
-type Sample struct {
-	Color    rgb.Energy
-	Light    rgb.Energy
-	Fresnel  rgb.Energy
-	Transmit float64
-	Refract  float64
-	Rough    float64
-	Coat     float64
-	Metal    float64
-	Thin     bool
+type Description interface {
+	At(u, v float64) *Sample
+	Emits() bool
 }
 
-type BSDF interface {
-	Sample(out geom.Direction, rnd *rand.Rand) (in geom.Direction)
-	PDF(in, out geom.Direction) float64
-	Eval(in, out geom.Direction) rgb.Energy
+type Sample struct {
+	Color        rgb.Energy
+	Metalness    float64
+	Roughness    float64
+	Specularity  float64
+	Emission     float64
+	Transmission float64
+}
+
+func (s *Sample) Light() rgb.Energy {
+	return s.Color.Scaled(s.Emission)
 }
 
 func (s *Sample) BSDF() BSDF {
-	if s.Metal == 1 {
-		// copper: http://www.cs.cornell.edu/courses/cs5625/2013sp/lectures/Lec2ShadingModelsWeb.pdf
-		return Microfacet{
-			F0:        rgb.Energy{0.95, 0.64, 0.54},
-			Roughness: 0.2,
-		}
+	if s.Metalness > 0 {
+		return Microfacet{F0: s.Color, Roughness: s.Roughness}
 	}
-	if s.Transmit == 1 {
-		return Lambert{1, 0.3, 0.3}
-	}
-	return Lambert{0.9, 0.9, 0.9}
+	return Lambert{R: s.Color.X, G: s.Color.Y, B: s.Color.Z}
 }

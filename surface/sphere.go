@@ -11,12 +11,12 @@ import (
 // TODO: make all of these private, this is accessed through interfaces anyway
 type Sphere struct {
 	Pos *geom.Matrix4
-	Mat *material.Map
+	Mat material.Description
 	box *Box
 }
 
 // UnitSphere returns a pointer to a new 1x1x1 Sphere Surface with a given material and optional transforms.
-func UnitSphere(m ...*material.Map) *Sphere {
+func UnitSphere(m ...material.Description) *Sphere {
 	s := &Sphere{
 		Pos: geom.Identity(),
 		Mat: material.Default,
@@ -43,10 +43,6 @@ func (s *Sphere) transform(t *geom.Matrix4) *Sphere {
 	}
 	s.box = NewBox(min, max)
 	return s
-}
-
-func (s *Sphere) Material() *material.Map {
-	return s.Mat
 }
 
 func (s *Sphere) Move(x, y, z float64) *Sphere {
@@ -107,4 +103,8 @@ func (s *Sphere) At(pt geom.Vector3) (normal geom.Direction, material *material.
 	i := s.Pos.Inverse()
 	p := i.MultPoint(pt)
 	return s.Pos.MultDir(p.Unit()), s.Mat.At(0, 0)
+}
+
+func (s *Sphere) Emits() bool {
+	return s.Mat.Emits()
 }

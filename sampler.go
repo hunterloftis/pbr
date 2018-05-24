@@ -45,7 +45,7 @@ func (s *sampler) start(buffer *rgb.Framebuffer, in <-chan int, done chan<- samp
 func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	ray := s.camera.ray(float64(x), float64(y), rnd)
 	strength := rgb.Energy{1, 1, 1}
-	lights := s.scene.Lights()
+	// lights := s.scene.Lights()
 
 	for i := 0; i < 9; i++ {
 		if i > 3 {
@@ -60,8 +60,8 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		}
 		point := ray.Moved(hit.Dist)
 		normal, mat := hit.Surface.At(point)
-		if !mat.Light.Zero() {
-			energy = energy.Plus(mat.Light.Times(strength))
+		if mat.Emission > 0 {
+			energy = energy.Plus(mat.Light().Times(strength))
 			break
 		}
 		bsdf := mat.BSDF()
@@ -69,22 +69,22 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		wo := toTangent.MultDir(ray.Dir.Inv())
 
 		coverage := 0.0
-		for j := 0; j < len(lights); j++ {
-			light := lights[j]
-			direct, solidAngle := light.Box().ShadowRay(point, normal, rnd)
-			if solidAngle <= 0 {
-				continue
-			}
-			coverage += solidAngle
-			hit := s.scene.Intersect(direct)
-			if !hit.Ok {
-				continue
-			}
-			wid := toTangent.MultDir(direct)
-			weightD := solidAngle / math.Pi
-			reflectance := bsdf.Eval(wid, wo).Scaled(weightD * strength)
-			energy = energy.Plus(light.Energy().Scaled(reflectance))
-		}
+		// for j := 0; j < len(lights); j++ {
+		// 	light := lights[j]
+		// 	direct, solidAngle := light.Box().ShadowRay(point, normal, rnd)
+		// 	if solidAngle <= 0 {
+		// 		continue
+		// 	}
+		// 	coverage += solidAngle
+		// 	hit := s.scene.Intersect(direct)
+		// 	if !hit.Ok {
+		// 		continue
+		// 	}
+		// 	wid := toTangent.MultDir(direct)
+		// 	weightD := solidAngle / math.Pi
+		// 	reflectance := bsdf.Eval(wid, wo).Scaled(weightD * strength)
+		// 	energy = energy.Plus(light.Energy().Scaled(reflectance))
+		// }
 
 		wi := bsdf.Sample(wo, rnd)
 		weight := (1 - coverage) * wi.Dot(geom.Up) / bsdf.PDF(wi, wo)
@@ -108,23 +108,23 @@ func tangentMatrix(normal geom.Direction) (to, from *geom.Matrix4) {
 	return m, m.Inverse()
 }
 
-func (s *sampler) traceDirect(point geom.Vector3, normal geom.Direction, rnd *rand.Rand) (energy rgb.Energy, coverage float64) {
-	for i := 0; i < 1; i++ {
-		light := s.scene.Light(rnd)
-		ray, solidAngle := light.Box().ShadowRay(point, normal, rnd)
-		if solidAngle <= 0 {
-			break
-		}
-		coverage += solidAngle
-		hit := s.scene.Intersect(ray)
-		if !hit.Ok {
-			break
-		}
-		e := hit.Surface.Material().Emit().Scaled(solidAngle / math.Pi)
-		energy = energy.Plus(e)
-	}
-	return energy, coverage
-}
+// func (s *sampler) traceDirect(point geom.Vector3, normal geom.Direction, rnd *rand.Rand) (energy rgb.Energy, coverage float64) {
+// 	for i := 0; i < 1; i++ {
+// 		light := s.scene.Light(rnd)
+// 		ray, solidAngle := light.Box().ShadowRay(point, normal, rnd)
+// 		if solidAngle <= 0 {
+// 			break
+// 		}
+// 		coverage += solidAngle
+// 		hit := s.scene.Intersect(ray)
+// 		if !hit.Ok {
+// 			break
+// 		}
+// 		e := hit.Surface.Material().Emit().Scaled(solidAngle / math.Pi)
+// 		energy = energy.Plus(e)
+// 	}
+// 	return energy, coverage
+// }
 
 // http://gfx.cs.princeton.edu/pubs/DeCoro_2010_DOR/outliers.pdf
 // TODO: backgrounds should be basically completely black on the heatmap

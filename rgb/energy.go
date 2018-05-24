@@ -21,6 +21,12 @@ func (a Energy) Merged(b Energy, signal Energy) Energy {
 	return Energy{a.X + b.X*signal.X, a.Y + b.Y*signal.Y, a.Z + b.Z*signal.Z}
 }
 
+func (a Energy) Compressed(n float64) (b Energy, scale float64) {
+	max := math.Max(a.X, math.Max(a.Y, a.Z))
+	scale = max / n
+	return a.Scaled(n / max), scale
+}
+
 // Scaled returns energy a scaled by n.
 func (a Energy) Scaled(n float64) Energy {
 	return Energy{a.X * n, a.Y * n, a.Z * n}

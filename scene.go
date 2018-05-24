@@ -2,7 +2,6 @@ package pbr
 
 import (
 	"math"
-	"math/rand"
 	"os"
 	"sync/atomic"
 
@@ -123,13 +122,7 @@ func (s *Scene) Info() (box *surface.Box, surfaces []surface.Surface) {
 	return b, s.surfaces
 }
 
-// Light returns a random light (surface with Emit() > 0) from the Scene.
-func (s *Scene) Light(rnd *rand.Rand) surface.Surface {
-	i := rnd.Intn(len(s.lights))
-	return s.lights[i]
-}
-
-// Lights returns the number of lights in the Scene.
+// Lights returns all the lights in the scene.
 func (s *Scene) Lights() int {
 	return len(s.lights)
 }
@@ -139,8 +132,8 @@ func (s *Scene) Lights() int {
 func (s *Scene) prepare() {
 	s.tree = surface.NewTree(s.surfaces)
 	s.lights = make([]surface.Surface, 0)
-	for _, surf := range s.surfaces { // TODO: change this to a Light interface
-		if surf.Material().Emit().Mean() > 0 {
+	for _, surf := range s.surfaces {
+		if surf.Emits() {
 			s.lights = append(s.lights, surf)
 		}
 	}

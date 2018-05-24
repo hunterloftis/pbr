@@ -9,16 +9,13 @@ import (
 
 // Cube describes the orientation and material of a unit cube
 type Cube struct {
-	Pos      *geom.Matrix4
-	Mat      *material.Map
-	GridMat  *material.Map
-	GridSize float64
-	BSDF     *material.BSDF
-	box      *Box
+	Pos *geom.Matrix4
+	Mat material.Description
+	box *Box
 }
 
 // UnitCube returns a pointer to a new 1x1x1 Cube Surface with material and optional transforms.
-func UnitCube(m ...*material.Map) *Cube {
+func UnitCube(m ...material.Description) *Cube {
 	c := &Cube{
 		Pos: geom.Identity(),
 		Mat: material.Default,
@@ -56,13 +53,6 @@ func (c *Cube) Scale(x, y, z float64) *Cube {
 
 func (c *Cube) Rotate(x, y, z float64) *Cube {
 	return c.transform(geom.Rot(geom.Vector3{x, y, z}))
-}
-
-// SetGrid adds a second material to the cube which is applied as a grid across its surface
-func (c *Cube) SetGrid(mat *material.Map, size float64) *Cube {
-	c.GridMat = mat
-	c.GridSize = size
-	return c
 }
 
 func (c *Cube) Intersect(ray *geom.Ray3) Hit {
@@ -106,10 +96,6 @@ func (c *Cube) Center() geom.Vector3 {
 	return c.Pos.MultPoint(geom.Vector3{})
 }
 
-func (c *Cube) Material() *material.Map {
-	return c.Mat
-}
-
 // At returns the normal geom.Vector3 at this point on the Surface
 func (c *Cube) At(pt geom.Vector3) (normal geom.Direction, material *material.Sample) {
 	normal = geom.Direction{}
@@ -129,4 +115,8 @@ func (c *Cube) At(pt geom.Vector3) (normal geom.Direction, material *material.Sa
 
 func (c *Cube) Box() *Box {
 	return c.box
+}
+
+func (c *Cube) Emits() bool {
+	return c.Mat.Emits()
 }

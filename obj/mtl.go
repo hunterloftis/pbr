@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"image"
-	"math"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -31,7 +30,7 @@ type mtl struct {
 	mapKd image.Image
 }
 
-func ReadMtl(filename string, thin bool) (mats []*material.Map, err error) {
+func ReadMtl(filename string, thin bool) (mats map[string]*material.Map, err error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open mtl %v, %v", filename, err)
@@ -39,7 +38,7 @@ func ReadMtl(filename string, thin bool) (mats []*material.Map, err error) {
 	defer f.Close()
 	scanner := bufio.NewScanner(f)
 	props := mtl{}
-	mats = make([]*material.Map, 0)
+	mats = make(map[string]*material.Map)
 	for scanner.Scan() {
 		line := scanner.Text()
 		fields := strings.Fields(line)
@@ -51,7 +50,7 @@ func ReadMtl(filename string, thin bool) (mats []*material.Map, err error) {
 		switch key {
 		case "newmtl":
 			if len(props.name) > 0 {
-				mats = append(mats, adapt(props, thin))
+				mats[props.name] = adapt(props)
 			}
 			props = mtl{name: args[0]}
 		case "Kd":
@@ -101,7 +100,7 @@ func ReadMtl(filename string, thin bool) (mats []*material.Map, err error) {
 		}
 	}
 	if len(props.name) > 0 {
-		mats = append(mats, adapt(props, thin))
+		mats[props.name] = adapt(props)
 	}
 	return mats, nil
 }
@@ -109,35 +108,27 @@ func ReadMtl(filename string, thin bool) (mats []*material.Map, err error) {
 // https://github.com/AnalyticalGraphicsInc/obj2gltf#material-types
 // http://exocortex.com/blog/extending_wavefront_mtl_to_support_pbr
 // TODO: refractive index (ni) => .Fresnel
-func adapt(props mtl, thin bool) *material.Map {
-	d := material.MaterialDesc{
-		Name:     props.name,
-		Color:    props.kd,
-		Transmit: props.tr,
-		Rough:    1 - (props.ns / 1000),
-		Light:    props.ke,
-		Metal:    props.pm,
-		Thin:     thin,
-		Coat:     props.pc,
-		Texture:  props.mapKd,
+func adapt(props mtl) *material.Map {
+	s := material.Sample{
+		Color:        props.kd,
+		Metalness:    props.pm,
+		Roughness:    1 - (props.ns / 1000),
+		Specularity:  0.04,
+		Emission:     0,
+		Transmission: props.tr,
 	}
-	if props.tr > 0 {
-		if d.Thin {
-			d.Transmit = props.tr
-		} else {
-			d.Transmit = 1
-			d.Color = d.Color.Scaled(props.tr)
-		}
-		d.Fresnel = rgb.Energy{0.042, 0.042, 0.042} // Glass
-	} else {
-		d.Fresnel = rgb.Energy{0.02, 0.02, 0.02}.Blend(props.ks, d.Metal)
+	if !props.ke.Zero() {
+		rgb, scale := props.ke.Compressed(1)
+		s.Color = rgb
+		s.Emission = scale
 	}
-	if props.ni > 1 {
-		// https://docs.blender.org/manual/en/dev/render/cycles/nodes/types/shaders/principled.html
-		f := math.Pow((props.ni-1)/(props.ni+1), 2)
-		d.Fresnel = rgb.Energy{f, f, f}
-	}
-	return material.New(d)
+	m := material.MappedMaterial(s)
+	// if props.ni > 1 {
+	// 	// https://docs.blender.org/manual/en/dev/render/cycles/nodes/types/shaders/principled.html
+	// 	f := math.Pow((props.ni-1)/(props.ni+1), 2)
+	// 	d.Fresnel = rgb.Energy{f, f, f}
+	// }
+	return m
 }
 
 func readTexture(filename string) (image.Image, error) {

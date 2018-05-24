@@ -25,7 +25,7 @@ type Scanner struct {
 	vn      []geom.Direction
 	vt      []geom.Vector3
 	lib     map[string]*material.Map
-	mat     *material.Map
+	mat     material.Description
 }
 
 func NewScanner(r io.Reader) *Scanner {
@@ -135,9 +135,9 @@ func (s *Scanner) Err() error {
 	return s.err
 }
 
-func (s *Scanner) AddMaterials(mats []*material.Map) {
-	for _, mat := range mats {
-		s.lib[mat.Name()] = mat
+func (s *Scanner) AddMaterials(mats map[string]*material.Map) {
+	for name, mat := range mats {
+		s.lib[name] = mat
 	}
 }
 

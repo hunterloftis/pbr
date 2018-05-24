@@ -11,14 +11,14 @@ type Triangle struct {
 	Points  [3]geom.Vector3
 	Normals [3]geom.Direction
 	Texture [3]geom.Vector3
-	Mat     *material.Map
+	Mat     material.Description
 	edge1   geom.Vector3
 	edge2   geom.Vector3
 	box     *Box
 }
 
 // NewTriangle creates a new triangle
-func NewTriangle(a, b, c geom.Vector3, m *material.Map) *Triangle {
+func NewTriangle(a, b, c geom.Vector3, m material.Description) *Triangle {
 	edge1 := b.Minus(a)
 	edge2 := c.Minus(a)
 	n := edge1.Cross(edge2).Unit()
@@ -37,10 +37,6 @@ func NewTriangle(a, b, c geom.Vector3, m *material.Map) *Triangle {
 
 func (t *Triangle) Box() *Box {
 	return t.box
-}
-
-func (t *Triangle) Material() *material.Map {
-	return t.Mat
 }
 
 // Intersect determines whether or not, and where, a Ray intersects this Triangle
@@ -140,4 +136,8 @@ func (t *Triangle) Bary(p geom.Vector3) (u, v, w float64) {
 	w = (d00*d21 - d01*d20) / d
 	u = 1 - v - w
 	return
+}
+
+func (t *Triangle) Emits() bool {
+	return t.Mat.Emits()
 }
