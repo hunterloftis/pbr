@@ -45,7 +45,7 @@ func (s *sampler) start(buffer *rgb.Framebuffer, in <-chan int, done chan<- samp
 func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	ray := s.camera.ray(float64(x), float64(y), rnd)
 	strength := rgb.Energy{1, 1, 1}
-	// lights := s.scene.Lights() TODO: direct lighting
+	lights := s.scene.Lights()
 
 	for i := 0; i < 9; i++ {
 		if i > 3 {
@@ -67,10 +67,26 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		bsdf := mat.BSDF()
 		toTangent, fromTangent := tangentMatrix(normal)
 
+		coverage := 0.0
+		for j := 0; j < len(lights); j++ {
+			light := lights[j]
+			direct, solidAngle := light.Box().ShadowRay(point, normal, rnd)
+			if solidAngle <= 0 {
+				continue
+			}
+			coverage += solidAngle
+			hit := s.scene.Intersect(direct)
+			if !hit.Ok {
+				continue
+			}
+			weightD := solidAngle / math.Pi * strength
+			energy = energy.Plus(light.Energy().Times(strength))
+		}
+
 		wo := toTangent.MultDir(ray.Dir.Inv())
 		wi := bsdf.Sample(wo, rnd)
 		weight := wi.Dot(geom.Up) / bsdf.PDF(wi, wo)
-		strength = strength.Times(bsdf.Eval(wi, wo)).Scaled(weight)
+		strength = strength.Times(bsdf.Eval(wi, wo)).Scaled(weight) // TODO: is this order of operations correct?
 
 		ray = geom.NewRay(point, fromTangent.MultDir(wi))
 	}
