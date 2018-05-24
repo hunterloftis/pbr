@@ -19,6 +19,9 @@ type Microfacet struct {
 func (m Microfacet) Sample(wo geom.Direction, rnd *rand.Rand) geom.Direction {
 	r0 := rnd.Float64()
 	r1 := rnd.Float64()
+	if m.Roughness == 0 {
+		panic("Need to fix this, 0 isn't allowed")
+	}
 	a := m.Roughness
 	a2 := a * a
 	theta := math.Acos(math.Sqrt((1 - r0) / ((a2-1)*r0 + 1)))
