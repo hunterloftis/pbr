@@ -32,10 +32,11 @@ func (s *Sample) Light() rgb.Energy {
 }
 
 func (s *Sample) BSDF(wo geom.Direction, rnd *rand.Rand) BSDF {
-	if wo.Enters(geom.Up) {
+	entering := wo.Dot(geom.Up) > 0
+	if entering {
 		spec := rgb.Energy{s.Specularity, s.Specularity, s.Specularity}
 		F0 := spec.Lerp(s.Color, s.Metalness)
-		reflect := fresnelSchlick(wo.Dot(geom.Up), F0.Mean())
+		reflect := fresnelSchlick(wo.Dot(geom.Up), F0.Max())
 		switch {
 		case rnd.Float64() < reflect:
 			return Microfacet{F0: F0, Roughness: s.Roughness}

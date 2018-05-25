@@ -52,9 +52,11 @@ func (m Microfacet) Eval(wi, wo geom.Direction) rgb.Energy {
 	if wi.Y <= 0 || wi.Dot(wm) <= 0 {
 		return rgb.Energy{0, 0, 0}
 	}
+	F := 1.0                           // Instead of calculating Fresnel here, it's done externally and stochastically
 	D := ggx(wi, wo, wg, m.Roughness)  // The NDF (Normal Distribution Function)
 	G := smithGGX(wo, wg, m.Roughness) // The Geometric Shadowing function
-	F := 1.0                           // Instead of calculating Fresnel here, it's done externally and stochastically
 	r := (F * D * G) / (4 * wg.Dot(wi) * wg.Dot(wo))
-	return m.F0.Scaled(r)
+	f0, _ := m.F0.Compressed(1)
+	return f0.Scaled(r)
+	// return m.F0.Scaled(r) // TODO: it seems like F0 is double-factored in. How can I remove this but keep color (eg copper?)
 }
