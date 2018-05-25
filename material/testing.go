@@ -10,9 +10,8 @@ import (
 
 // Cook-Torrance microfacet model
 type Testing struct {
-	F0        rgb.Energy
-	Roughness float64
-	u         float64
+	sample Sample
+	u      float64
 }
 
 // https://schuttejoe.github.io/post/ggximportancesamplingpart1/
@@ -37,12 +36,16 @@ func (t Testing) Eval(wi, wo geom.Direction) rgb.Energy {
 	if wi.Y <= 0 || wi.Dot(wm) <= 0 {
 		return rgb.Energy{0, 0, 0}
 	}
-	F := fresnelSchlick(wo, geom.Up, t.F0.Mean())
+	s := t.sample
+	spec := rgb.Energy{s.Specularity, s.Specularity, s.Specularity}
+	F0 := spec.Lerp(s.Color, s.Metalness)
+	F := fresnelSchlick(wo, geom.Up, F0.Mean())
+	c := s.Color.Lerp(rgb.Black, s.Metalness)
 	if t.u < F {
-		D := ggx(wi, wo, wg, t.Roughness)  // The NDF (Normal Distribution Function)
-		G := smithGGX(wo, wg, t.Roughness) // The Geometric Shadowing function
-		r := (F * D * G) / (4 * wg.Dot(wi) * wg.Dot(wo))
-		return t.F0.Scaled(r)
+		D := ggx(wi, wo, wg, s.Roughness)  // The NDF (Normal Distribution Function)
+		G := smithGGX(wo, wg, s.Roughness) // The Geometric Shadowing function
+		r := (D * G) / (4 * wg.Dot(wi) * wg.Dot(wo))
+		return F0.Scaled(r)
 	}
-	return rgb.Energy{0, 0, 0}
+	return c
 }

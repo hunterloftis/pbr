@@ -32,6 +32,8 @@ func (s *Sample) Light() rgb.Energy {
 }
 
 func (s *Sample) BSDF(wo geom.Direction, rnd *rand.Rand) BSDF {
+	return Testing{*s, rnd.Float64()}
+
 	if s.Specularity == 0 && s.Metalness == 0 {
 		return Lambert{Color: s.Color}
 	}
