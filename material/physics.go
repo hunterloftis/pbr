@@ -18,7 +18,14 @@ func beers(dist float64, absorb rgb.Energy) rgb.Energy {
 
 // Schlick's approximation of Fresnel
 func fresnelSchlick(in, normal geom.Direction, f0 float64) float64 {
-	return f0 + (1-f0)*math.Pow(1-normal.Dot(in), 5)
+	x := math.Pow(1-normal.Dot(in), 5)
+	return f0 + (1-f0)*x
+}
+
+func schlick(a, b geom.Direction, r0 float64) float64 {
+	cosX := a.Dot(b)
+	x := 1.0 - cosX
+	return r0 + (1.0-r0)*x*x*x*x*x
 }
 
 // GGX Normal Distribution Function

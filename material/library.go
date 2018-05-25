@@ -5,8 +5,8 @@ import "github.com/hunterloftis/pbr/rgb"
 var Default = UniformMaterial(Sample{
 	Color:        rgb.Energy{1, 1, 1},
 	Metalness:    0,
-	Roughness:    0.5,
-	Specularity:  0.04,
+	Roughness:    1,
+	Specularity:  0.02,
 	Emission:     0,
 	Transmission: 0,
 })
@@ -14,7 +14,7 @@ var Default = UniformMaterial(Sample{
 var Copper = UniformMaterial(Sample{
 	Color:     rgb.Energy{0.95, 0.64, 0.54},
 	Metalness: 1,
-	Roughness: 0.1,
+	Roughness: 0.2,
 })
 
 var WhiteLambert = UniformMaterial(Sample{

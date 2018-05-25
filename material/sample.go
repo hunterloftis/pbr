@@ -48,13 +48,14 @@ func (s *Sample) BSDF(wo geom.Direction, rnd *rand.Rand) BSDF {
 	// 	// panic("wtf")
 	// }
 	// fmt.Println("ok")
-	if (s.Metalness == 1 && r < F) || rnd.Float64() < 0.001 {
+	// if r < F && (s.Metalness == 1 || rnd.Float64() < 0.00001) {
+	if r < F && s.Metalness == 1 {
 		// if s.Metalness != 1 {
 		// 	fmt.Println(r, "<", F, "where F0.Mean() =", F0.Mean())
 		// 	fmt.Println(spec, F0.Mean(), F, c, r, s.Emission)
 		// 	panic("wtf")
 		// }
-		return Microfacet{F0: F0, Roughness: s.Roughness}
+		return Microfacet{F0: F0, Roughness: s.Roughness, nonmetal: s.Metalness == 0}
 	}
 	return Lambert{Color: c}
 }

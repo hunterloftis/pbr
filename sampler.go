@@ -88,7 +88,9 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		// }
 
 		wi := bsdf.Sample(wo, rnd)
-		weight := (1 - coverage) * wi.Dot(geom.Up) / bsdf.PDF(wi, wo)
+		indirect := (1 - coverage)
+		cos := wi.Dot(geom.Up)
+		weight := indirect * cos / bsdf.PDF(wi, wo)
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		strength = strength.Times(reflectance)
 

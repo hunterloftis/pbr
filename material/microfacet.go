@@ -12,6 +12,7 @@ import (
 type Microfacet struct {
 	F0        rgb.Energy
 	Roughness float64
+	nonmetal  bool
 }
 
 // https://schuttejoe.github.io/post/ggximportancesamplingpart1/

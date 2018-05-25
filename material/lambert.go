@@ -23,6 +23,5 @@ func (l Lambert) PDF(in, out geom.Direction) float64 {
 }
 
 func (l Lambert) Eval(in, out geom.Direction) rgb.Energy {
-	normal := geom.Up
-	return l.Color.Scaled(math.Pi * in.Dot(normal))
+	return l.Color
 }
