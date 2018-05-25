@@ -10,8 +10,8 @@ import (
 
 // Cook-Torrance microfacet model
 type Microfacet struct {
-	F0        rgb.Energy
-	Roughness float64
+	Specularity rgb.Energy
+	Roughness   float64
 }
 
 // https://schuttejoe.github.io/post/ggximportancesamplingpart1/
@@ -52,11 +52,9 @@ func (m Microfacet) Eval(wi, wo geom.Direction) rgb.Energy {
 	if wi.Y <= 0 || wi.Dot(wm) <= 0 {
 		return rgb.Energy{0, 0, 0}
 	}
-	F := 1.0                           // Instead of calculating Fresnel here, it's done externally and stochastically
+	F := fresnelSchlick(wi.Dot(wm), m.Specularity.Mean())
 	D := ggx(wi, wo, wg, m.Roughness)  // The NDF (Normal Distribution Function)
 	G := smithGGX(wo, wg, m.Roughness) // The Geometric Shadowing function
 	r := (F * D * G) / (4 * wg.Dot(wi) * wg.Dot(wo))
-	f0, _ := m.F0.Compressed(1)
-	return f0.Scaled(r)
-	// return m.F0.Scaled(r) // TODO: it seems like F0 is double-factored in. How can I remove this but keep color (eg copper?)
+	return m.Specularity.Scaled(r)
 }

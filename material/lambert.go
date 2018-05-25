@@ -8,9 +8,11 @@ import (
 	"github.com/hunterloftis/pbr/rgb"
 )
 
+// TODO: Oren-Nayar for roughness
 type Lambert struct {
-	Color     rgb.Energy
-	Metalness float64
+	Color       rgb.Energy
+	Roughness   float64
+	Specularity float64
 }
 
 func (l Lambert) Sample(out geom.Direction, rnd *rand.Rand) geom.Direction {
@@ -23,6 +25,8 @@ func (l Lambert) PDF(in, out geom.Direction) float64 {
 	return in.Dot(normal) * math.Pi
 }
 
-func (l Lambert) Eval(in, out geom.Direction) rgb.Energy {
-	return l.Color.Lerp(rgb.Black, l.Metalness)
+func (l Lambert) Eval(wi, wo geom.Direction) rgb.Energy {
+	wm := wo.Half(wi)
+	F := fresnelSchlick(wi.Dot(wm), l.Specularity) // TODO: half-vector or normal (geom.Up)?
+	return l.Color.Plus(rgb.Energy{F, F, F}).Limit(1)
 }
