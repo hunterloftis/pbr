@@ -17,9 +17,11 @@ func beers(dist float64, absorb rgb.Energy) rgb.Energy {
 }
 
 // Schlick's approximation of Fresnel
-func fresnelSchlick(in, normal geom.Direction, f0 float64) float64 {
-	x := math.Pow(1-normal.Dot(in), 5)
-	return math.Min(0, math.Max(1, f0+(1-f0)*x))
+// https://en.wikipedia.org/wiki/Schlick%27s_approximation
+// cosTheta is the cosine between the (view or light) ray and the surface normal (or microfacet half-vector)
+func fresnelSchlick(cosTheta, f0 float64) float64 {
+	x := math.Pow(1-cosTheta, 5)
+	return math.Max(0, math.Min(1, f0+(1-f0)*x))
 }
 
 // GGX Normal Distribution Function

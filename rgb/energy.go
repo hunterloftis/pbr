@@ -79,6 +79,10 @@ func (a Energy) Mean() float64 {
 	return (a.X + a.Y + a.Z) / 3
 }
 
+func (a Energy) Max() float64 {
+	return math.Max(a.X, math.Max(a.Y, a.Z))
+}
+
 func (a Energy) Lerp(b Energy, n float64) Energy {
 	return Energy(geom.Vector3(a).Lerp(geom.Vector3(b), n))
 }
