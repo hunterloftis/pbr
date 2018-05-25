@@ -32,7 +32,28 @@ func (s *Sample) Light() rgb.Energy {
 }
 
 func (s *Sample) BSDF(wo geom.Direction, rnd *rand.Rand) BSDF {
-	return Testing{*s, rnd.Float64()}
+	if wo.Enters(geom.Up) {
+		spec := rgb.Energy{s.Specularity, s.Specularity, s.Specularity}
+		F0 := spec.Lerp(s.Color, s.Metalness)
+		reflect := fresnelSchlick(wo.Dot(geom.Up), F0.Mean())
+		switch {
+		case rnd.Float64() < reflect:
+			return Microfacet{F0: F0, Roughness: s.Roughness}
+		case s.Transmission > 0:
+			// TODO: handle Microfacet transmission
+			return Microfacet{F0: F0, Roughness: s.Roughness}
+		default:
+			return Lambert{Color: s.Color, Metalness: s.Metalness}
+		}
+	}
+	// TODO: return/handle exits
+	return Lambert{Color: s.Color, Metalness: s.Metalness}
+
+	// return Testing{
+	// 	sample:   *s,
+	// 	u:        rnd.Float64(),
+	// 	specular: rnd.Float64() < 0.1,
+	// }
 
 	// if s.Specularity == 0 && s.Metalness == 0 {
 	// 	return Lambert{Color: s.Color}

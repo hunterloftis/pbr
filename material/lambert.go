@@ -9,7 +9,8 @@ import (
 )
 
 type Lambert struct {
-	Color rgb.Energy
+	Color     rgb.Energy
+	Metalness float64
 }
 
 func (l Lambert) Sample(out geom.Direction, rnd *rand.Rand) geom.Direction {
@@ -23,5 +24,5 @@ func (l Lambert) PDF(in, out geom.Direction) float64 {
 }
 
 func (l Lambert) Eval(in, out geom.Direction) rgb.Energy {
-	return l.Color
+	return l.Color.Lerp(rgb.Black, l.Metalness)
 }
