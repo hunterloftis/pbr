@@ -26,7 +26,7 @@ func main() {
 	scene.SetAmbient(rgb.Energy{50, 50, 50})
 	fmt.Println("rendering hello.png (3 minutes)...")
 	render.Start()
-	time.Sleep(time.Minute * 10)
+	time.Sleep(time.Minute * 1)
 	render.Stop()
 	render.WritePngs("hello.png", "hello-heat.png", "hello-noise.png", 1)
 }

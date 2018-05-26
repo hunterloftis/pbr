@@ -123,8 +123,8 @@ func (s *Scene) Info() (box *surface.Box, surfaces []surface.Surface) {
 }
 
 // Lights returns all the lights in the scene.
-func (s *Scene) Lights() int {
-	return len(s.lights)
+func (s *Scene) Lights() []surface.Surface {
+	return s.lights
 }
 
 // TODO: figure out how to deal with triangle mesh lights; ignore them? group them into a higher-level Mesh abstraction?

@@ -46,7 +46,7 @@ func (s *sampler) start(buffer *rgb.Framebuffer, in <-chan int, done chan<- samp
 func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	ray := s.camera.ray(float64(x), float64(y), rnd)
 	strength := rgb.Energy{1, 1, 1}
-	// lights := s.scene.Lights()
+	lights := s.scene.Lights()
 
 	for i := 0; i < 9; i++ {
 		if i > 3 {
@@ -71,22 +71,24 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		bsdf := mat.BSDF(rnd)
 
 		coverage := 0.0
-		// for j := 0; j < len(lights); j++ {
-		// 	light := lights[j]
-		// 	direct, solidAngle := light.Box().ShadowRay(point, normal, rnd)
-		// 	if solidAngle <= 0 {
-		// 		continue
-		// 	}
-		// 	coverage += solidAngle
-		// 	hit := s.scene.Intersect(direct)
-		// 	if !hit.Ok {
-		// 		continue
-		// 	}
-		// 	wid := toTangent.MultDir(direct)
-		// 	weightD := solidAngle / math.Pi
-		// 	reflectance := bsdf.Eval(wid, wo).Scaled(weightD * strength)
-		// 	energy = energy.Plus(light.Energy().Scaled(reflectance))
-		// }
+		for j := 0; j < len(lights); j++ {
+			light := lights[j]
+			shadow, solidAngle := light.Box().ShadowRay(point, normal, rnd)
+			if solidAngle <= 0 {
+				continue
+			}
+			coverage += solidAngle
+			hit := s.scene.Intersect(shadow)
+			if !hit.Ok {
+				continue
+			}
+			_, mat := hit.Surface.At(shadow.Moved(hit.Dist))
+			wid := toTangent.MultDir(shadow.Dir)
+			weightD := solidAngle / math.Pi
+			reflectance := bsdf.Eval(wid, wo).Scaled(weightD).Times(strength)
+			lightEnergy := mat.Light().Times(reflectance)
+			energy = energy.Plus(lightEnergy)
+		}
 
 		wi, pdf := bsdf.Sample(wo, rnd)
 		indirect := (1 - coverage)
