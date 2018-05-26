@@ -5,7 +5,7 @@ import "github.com/hunterloftis/pbr/rgb"
 var Default = UniformMaterial(Sample{
 	Color:        rgb.Energy{1, 1, 1},
 	Metalness:    0,
-	Roughness:    1,
+	Roughness:    0.5,
 	Specularity:  0.04,
 	Emission:     0,
 	Transmission: 0,
