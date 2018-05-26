@@ -1,6 +1,7 @@
 package pbr
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -70,14 +71,14 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		wo := toTangent.MultDir(ray.Dir.Inv())
 		bsdf := mat.BSDF(rnd)
 
-		coverage := 0.0
+		direct := 0.0
 		for j := 0; j < len(lights); j++ {
 			light := lights[j]
 			shadow, solidAngle := light.Box().ShadowRay(point, normal, rnd)
 			if solidAngle <= 0 {
 				continue
 			}
-			coverage += solidAngle
+			direct += solidAngle
 			hit := s.scene.Intersect(shadow)
 			if !hit.Ok {
 				continue
@@ -91,11 +92,22 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		}
 
 		wi, pdf := bsdf.Sample(wo, rnd)
-		indirect := (1 - coverage)
+		indirect := (1 - direct)
 		cos := wi.Dot(geom.Up)
 		weight := math.Min(30, indirect*cos/pdf)
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		strength = strength.Times(reflectance)
+
+		if math.IsNaN(energy.X) || math.IsNaN(energy.Y) || math.IsNaN(energy.Z) {
+			fmt.Println("weight:", weight)
+			fmt.Println("direct:", direct)
+			fmt.Println("indirect:", indirect)
+			fmt.Println("reflectance:", reflectance)
+			fmt.Println("strength:", strength)
+			fmt.Println("ray:", ray)
+			fmt.Println("energy:", energy)
+			panic("damn it, NaN")
+		}
 
 		ray = geom.NewRay(point, fromTangent.MultDir(wi))
 	}
