@@ -7,6 +7,9 @@ import (
 	"github.com/hunterloftis/pbr/rgb"
 )
 
+const reflect = 1.0 / 2.0
+const refract = 1 - reflect
+
 type Description interface {
 	At(u, v float64) *Sample
 	Emits() bool
@@ -38,18 +41,21 @@ func (s *Sample) BSDF(rnd *rand.Rand) BSDF {
 			Multiplier: 1,
 		}
 	}
-	if rnd.Float64() < 0.5 {
+	// TODO: dynamic reflect/refract ratio based on material properties
+	if rnd.Float64() < reflect {
 		return Microfacet{
 			Specular:   rgb.Energy{s.Specularity, s.Specularity, s.Specularity},
 			Roughness:  s.Roughness,
-			Multiplier: 2,
+			Multiplier: 1 / reflect,
 		}
 	}
 	if s.Transmission > 0 {
-		return Microfacet{}
+		return Microfacet{
+			Multiplier: 1 / refract,
+		}
 	}
 	return Lambert{
 		Color:      s.Color,
-		Multiplier: 2,
+		Multiplier: 1 / refract,
 	}
 }
