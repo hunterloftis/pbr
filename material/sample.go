@@ -30,7 +30,7 @@ func (s *Sample) Light() rgb.Energy {
 	return s.Color.Scaled(s.Emission)
 }
 
-func (s *Sample) BSDF(wo geom.Direction, rnd *rand.Rand) BSDF {
+func (s *Sample) BSDF(rnd *rand.Rand) BSDF {
 	if s.Transmission > 0 {
 		return Microfacet{}
 	}

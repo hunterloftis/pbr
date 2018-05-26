@@ -26,8 +26,7 @@ func (l Lambert) PDF(wi, wo geom.Direction) float64 {
 }
 
 func (l Lambert) Eval(wi, wo geom.Direction) rgb.Energy {
-	wm := wo.Half(wi)
-	F := fresnelSchlick(wi.Dot(wm), l.Specularity) // TODO: half-vector or normal (geom.Up)?
+	F := fresnelSchlick(wo.Dot(geom.Up), l.Specularity)
 	c := l.Color.Lerp(rgb.Black, l.Metalness)
 	return c.Plus(rgb.Energy{F, F, F}).Limit(1)
 }

@@ -29,6 +29,12 @@ var RedLambert = UniformMaterial(Sample{
 	Specularity: 0,
 })
 
+var RedPlastic = UniformMaterial(Sample{
+	Color:       rgb.Energy{1, 0, 0},
+	Roughness:   0,
+	Specularity: 0.04,
+})
+
 func Halogen(brightness float64) *Uniform {
 	c, _ := rgb.Energy{4781, 4518, 4200}.Compressed(1)
 	return UniformMaterial(Sample{
