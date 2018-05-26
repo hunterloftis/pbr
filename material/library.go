@@ -5,7 +5,7 @@ import "github.com/hunterloftis/pbr/rgb"
 var Default = UniformMaterial(Sample{
 	Color:        rgb.Energy{1, 1, 1},
 	Metalness:    0,
-	Roughness:    0.01,
+	Roughness:    0.1,
 	Specularity:  0.04,
 	Emission:     0,
 	Transmission: 0,
@@ -39,6 +39,12 @@ var TealPlastic = UniformMaterial(Sample{
 	Color:       rgb.Energy{0, 1, 1},
 	Roughness:   0.1,
 	Specularity: 0.04,
+})
+
+var ShinyPlastic = UniformMaterial(Sample{
+	Color:       rgb.Energy{1, 1, 1},
+	Roughness:   0.0001,
+	Specularity: 0.08,
 })
 
 func Halogen(brightness float64) *Uniform {
