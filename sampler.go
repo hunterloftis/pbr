@@ -87,10 +87,10 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		// 	energy = energy.Plus(light.Energy().Scaled(reflectance))
 		// }
 
-		wi := bsdf.Sample(wo, rnd)
+		wi, pdf := bsdf.Sample(wo, rnd)
 		indirect := (1 - coverage)
 		cos := wi.Dot(geom.Up)
-		weight := indirect * cos / bsdf.PDF(wi, wo)
+		weight := indirect * cos / pdf
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		strength = strength.Times(reflectance)
 

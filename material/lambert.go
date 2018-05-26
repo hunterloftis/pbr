@@ -10,23 +10,24 @@ import (
 
 // TODO: Oren-Nayar for roughness
 type Lambert struct {
-	Color       rgb.Energy
-	Roughness   float64
-	Specularity float64
+	Color     rgb.Energy
+	Roughness float64
+	// Specularity float64
+	Metalness float64
 }
 
-func (l Lambert) Sample(out geom.Direction, rnd *rand.Rand) geom.Direction {
-	normal := geom.Up
-	return normal.RandHemiCos(rnd)
+func (l Lambert) Sample(wo geom.Direction, rnd *rand.Rand) (geom.Direction, float64) {
+	wi := geom.Up.RandHemiCos(rnd)
+	return wi, l.PDF(wo, wi)
 }
 
 func (l Lambert) PDF(in, out geom.Direction) float64 {
-	normal := geom.Up
-	return in.Dot(normal) * math.Pi
+	return in.Dot(geom.Up) * math.Pi
 }
 
 func (l Lambert) Eval(wi, wo geom.Direction) rgb.Energy {
-	wm := wo.Half(wi)
-	F := fresnelSchlick(wi.Dot(wm), l.Specularity) // TODO: half-vector or normal (geom.Up)?
-	return l.Color.Plus(rgb.Energy{F, F, F}).Limit(1)
+	// wm := wo.Half(wi)
+	// F := fresnelSchlick(wi.Dot(wm), l.Specularity) // TODO: half-vector or normal (geom.Up)?
+	// return l.Color.Plus(rgb.Energy{F, F, F}).Limit(1)
+	return l.Color.Lerp(rgb.Black, l.Metalness)
 }
