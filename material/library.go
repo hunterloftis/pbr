@@ -17,6 +17,12 @@ var Copper = UniformMaterial(Sample{
 	Roughness: 0.2,
 })
 
+var Mirror = UniformMaterial(Sample{
+	Color:     rgb.Energy{1, 1, 1},
+	Metalness: 1,
+	Roughness: 0.01,
+})
+
 var WhiteLambert = UniformMaterial(Sample{
 	Color:       rgb.Energy{1, 1, 1},
 	Roughness:   1,
