@@ -40,9 +40,9 @@ func (s *Sample) BSDF(rnd *rand.Rand) BSDF {
 			Roughness: s.Roughness,
 		}
 	}
-	if rnd.Float64() < s.Specularity {
+	if rnd.Float64() <= s.Specularity {
 		return Microfacet{
-			Specular:  rgb.Energy{s.Specularity, s.Specularity, s.Specularity},
+			Specular:  rgb.White,
 			Roughness: s.Roughness,
 		}
 	}

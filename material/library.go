@@ -49,8 +49,8 @@ var TealPlastic = UniformMaterial(Sample{
 
 var ShinyPlastic = UniformMaterial(Sample{
 	Color:       rgb.Energy{1, 1, 1},
-	Roughness:   0.0001,
-	Specularity: 0.08,
+	Roughness:   0.01,
+	Specularity: 1,
 })
 
 func Halogen(brightness float64) *Uniform {

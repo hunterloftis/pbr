@@ -11,8 +11,8 @@ import (
 )
 
 func main() {
-	floor := surface.UnitCube(material.Default).Move(0, -1, 0).Scale(100, 1, 100)
-	wall := surface.UnitCube(material.Gold(0.05)).Move(0, 0, -2).Scale(100, 100, 1)
+	floor := surface.UnitCube(material.ShinyPlastic).Move(0, -1, 0).Scale(100, 1, 100)
+	wall := surface.UnitCube(material.Default).Move(0, 0, -2).Scale(100, 100, 1)
 	halogen := material.Halogen(2500)
 	light := surface.UnitSphere(halogen).Move(-15, 30, 15).Scale(30, 30, 30)
 	ball := surface.UnitSphere(material.Default)
@@ -20,7 +20,7 @@ func main() {
 	// wall2 := surface.UnitCube(material.RedPlastic).Move(1.1, 0, 0).Scale(1, 100, 100)
 	box := surface.UnitCube(material.TealPlastic).Move(-1.1, 0, 0)
 	scene := pbr.NewScene(floor, light, ball, wall, ball2, box)
-	cam := pbr.NewCamera(700, 500).MoveTo(0, 1, 5).LookAt(ball.Center(), ball.Center())
+	cam := pbr.NewCamera(700, 500).MoveTo(0, -0.1, 5).LookAt(ball.Center(), ball.Center())
 	render := pbr.NewRender(scene, cam)
 
 	scene.SetAmbient(rgb.Energy{50, 50, 50})
