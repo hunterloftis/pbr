@@ -11,8 +11,8 @@ import (
 )
 
 func main() {
-	floor := surface.UnitCube(material.Default).Move(0, -1, 0).Scale(100, 1, 100)
-	wall := surface.UnitCube(material.Mirror).Move(0, 0, -2).Scale(100, 100, 1)
+	floor := surface.UnitCube(material.Mirror).Move(0, -1, 0).Scale(100, 1, 100)
+	wall := surface.UnitCube(material.Default).Move(0, 0, -2).Scale(100, 100, 1)
 	halogen := material.Halogen(2500)
 	light := surface.UnitSphere(halogen).Move(0, 30, 15).Scale(30, 30, 30)
 	ball := surface.UnitSphere(material.Copper)
