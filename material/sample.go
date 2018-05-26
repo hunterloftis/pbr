@@ -13,8 +13,7 @@ type Description interface {
 }
 
 type BSDF interface {
-	Sample(out geom.Direction, rnd *rand.Rand) (in geom.Direction)
-	PDF(in, out geom.Direction) float64
+	Sample(out geom.Direction, rnd *rand.Rand) (in geom.Direction, pdf float64)
 	Eval(in, out geom.Direction) rgb.Energy
 }
 
@@ -32,19 +31,18 @@ func (s *Sample) Light() rgb.Energy {
 }
 
 func (s *Sample) BSDF(wo geom.Direction, rnd *rand.Rand) BSDF {
-	switch {
-	case s.Transmission > 0:
+	if s.Transmission > 0 {
 		return Microfacet{}
-	case rnd.Float64() <= s.Metalness:
+	}
+	if rnd.Float64() <= s.Metalness {
 		return Microfacet{
 			Specularity: s.Color,
 			Roughness:   s.Roughness,
 		}
-	default:
-		return Lambert{
-			Color:       s.Color,
-			Roughness:   s.Roughness,
-			Specularity: s.Specularity,
-		}
+	}
+	return Lambert{
+		Color:       s.Color,
+		Roughness:   s.Roughness,
+		Specularity: s.Specularity,
 	}
 }
