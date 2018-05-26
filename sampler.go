@@ -50,20 +50,42 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	lights := s.scene.Lights()
 
 	for i := 0; i < 7; i++ {
+		if math.IsNaN(strength.X) || math.IsNaN(strength.Y) || math.IsNaN(strength.Z) {
+			fmt.Println("starting loop with NaN strength:", strength)
+			panic("starting at NaN strength")
+		}
 		if i > 1 {
+			oldStr := strength
 			if strength = strength.RandomGain(rnd); strength.Zero() {
 				break
+			}
+			if math.IsNaN(strength.X) || math.IsNaN(strength.Y) || math.IsNaN(strength.Z) {
+				fmt.Println("strength:", strength)
+				fmt.Println("oldStr:", oldStr)
+				fmt.Println("randomgain:", oldStr.RandomGain(rnd))
+				panic("Russian roulette made strength NaN")
 			}
 		}
 		hit := s.scene.Intersect(ray)
 		if !hit.Ok {
 			energy = energy.Plus(s.scene.EnvAt(ray.Dir).Times(strength))
+			if math.IsNaN(energy.X) || math.IsNaN(energy.Y) || math.IsNaN(energy.Z) {
+				fmt.Println("scene energy:", s.scene.EnvAt(ray.Dir))
+				fmt.Println("strength:", strength)
+				panic("NaN in miss")
+			}
 			break
 		}
 		point := ray.Moved(hit.Dist)
 		normal, mat := hit.Surface.At(point)
 		if mat.Emission > 0 {
 			energy = energy.Plus(mat.Light().Times(strength))
+			if math.IsNaN(energy.X) || math.IsNaN(energy.Y) || math.IsNaN(energy.Z) {
+				fmt.Println("mat:", mat)
+				fmt.Println("mat.Light():", mat.Light())
+				fmt.Println("strength:", strength)
+				panic("NaN in emission > 0")
+			}
 			break
 		}
 
@@ -98,7 +120,7 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		strength = strength.Times(reflectance)
 
-		if math.IsNaN(energy.X) || math.IsNaN(energy.Y) || math.IsNaN(energy.Z) {
+		if math.IsNaN(strength.X) || math.IsNaN(strength.Y) || math.IsNaN(strength.Z) {
 			fmt.Println("weight:", weight)
 			fmt.Println("direct:", direct)
 			fmt.Println("indirect:", indirect)
