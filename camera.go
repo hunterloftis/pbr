@@ -103,10 +103,10 @@ func (c *Camera) ray(x, y float64, rnd *rand.Rand) *geom.Ray3 {
 	px := rx / float64(c.width)
 	py := ry / float64(c.height)
 	sensorPt := c.sensorPoint(px, py)
-	straight := geom.Vector3{}.Minus(sensorPt).Unit()
+	straight, _ := geom.Vector3{}.Minus(sensorPt).Unit()
 	focalPt := geom.Vector3(straight).Scaled(c.focusDist)
 	lensPt := c.aperturePoint(rnd)
-	refracted := focalPt.Minus(lensPt).Unit()
+	refracted, _ := focalPt.Minus(lensPt).Unit()
 	ray := geom.NewRay(lensPt, refracted)
 	return c.trans.MultRay(ray)
 }

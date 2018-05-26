@@ -102,7 +102,8 @@ func (s *Sphere) Intersect(ray *geom.Ray3) Hit {
 func (s *Sphere) At(pt geom.Vector3) (normal geom.Direction, material *material.Sample) {
 	i := s.Pos.Inverse()
 	p := i.MultPoint(pt)
-	return s.Pos.MultDir(p.Unit()), s.Mat.At(0, 0)
+	pu, _ := p.Unit()
+	return s.Pos.MultDir(pu), s.Mat.At(0, 0)
 }
 
 func (s *Sphere) Emits() bool {

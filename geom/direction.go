@@ -11,7 +11,7 @@ type Direction Vector3
 // Up is the positive Direction on the vertical (Y) axis.
 var Up = Direction{0, 1, 0}
 
-func SphericalDirection(theta, phi float64) Direction {
+func SphericalDirection(theta, phi float64) (Direction, bool) {
 	x := math.Sin(theta) * math.Cos(phi)
 	y := math.Cos(theta)
 	z := math.Sin(theta) * math.Sin(phi)
@@ -34,7 +34,8 @@ func (a Direction) Dot(b Direction) float64 {
 }
 
 func (a Direction) Half(b Direction) Direction {
-	return Vector3(a).Plus(Vector3(b)).Unit()
+	dir, _ := Vector3(a).Plus(Vector3(b)).Unit()
+	return dir
 }
 
 // Refracted refracts a vector through the plane represented by a normal, based on the ratio of refraction indices.
@@ -47,19 +48,22 @@ func (a Direction) Refracted(normal Direction, indexA, indexB float64) (bool, Di
 		return false, a
 	}
 	offset := normal.Scaled(ratio*cos + math.Sqrt(k))
-	return true, a.Scaled(ratio).Minus(offset).Unit()
+	dir, _ := a.Scaled(ratio).Minus(offset).Unit()
+	return true, dir
 }
 
 // Reflected reflects the vector about a normal.
 // https://www.bramz.net/data/writings/reflection_transmission.pdf
 func (a Direction) Reflected(normal Direction) Direction {
 	cos := normal.Dot(a)
-	return Vector3(a).Minus(normal.Scaled(2 * cos)).Unit()
+	dir, _ := Vector3(a).Minus(normal.Scaled(2 * cos)).Unit()
+	return dir
 }
 
 // To ensure that both face outward
 func (a Direction) Reflect2(normal Direction) Direction {
-	return normal.Scaled(2).Scaled(a.Dot(normal)).Minus(Vector3(a)).Unit()
+	dir, _ := normal.Scaled(2).Scaled(a.Dot(normal)).Minus(Vector3(a)).Unit()
+	return dir
 }
 
 // Scaled multiplies a Direction by a scalar to produce a Vector3.
@@ -68,14 +72,14 @@ func (a Direction) Scaled(n float64) Vector3 {
 }
 
 // Cross returns the cross product of unit vectors a and b.
-func (a Direction) Cross(b Direction) Direction {
+func (a Direction) Cross(b Direction) (Direction, bool) {
 	return Vector3(a).Cross(Vector3(b)).Unit()
 }
 
 // Cone returns a random vector within a cone about Direction a.
 // size is 0-1, where 0 is the original vector and 1 is anything within the original hemisphere.
 // https://github.com/fogleman/pt/blob/69e74a07b0af72f1601c64120a866d9a5f432e2f/pt/util.go#L24
-func (a Direction) Cone(size float64, rnd *rand.Rand) Direction {
+func (a Direction) Cone(size float64, rnd *rand.Rand) (Direction, bool) {
 	u := rnd.Float64()
 	v := rnd.Float64()
 	theta := size * 0.5 * math.Pi * (1 - (2 * math.Acos(u) / math.Pi))
@@ -83,8 +87,8 @@ func (a Direction) Cone(size float64, rnd *rand.Rand) Direction {
 	m2 := math.Cos(theta)
 	a2 := v * 2 * math.Pi
 	q := RandDirection(rnd)
-	s := a.Cross(q)
-	t := a.Cross(s)
+	s, _ := a.Cross(q)
+	t, _ := a.Cross(s)
 	d := Vector3{}
 	d = d.Plus(s.Scaled(m1 * math.Cos(a2)))
 	d = d.Plus(t.Scaled(m1 * math.Sin(a2)))
@@ -107,13 +111,13 @@ func AngleDirection(theta, phi float64) Direction {
 // It distributes these random vectors with a cosine weight.
 // https://github.com/fogleman/pt/blob/69e74a07b0af72f1601c64120a866d9a5f432e2f/pt/ray.go#L28
 // NOTE: Added .Unit() because this doesn't always return a unit vector otherwise
-func (a Direction) RandHemiCos(rnd *rand.Rand) Direction {
+func (a Direction) RandHemiCos(rnd *rand.Rand) (Direction, bool) {
 	u := rnd.Float64()
 	v := rnd.Float64()
 	r := math.Sqrt(u)
 	theta := 2 * math.Pi * v
-	s := a.Cross(RandDirection(rnd))
-	t := a.Cross(s)
+	s, _ := a.Cross(RandDirection(rnd))
+	t, _ := a.Cross(s)
 	d := Vector3{}
 	d = d.Plus(s.Scaled(r * math.Cos(theta)))
 	d = d.Plus(t.Scaled(r * math.Sin(theta)))
@@ -131,7 +135,7 @@ func (a Direction) RandHemi(rnd *rand.Rand) Direction {
 	x := math.Sin(phi) * math.Cos(theta)
 	y := math.Sin(phi) * math.Sin(theta)
 	z := math.Cos(phi)
-	dir := Vector3{x, y, z}.Unit()
+	dir, _ := Vector3{x, y, z}.Unit()
 	if a.Dot(dir) < 0 {
 		return dir.Inv()
 	}
@@ -143,5 +147,6 @@ func ParseDirection(s string) (d Direction, err error) {
 	if err != nil {
 		return d, err
 	}
-	return v.Unit(), nil
+	dir, _ := v.Unit()
+	return dir, nil
 }

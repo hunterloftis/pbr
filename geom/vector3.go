@@ -134,9 +134,9 @@ func (a Vector3) Projected(d Direction) Vector3 {
 }
 
 // Unit normalizes a Vector3 into a Direction.
-func (a Vector3) Unit() Direction {
+func (a Vector3) Unit() (Direction, bool) {
 	d := a.Len()
-	return Direction{a.X / d, a.Y / d, a.Z / d}
+	return Direction{a.X / d, a.Y / d, a.Z / d}, d > 0
 }
 
 // Set sets the vector from a string value

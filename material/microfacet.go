@@ -24,7 +24,7 @@ func (m Microfacet) Sample(wo geom.Direction, rnd *rand.Rand) (geom.Direction, f
 	a2 := a * a
 	theta := math.Acos(math.Sqrt((1 - r0) / ((a2-1)*r0 + 1)))
 	phi := 2 * math.Pi * r1
-	wm := geom.SphericalDirection(theta, phi)
+	wm, _ := geom.SphericalDirection(theta, phi)
 	wi := wo.Reflect2(wm)
 	return wi, m.PDF(wi, wo)
 }

@@ -21,7 +21,7 @@ type Triangle struct {
 func NewTriangle(a, b, c geom.Vector3, m material.Description) *Triangle {
 	edge1 := b.Minus(a)
 	edge2 := c.Minus(a)
-	n := edge1.Cross(edge2).Unit()
+	n, _ := edge1.Cross(edge2).Unit()
 	t := &Triangle{
 		Points:  [3]geom.Vector3{a, b, c},
 		Normals: [3]geom.Direction{n, n, n},
@@ -45,7 +45,7 @@ func (t *Triangle) Intersect(ray *geom.Ray3) Hit {
 	if ok, _, _ := t.box.Check(ray); !ok {
 		return Miss
 	}
-	h := ray.Dir.Cross(geom.Direction(t.edge2))
+	h, _ := ray.Dir.Cross(geom.Direction(t.edge2))
 	a := t.edge1.Dot(geom.Vector3(h))
 	if a > -bias && a < bias {
 		return Miss
@@ -109,7 +109,8 @@ func (t *Triangle) normal(u, v, w float64) geom.Direction { // TODO: instead of 
 	n0 := t.Normals[0].Scaled(u)
 	n1 := t.Normals[1].Scaled(v)
 	n2 := t.Normals[2].Scaled(w)
-	return n0.Plus(n1).Plus(n2).Unit()
+	n, _ := n0.Plus(n1).Plus(n2).Unit()
+	return n
 }
 
 func (t *Triangle) texture(u, v, w float64) geom.Vector3 {

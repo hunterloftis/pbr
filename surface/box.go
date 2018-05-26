@@ -96,12 +96,13 @@ func (b *Box) Contains(p geom.Vector3) bool {
 // and returns a Ray3 from the origin to the random point.
 // https://marine.rutgers.edu/dmcs/ms552/2009/solidangle.pdf
 func (b *Box) ShadowRay(origin geom.Vector3, normal geom.Direction, rnd *rand.Rand) (*geom.Ray3, float64) {
-	forward := origin.Minus(b.Center).Unit()
+	forward, _ := origin.Minus(b.Center).Unit()
 	x, y := geom.RandPointInCircle(b.Radius, rnd) // TODO: push center back along "forward" axis, away from origin
-	right := forward.Cross(geom.Up)
-	up := right.Cross(forward)
+	right, _ := forward.Cross(geom.Up)
+	up, _ := right.Cross(forward)
 	point := b.Center.Plus(right.Scaled(x)).Plus(up.Scaled(y))
-	ray := geom.NewRay(origin, point.Minus(origin).Unit()) // TODO: this should be a convenience method
+	diff, _ := point.Minus(origin).Unit()
+	ray := geom.NewRay(origin, diff) // TODO: this should be a convenience method
 	dist := b.Center.Minus(origin).Len()
 	cos := ray.Dir.Dot(normal)
 	solidAngle := cos * (b.Radius * b.Radius) / (2 * dist * dist) // cosine-weighted ratio of disc surface area to hemisphere surface area

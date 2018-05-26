@@ -1,6 +1,8 @@
 package geom
 
-import "math"
+import (
+	"math"
+)
 
 var yAxis = Direction{0, 1, 0}
 
@@ -42,9 +44,9 @@ func Identity() *Matrix4 {
 // http://www.codinglabs.net/article_world_view_projection_matrix.aspx
 // https://fgiesen.wordpress.com/2012/02/12/row-major-vs-column-major-row-vectors-vs-column-vectors/
 func LookMatrix(o Vector3, to Vector3) *Matrix4 {
-	f := o.Minus(to).Unit() // forward
-	r := yAxis.Cross(f)     // right
-	u := f.Cross(r)         // up
+	f, _ := o.Minus(to).Unit() // forward
+	r, _ := yAxis.Cross(f)     // right
+	u, _ := f.Cross(r)         // up
 	orient := NewMatrix4(
 		r.X, u.X, f.X, 0,
 		r.Y, u.Y, f.Y, 0,
@@ -81,7 +83,7 @@ func Rot(v Vector3) *Matrix4 {
 	c := math.Cos(a)
 	s := math.Sin(a)
 	t := 1 - c
-	n := v.Unit()
+	n, _ := v.Unit()
 	x, y, z := n.X, n.Y, n.Z
 	return NewMatrix4(
 		t*x*x+c, t*x*y-z*s, t*x*z+y*s, 0,
@@ -136,7 +138,8 @@ func (a *Matrix4) MultDist(v Vector3) (result Vector3) {
 
 // MultDir multiplies this matrix4 by a direction, renormalizing the result
 func (a *Matrix4) MultDir(v Direction) (result Direction) {
-	return a.MultDist(Vector3(v)).Unit()
+	dir, _ := a.MultDist(Vector3(v)).Unit()
+	return dir
 }
 
 // MultRay multiplies this matrix by a ray
