@@ -27,6 +27,7 @@ func (l Lambert) PDF(wi, wo geom.Direction) float64 {
 
 func (l Lambert) Eval(wi, wo geom.Direction) rgb.Energy {
 	F := fresnelSchlick(wo.Dot(geom.Up), l.Specularity)
+	specular := rgb.Energy{F, F, F}
 	c := l.Color.Lerp(rgb.Black, l.Metalness)
-	return c.Plus(rgb.Energy{F, F, F}).Limit(1)
+	return c.Plus(specular).Limit(1)
 }

@@ -15,8 +15,9 @@ func main() {
 	halogen := material.Halogen(2500)
 	light := surface.UnitSphere(halogen).Move(0, 30, 15).Scale(30, 30, 30)
 	ball := surface.UnitSphere(material.Copper)
-	ball2 := surface.UnitSphere(material.RedPlastic).Move(1, 0, 0)
-	scene := pbr.NewScene(floor, light, ball, wall, ball2)
+	ball2 := surface.UnitSphere(material.RedPlastic).Move(1.05, 0, 0)
+	box := surface.UnitCube(material.TealPlastic).Move(-1.1, 0, 0)
+	scene := pbr.NewScene(floor, light, ball, wall, ball2, box)
 	cam := pbr.NewCamera(700, 500).MoveTo(0, 0.5, 5).LookAt(ball.Center(), ball.Center())
 	render := pbr.NewRender(scene, cam)
 

@@ -42,6 +42,7 @@ func (s *sampler) start(buffer *rgb.Framebuffer, in <-chan int, done chan<- samp
 	}()
 }
 
+// clamping weight: https://www.solidangle.com/research/physically_based_shader_design_in_arnold.pdf
 func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 	ray := s.camera.ray(float64(x), float64(y), rnd)
 	strength := rgb.Energy{1, 1, 1}
@@ -90,7 +91,7 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		wi, pdf := bsdf.Sample(wo, rnd)
 		indirect := (1 - coverage)
 		cos := wi.Dot(geom.Up)
-		weight := indirect * cos / pdf
+		weight := math.Min(10, indirect*cos/pdf)
 		reflectance := bsdf.Eval(wi, wo).Scaled(weight)
 		strength = strength.Times(reflectance)
 
