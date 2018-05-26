@@ -36,7 +36,7 @@ var RedLambert = UniformMaterial(Sample{
 })
 
 var RedPlastic = UniformMaterial(Sample{
-	Color:       rgb.Energy{1, 0.1, 0},
+	Color:       rgb.Energy{1, 0, 0},
 	Roughness:   0.1,
 	Specularity: 0.04,
 })
@@ -58,5 +58,13 @@ func Halogen(brightness float64) *Uniform {
 	return UniformMaterial(Sample{
 		Color:    c,
 		Emission: brightness,
+	})
+}
+
+func Gold(roughness float64) *Uniform {
+	return UniformMaterial(Sample{
+		Color:     rgb.Energy{1.022, 0.782, 0.344},
+		Metalness: 1,
+		Roughness: roughness,
 	})
 }
