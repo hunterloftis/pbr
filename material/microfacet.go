@@ -10,8 +10,9 @@ import (
 
 // Cook-Torrance microfacet model
 type Microfacet struct {
-	Specular  rgb.Energy
-	Roughness float64
+	Specular   rgb.Energy
+	Roughness  float64
+	Multiplier float64
 }
 
 // https://schuttejoe.github.io/post/ggximportancesamplingpart1/
@@ -57,5 +58,5 @@ func (m Microfacet) Eval(wi, wo geom.Direction) rgb.Energy {
 	D := ggx(wi, wo, wg, m.Roughness)  // The NDF (Normal Distribution Function)
 	G := smithGGX(wo, wg, m.Roughness) // The Geometric Shadowing function
 	r := (D * G) / (4 * wg.Dot(wi) * wg.Dot(wo))
-	return F.Scaled(r)
+	return F.Scaled(r * m.Multiplier)
 }

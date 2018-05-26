@@ -13,6 +13,7 @@ type Lambert struct {
 	Color       rgb.Energy
 	Roughness   float64
 	Specularity float64
+	Multiplier  float64
 }
 
 func (l Lambert) Sample(wo geom.Direction, rnd *rand.Rand) (geom.Direction, float64) {
@@ -32,5 +33,5 @@ func (l Lambert) Eval(wi, wo geom.Direction) rgb.Energy {
 	// specular := rgb.Energy{F, F, F}
 	// return l.Color.Plus(specular).Limit(1)
 
-	return l.Color
+	return l.Color.Scaled(l.Multiplier)
 }

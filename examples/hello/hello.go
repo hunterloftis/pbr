@@ -15,7 +15,7 @@ func main() {
 	wall := surface.UnitCube(material.Default).Move(0, 0, -2).Scale(100, 100, 1)
 	halogen := material.Halogen(2500)
 	light := surface.UnitSphere(halogen).Move(-15, 30, 15).Scale(30, 30, 30)
-	ball := surface.UnitSphere(material.Default)
+	ball := surface.UnitSphere(material.Gold(0.1))
 	ball2 := surface.UnitSphere(material.RedPlastic).Move(1.05, 0, 0)
 	// wall2 := surface.UnitCube(material.RedPlastic).Move(1.1, 0, 0).Scale(1, 100, 100)
 	box := surface.UnitCube(material.TealPlastic).Move(-1.1, 0, 0)
