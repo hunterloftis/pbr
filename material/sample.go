@@ -31,9 +31,6 @@ func (s *Sample) Light() rgb.Energy {
 }
 
 func (s *Sample) BSDF(rnd *rand.Rand) BSDF {
-	if s.Transmission > 0 {
-		return Microfacet{}
-	}
 	if rnd.Float64() <= s.Metalness {
 		return Microfacet{
 			Specular:   s.Color,
@@ -48,10 +45,11 @@ func (s *Sample) BSDF(rnd *rand.Rand) BSDF {
 			Multiplier: 2,
 		}
 	}
+	if s.Transmission > 0 {
+		return Microfacet{}
+	}
 	return Lambert{
-		Color:       s.Color,
-		Roughness:   s.Roughness,
-		Specularity: s.Specularity,
-		Multiplier:  2,
+		Color:      s.Color,
+		Multiplier: 2,
 	}
 }
