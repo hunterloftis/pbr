@@ -121,13 +121,15 @@ func (s *sampler) trace(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
 		strength = strength.Times(reflectance)
 
 		if math.IsNaN(strength.X) || math.IsNaN(strength.Y) || math.IsNaN(strength.Z) {
+			fmt.Println("wi, pdf:", wi, pdf)
 			fmt.Println("weight:", weight)
-			fmt.Println("direct:", direct)
-			fmt.Println("indirect:", indirect)
-			fmt.Println("reflectance:", reflectance)
-			fmt.Println("strength:", strength)
-			fmt.Println("ray:", ray)
-			fmt.Println("energy:", energy)
+
+			// fmt.Println("direct:", direct)
+			// fmt.Println("indirect:", indirect)
+			// fmt.Println("reflectance:", reflectance)
+			// fmt.Println("strength:", strength)
+			// fmt.Println("ray:", ray)
+			// fmt.Println("energy:", energy)
 			panic("damn it, NaN")
 		}
 
