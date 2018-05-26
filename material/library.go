@@ -5,7 +5,7 @@ import "github.com/hunterloftis/pbr/rgb"
 var Default = UniformMaterial(Sample{
 	Color:        rgb.Energy{1, 1, 1},
 	Metalness:    0,
-	Roughness:    0.5,
+	Roughness:    0.01,
 	Specularity:  0.04,
 	Emission:     0,
 	Transmission: 0,
@@ -31,19 +31,13 @@ var RedLambert = UniformMaterial(Sample{
 
 var RedPlastic = UniformMaterial(Sample{
 	Color:       rgb.Energy{1, 0.1, 0},
-	Roughness:   0,
+	Roughness:   0.1,
 	Specularity: 0.04,
 })
 
 var TealPlastic = UniformMaterial(Sample{
 	Color:       rgb.Energy{0, 1, 1},
-	Roughness:   0,
-	Specularity: 0.04,
-})
-
-var ShinyPurple = UniformMaterial(Sample{
-	Color:       rgb.Energy{1, 0.5, 1},
-	Roughness:   0,
+	Roughness:   0.1,
 	Specularity: 0.04,
 })
 

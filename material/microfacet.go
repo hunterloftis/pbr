@@ -10,8 +10,8 @@ import (
 
 // Cook-Torrance microfacet model
 type Microfacet struct {
-	Specularity rgb.Energy
-	Roughness   float64
+	Specular  rgb.Energy
+	Roughness float64
 }
 
 // https://schuttejoe.github.io/post/ggximportancesamplingpart1/
@@ -19,9 +19,6 @@ type Microfacet struct {
 func (m Microfacet) Sample(wo geom.Direction, rnd *rand.Rand) (geom.Direction, float64) {
 	r0 := rnd.Float64()
 	r1 := rnd.Float64()
-	if m.Roughness == 0 {
-		panic("Need to fix this, 0 isn't allowed")
-	}
 	a := m.Roughness
 	a2 := a * a
 	theta := math.Acos(math.Sqrt((1 - r0) / ((a2-1)*r0 + 1)))
@@ -52,9 +49,13 @@ func (m Microfacet) Eval(wi, wo geom.Direction) rgb.Energy {
 	if wi.Y <= 0 || wi.Dot(wm) <= 0 {
 		return rgb.Energy{0, 0, 0}
 	}
-	F := fresnelSchlick(wi.Dot(wm), m.Specularity.Mean())
+	F := rgb.Energy{
+		X: fresnelSchlick(wi.Dot(wm), m.Specular.X),
+		Y: fresnelSchlick(wi.Dot(wm), m.Specular.Y),
+		Z: fresnelSchlick(wi.Dot(wm), m.Specular.Z),
+	}
 	D := ggx(wi, wo, wg, m.Roughness)  // The NDF (Normal Distribution Function)
 	G := smithGGX(wo, wg, m.Roughness) // The Geometric Shadowing function
-	r := (F * D * G) / (4 * wg.Dot(wi) * wg.Dot(wo))
-	return m.Specularity.Scaled(r)
+	r := (D * G) / (4 * wg.Dot(wi) * wg.Dot(wo))
+	return F.Scaled(r)
 }
