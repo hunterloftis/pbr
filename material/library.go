@@ -30,13 +30,19 @@ var RedLambert = UniformMaterial(Sample{
 })
 
 var RedPlastic = UniformMaterial(Sample{
-	Color:       rgb.Energy{1, 0.2, 0},
+	Color:       rgb.Energy{1, 0.1, 0},
 	Roughness:   0,
 	Specularity: 0.04,
 })
 
 var TealPlastic = UniformMaterial(Sample{
 	Color:       rgb.Energy{0, 1, 1},
+	Roughness:   0,
+	Specularity: 0.04,
+})
+
+var ShinyPurple = UniformMaterial(Sample{
+	Color:       rgb.Energy{1, 0.5, 1},
 	Roughness:   0,
 	Specularity: 0.04,
 })
