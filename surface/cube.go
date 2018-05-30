@@ -123,7 +123,16 @@ func (c *Cube) At(pt geom.Vector3) (normal geom.Direction, material *material.Sa
 	default:
 		normal = geom.Direction{0, 0, math.Copysign(1, p1.Z)}
 	}
-	return c.Pos.MultDir(normal), c.Mat.At(0, 0)
+	mat := c.Mat
+	if c.GridMat != nil && c.GridSize > 0 {
+		x, z := pt.X/c.GridSize, pt.Z/c.GridSize
+		if dx := math.Abs(x - math.Floor(x)); dx < 0.08 { // TODO: this should not be a magic number
+			mat = c.GridMat
+		} else if dz := math.Abs(z - math.Floor(z)); dz < 0.08 {
+			mat = c.GridMat
+		}
+	}
+	return c.Pos.MultDir(normal), mat.At(0, 0)
 }
 
 func (c *Cube) Box() *Box {
