@@ -53,7 +53,7 @@ lambo:
 
 profile:
 	go build ./cmd/pbr
-	./pbr fixtures/models/lambo3/lambo.obj -heat lambo-heat.png -lon 4 -lat 0.1 -env fixtures/images/river.hdr -rad 2500 -lens 50 -fstop 1.4 -target=-0.2,0.5,0.4 -dist 6.6 -focus=-1,0.67,-0.56 -direct 0 -width 1920 -height 1080 -complete 1 -profile
+	./pbr fixtures/models/lambo3/lambo.obj -heat lambo-heat.png -lon 4 -lat 0.1 -env fixtures/images/river.hdr -rad 2500 -lens 50 -fstop 1.4 -target=-0.2,0.5,0.4 -dist 6.6 -focus=-1,0.67,-0.56 -direct 0 -width 128 -height 128 -complete 1 -profile
 	go tool pprof --pdf ./pbr ./cpu.pprof > cpu.pdf
 	open cpu.pdf
 
