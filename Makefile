@@ -68,4 +68,4 @@ ibl:
 
 gopher:
 	go build ./cmd/pbr
-	./pbr fixtures/models/gopher/gopher.obj -floor -env fixtures/images/river.hdr -rad 600 -width 1280 -height 720 -adapt 8 -dist 15 -focus='1,3,0' -verbose -fstop 0.5
+	./pbr fixtures/models/gopher/gopher.obj -floor -env fixtures/images/river.hdr -rad 600 -width 1280 -height 720 -adapt 8 -dist 15 -focus='1,3,0' -fstop 0.5
