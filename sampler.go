@@ -14,7 +14,7 @@ type sampler struct {
 	bounces int
 	direct  int
 	branch  int
-	camera  *Camera
+	sensor  Sensor
 	scene   *Scene
 }
 
@@ -24,7 +24,7 @@ type sample struct {
 }
 
 func (s *sampler) start(buffer *rgb.Framebuffer, in <-chan int, done chan<- sample) {
-	width := uint(s.camera.Width())
+	width := uint(s.sensor.Width())
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 	go func() {
 		for y := range in {
@@ -45,7 +45,7 @@ func (s *sampler) start(buffer *rgb.Framebuffer, in <-chan int, done chan<- samp
 // TODO: sample Specular reflections from direct light sources and weight results by their BSDF towards the light
 // Or, better, sample lights directly in general and pass that through a unified BSDF
 func (s *sampler) tracePrimary(x, y int, rnd *rand.Rand) (energy rgb.Energy) {
-	ray := s.camera.ray(float64(x), float64(y), rnd)
+	ray := s.sensor.Ray(float64(x), float64(y), rnd)
 	hit := s.scene.Intersect(ray)
 	if !hit.Ok {
 		return s.scene.EnvAt(ray.Dir)

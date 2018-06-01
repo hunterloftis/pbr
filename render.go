@@ -20,18 +20,18 @@ type Render struct {
 	buffer  *rgb.Framebuffer
 }
 
-// NewRender constructs a new Render from a Camera into a Scene.
-func NewRender(s *Scene, c *Camera) *Render {
+// NewRender constructs a new Render from a Sensor into a Scene.
+func NewRender(scene *Scene, sensor Sensor) *Render {
 	return &Render{
 		sampler: sampler{
 			adapt:   32,
 			bounces: 8,
 			branch:  32,
 			direct:  8,
-			camera:  c,
-			scene:   s,
+			sensor:  sensor,
+			scene:   scene,
 		},
-		buffer: rgb.NewBuffer(uint(c.Width()), uint(c.Height())),
+		buffer: rgb.NewBuffer(uint(sensor.Width()), uint(sensor.Height())),
 	}
 }
 
@@ -70,7 +70,7 @@ func (r *Render) Count() uint {
 
 // Size returns the total number of pixels in this Render.
 func (r *Render) Size() uint {
-	return uint(r.camera.Width() * r.camera.Height())
+	return uint(r.sensor.Width() * r.sensor.Height())
 }
 
 // Buffer returns a reference to the Framebuffer storing all of the light energy (rgb) data for this Render.
@@ -88,7 +88,7 @@ func (r *Render) Image(expose float64) image.Image {
 func (r *Render) Start(observers ...func(n, size int)) {
 	r.active = true
 	r.scene.prepare()
-	locks := make([]bool, r.camera.Height())
+	locks := make([]bool, r.sensor.Height())
 	size := len(locks)
 	n := min(runtime.NumCPU(), size)
 	rows := make(chan int, n*4)
