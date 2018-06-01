@@ -97,7 +97,7 @@ func (c *Camera) transform() {
 	c.focusDist = c.focus.Minus(c.position).Len()
 }
 
-func (c *Camera) ray(x, y float64, rnd *rand.Rand) *geom.Ray3 {
+func (c *Camera) Ray(x, y float64, rnd *rand.Rand) *geom.Ray3 {
 	rx := x + rnd.Float64()
 	ry := y + rnd.Float64()
 	px := rx / float64(c.width)
