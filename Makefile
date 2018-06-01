@@ -65,3 +65,7 @@ ibl:
 	./pbr fixtures/models/mario/mario-sculpture.obj -o mario-lobe.png -lon 1 -lat 0.1 -floor -env fixtures/images/lobe.hdr -rad 400 -width 888 -height 500 -complete 60
 	./pbr fixtures/models/mario/mario-sculpture.obj -o mario-ambient.png -lon 1 -lat 0.1 -floor -width 888 -height 500 -complete 50
 	open mario-249.png mario-beach.png mario-misty.png mario-lobe.png mario-ambient.png
+
+gopher:
+	go build ./cmd/pbr
+	./pbr fixtures/models/gopher/gopher.obj -floor -env fixtures/images/river.hdr -rad 600 -width 1280 -height 720 -adapt 8 -dist 15 -focus='1,3,0' -verbose -fstop 0.5
