@@ -51,8 +51,9 @@ func run(o *Options) error {
 	if o.Floor {
 		floor := surface.UnitCube(material.Plastic(0, 0, 0, 1))
 		dims := box.Max.Minus(box.Min).Scaled(1.1)
+		max := math.Max(dims.X, dims.Z)
 		floor.Move(box.Center.X, box.Min.Y-50, box.Center.Z)
-		floor.Scale(dims.X, 100, dims.Z)
+		floor.Scale(max, 100, max)
 		scene.Add(floor)
 	}
 
