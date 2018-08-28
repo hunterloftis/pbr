@@ -11,7 +11,7 @@
   branch = "master"
   name = "github.com/alexflint/go-arg"
   packages = ["."]
-  revision = "59fccacb2679dde66e0b20ed65bd26178fcbf54e"
+  revision = "f7c0423bd11ee80ab81d25c6d46f492998af8547"
 
 [[projects]]
   branch = "master"
@@ -19,9 +19,40 @@
   packages = ["."]
   revision = "e80c3b7ed292b052c7083b6fd7154a8422c33f65"
 
+[[projects]]
+  branch = "master"
+  name = "github.com/ftrvxmtrx/tga"
+  packages = ["."]
+  revision = "bd8e8d5be13a2bda61c29a47ca41ecc8f20ee731"
+
+[[projects]]
+  name = "github.com/gorilla/handlers"
+  packages = ["."]
+  revision = "7e0847f9db758cdebd26c149d0ae9d5d0b9c98ce"
+  version = "v1.4.0"
+
+[[projects]]
+  name = "golang.org/x/text"
+  packages = [
+    "feature/plural",
+    "internal",
+    "internal/catmsg",
+    "internal/format",
+    "internal/gen",
+    "internal/number",
+    "internal/stringset",
+    "internal/tag",
+    "language",
+    "message",
+    "message/catalog",
+    "unicode/cldr"
+  ]
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5a5168774d09652146566c376ef521bcdec5750224e367faf008150daa1f206d"
+  inputs-digest = "9f61f9711890beccd94eaa1bbf4f96c8a9e316d5e54688e89437b2d44aaeb048"
   solver-name = "gps-cdcl"
   solver-version = 1

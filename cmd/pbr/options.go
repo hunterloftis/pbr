@@ -5,65 +5,68 @@ import (
 	"path/filepath"
 
 	arg "github.com/alexflint/go-arg"
-	"github.com/hunterloftis/pbr/geom"
-	"github.com/hunterloftis/pbr/rgb"
+	"github.com/hunterloftis/pbr2/pkg/geom"
+	"github.com/hunterloftis/pbr2/pkg/rgb"
 )
 
 // Options configures rendering behavior.
 // TODO: add "watermark"
-// TODO: --filter (per pixel samples after which to apply smoothing filters; 0 = off)
-// TODO: change polar/latitude to lat/lon
 type Options struct {
 	Scene    string  `arg:"positional,required" help:"input scene .obj"`
-	Verbose  bool    `help:"verbose output with scene information"`
-	Info     bool    `arg:"-i" help:"output scene information and exit"`
-	Complete float64 `arg:"-c" help:"number of samples-per-pixel at which to exit"`
+	Verbose  bool    `arg:"-v" help:"verbose output with scene information"`
+	Info     bool    `help:"output scene information and exit"`
+	Frames   float64 `arg:"-f" help:"number of frames at which to exit"`
 	Time     float64 `arg:"-t" help:"time to run before exiting (seconds)"`
+	Material string  `help:"override material (glass, gold, mirror, plastic)"`
+
+	Width  int       `arg:"-w" help:"rendering width in pixels"`
+	Height int       `arg:"-h" help:"rendering height in pixels"`
+	Scale  *geom.Vec `help:"scale the scene by this amount"`
+	Rotate *geom.Vec `help:"rotate the scene by this vector"`
+	Mark   bool      `help:"render a watermark"`
 
 	Out     string `arg:"-o" help:"output render .png"`
 	Heat    string `help:"output heatmap as .png"`
-	Noise   string `help:"output noisemap as .png"`
 	Profile bool   `help:"record performance into profile.pprof"`
 
-	Width  int `help:"rendering width in pixels"`
-	Height int `help:"rendering height in pixels"`
+	From  *geom.Vec `help:"camera location"`
+	To    *geom.Vec `help:"camera look point"`
+	Focus float64   `help:"camera focus ratio"`
 
-	Target *geom.Vector3 `help:"camera target point"`
-	Focus  *geom.Vector3 `help:"camera focus point (if other than 'target')"`
-	Dist   float64       `help:"camera distance from target"`
-	Lat    float64       `help:"camera polar angle on target"`
-	Lon    float64       `help:"camera longitudinal angle on target"`
+	Lens     float64 `help:"camera focal length in mm"`
+	FStop    float64 `help:"camera f-stop"`
+	Expose   float64 `help:"exposure multiplier"`
+	Bounce   int     `arg:"-b" help:"number of indirect light bounces"`
+	Indirect bool    `help:"indirect lighting only (no direct shadow rays)"`
 
-	Lens   float64 `help:"camera focal length in mm"`
-	FStop  float64 `help:"camera f-stop"`
-	Expose float64 `help:"exposure multiplier"`
-
-	Ambient *rgb.Energy `help:"the ambient light color"`
-	Env     string      `arg:"-e" help:"environment as a panoramic hdr radiosity map (.hdr file)"`
-	Rad     float64     `help:"exposure of the hdr (radiosity) environment map"`
-	Floor   bool        `help:"create a floor underneath the scene"`
-	Adapt   float64     `help:"adaptive sampling multiplier"`
-	Bounce  int         `arg:"-d" help:"number of light bounces (depth)"`
-	Direct  int         `arg:"-d" help:"maximum number of direct rays to cast"`
-	Branch  int         `arg:"-b" help:"maximum number of branches on first hit"`
-	Thin    bool        `help:"treat transparent surfaces as having zero thickness"`
+	Ambient    *rgb.Energy `help:"the ambient light color"`
+	Env        string      `arg:"-e" help:"environment as a panoramic hdr radiosity map (.hdr file)"`
+	Rad        float64     `help:"exposure of the hdr (radiosity) environment map"`
+	Floor      float64     `help:"size of the floor relative to the scene mesh"`
+	FloorColor *rgb.Energy `help:"the color of the floor"`
+	FloorRough float64     `help:"roughness of the floor"`
+	Sun        *geom.Vec   `help:"position of a daylight emitter"`
+	SunSize    float64     `help:"size of the sun"`
 }
 
 func options() *Options {
 	c := &Options{
-		Width:    800,
-		Height:   450,
-		Ambient:  &rgb.Energy{600, 600, 600},
-		Rad:      100,
-		Adapt:    32,
-		Bounce:   8,
-		Direct:   1,
-		Branch:   32,
-		Complete: math.Inf(1),
-		Time:     math.Inf(1),
-		Lens:     50,
-		FStop:    4,
-		Expose:   1,
+		Width:      800,
+		Height:     450,
+		Ambient:    &rgb.Energy{1000, 1000, 1000},
+		Rad:        100,
+		Bounce:     6,
+		Indirect:   false,
+		Frames:     math.Inf(1),
+		Time:       math.Inf(1),
+		Lens:       50,
+		FStop:      4,
+		Focus:      1,
+		Expose:     1,
+		Floor:      0,
+		FloorColor: &rgb.Energy{0.9, 0.9, 0.9},
+		FloorRough: 0.5,
+		SunSize:    1,
 	}
 	arg.MustParse(c)
 	if c.Out == "" && !c.Info {
@@ -72,6 +75,17 @@ func options() *Options {
 		c.Out = name[0:len(name)-len(ext)] + ".png"
 	}
 	return c
+}
+
+func (o *Options) SetDefaults(b *geom.Bounds) {
+	if o.From == nil {
+		off := b.Max.Minus(b.Min).By(geom.Vec{2, 1, 2})
+		f := b.Max.Plus(off)
+		o.From = &f
+	}
+	if o.To == nil {
+		o.To = &b.Center
+	}
 }
 
 func (o *Options) Version() string {

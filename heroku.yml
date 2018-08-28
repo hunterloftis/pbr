@@ -1,0 +1,8 @@
+build: 
+  languages: 
+    - go
+  post:
+    - "make toys-fixtures"
+run: 
+  web: bin/toys
+  worker: bin/toys
