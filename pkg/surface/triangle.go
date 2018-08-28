@@ -3,9 +3,9 @@ package surface
 import (
 	"math/rand"
 
-	"github.com/hunterloftis/pbr2/pkg/geom"
-	"github.com/hunterloftis/pbr2/pkg/render"
-	"github.com/hunterloftis/pbr2/pkg/rgb"
+	"github.com/hunterloftis/pbr/pkg/geom"
+	"github.com/hunterloftis/pbr/pkg/render"
+	"github.com/hunterloftis/pbr/pkg/rgb"
 )
 
 // Triangle describes a triangle

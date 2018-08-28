@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hunterloftis/pbr2/pkg/render"
+	"github.com/hunterloftis/pbr/pkg/render"
 )
 
 func Render(scene *render.Scene, url string, w, h, depth int, direct bool) error {

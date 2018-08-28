@@ -1,8 +1,8 @@
 package surface
 
 import (
-	"github.com/hunterloftis/pbr2/pkg/geom"
-	"github.com/hunterloftis/pbr2/pkg/render"
+	"github.com/hunterloftis/pbr/pkg/geom"
+	"github.com/hunterloftis/pbr/pkg/render"
 )
 
 // bias is the minimum distance unit.

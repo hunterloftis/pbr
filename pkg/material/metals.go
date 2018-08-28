@@ -1,6 +1,6 @@
 package material
 
-import "github.com/hunterloftis/pbr2/pkg/rgb"
+import "github.com/hunterloftis/pbr/pkg/rgb"
 
 // https://i.stack.imgur.com/Q73nz.png
 

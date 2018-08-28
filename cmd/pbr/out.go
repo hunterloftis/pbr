@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hunterloftis/pbr2/pkg/camera"
-	"github.com/hunterloftis/pbr2/pkg/geom"
+	"github.com/hunterloftis/pbr/pkg/camera"
+	"github.com/hunterloftis/pbr/pkg/geom"
 )
 
 func printErr(err error) {

@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/Opioid/rgbe"
-	"github.com/hunterloftis/pbr2/pkg/geom"
-	"github.com/hunterloftis/pbr2/pkg/rgb"
+	"github.com/hunterloftis/pbr/pkg/geom"
+	"github.com/hunterloftis/pbr/pkg/rgb"
 )
 
 const maxEnergy = 1000000

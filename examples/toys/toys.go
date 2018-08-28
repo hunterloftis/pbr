@@ -8,14 +8,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hunterloftis/pbr2/pkg/camera"
-	"github.com/hunterloftis/pbr2/pkg/env"
-	"github.com/hunterloftis/pbr2/pkg/farm"
-	"github.com/hunterloftis/pbr2/pkg/format/obj"
-	"github.com/hunterloftis/pbr2/pkg/geom"
-	"github.com/hunterloftis/pbr2/pkg/material"
-	"github.com/hunterloftis/pbr2/pkg/render"
-	"github.com/hunterloftis/pbr2/pkg/surface"
+	"github.com/hunterloftis/pbr/pkg/camera"
+	"github.com/hunterloftis/pbr/pkg/env"
+	"github.com/hunterloftis/pbr/pkg/farm"
+	"github.com/hunterloftis/pbr/pkg/format/obj"
+	"github.com/hunterloftis/pbr/pkg/geom"
+	"github.com/hunterloftis/pbr/pkg/material"
+	"github.com/hunterloftis/pbr/pkg/render"
+	"github.com/hunterloftis/pbr/pkg/surface"
 )
 
 func main() {

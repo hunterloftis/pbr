@@ -3,8 +3,8 @@ package surface
 import (
 	"sort"
 
-	"github.com/hunterloftis/pbr2/pkg/geom"
-	"github.com/hunterloftis/pbr2/pkg/render"
+	"github.com/hunterloftis/pbr/pkg/geom"
+	"github.com/hunterloftis/pbr/pkg/render"
 )
 
 const (

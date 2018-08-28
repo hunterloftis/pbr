@@ -7,7 +7,7 @@ import (
 	"io"
 	"math"
 
-	"github.com/hunterloftis/pbr2/pkg/rgb"
+	"github.com/hunterloftis/pbr/pkg/rgb"
 )
 
 const (

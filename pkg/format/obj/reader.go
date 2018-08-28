@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hunterloftis/pbr2/pkg/format/mtl"
-	"github.com/hunterloftis/pbr2/pkg/geom"
-	"github.com/hunterloftis/pbr2/pkg/material"
-	"github.com/hunterloftis/pbr2/pkg/surface"
+	"github.com/hunterloftis/pbr/pkg/format/mtl"
+	"github.com/hunterloftis/pbr/pkg/geom"
+	"github.com/hunterloftis/pbr/pkg/material"
+	"github.com/hunterloftis/pbr/pkg/surface"
 )
 
 // TODO: make robust

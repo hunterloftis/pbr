@@ -1,6 +1,6 @@
 package material
 
-import "github.com/hunterloftis/pbr2/pkg/rgb"
+import "github.com/hunterloftis/pbr/pkg/rgb"
 
 func Light(r, g, b float64) *Uniform {
 	c, e := rgb.Energy{r, g, b}.Compressed(1)

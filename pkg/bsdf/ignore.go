@@ -3,8 +3,8 @@ package bsdf
 import (
 	"math/rand"
 
-	"github.com/hunterloftis/pbr2/pkg/geom"
-	"github.com/hunterloftis/pbr2/pkg/rgb"
+	"github.com/hunterloftis/pbr/pkg/geom"
+	"github.com/hunterloftis/pbr/pkg/rgb"
 )
 
 type Ignore struct{}

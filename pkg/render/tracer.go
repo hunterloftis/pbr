@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/hunterloftis/pbr2/pkg/geom"
-	"github.com/hunterloftis/pbr2/pkg/rgb"
+	"github.com/hunterloftis/pbr/pkg/geom"
+	"github.com/hunterloftis/pbr/pkg/rgb"
 )
 
 const (

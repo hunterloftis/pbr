@@ -1,6 +1,6 @@
 package material
 
-import "github.com/hunterloftis/pbr2/pkg/rgb"
+import "github.com/hunterloftis/pbr/pkg/rgb"
 
 func Plastic(r, g, b, roughness float64) *Uniform {
 	return &Uniform{

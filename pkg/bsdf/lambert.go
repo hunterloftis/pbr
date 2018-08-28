@@ -4,8 +4,8 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/hunterloftis/pbr2/pkg/geom"
-	"github.com/hunterloftis/pbr2/pkg/rgb"
+	"github.com/hunterloftis/pbr/pkg/geom"
+	"github.com/hunterloftis/pbr/pkg/rgb"
 )
 
 type Lambert struct {

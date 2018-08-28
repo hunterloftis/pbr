@@ -5,7 +5,7 @@ import (
 	"math"
 	"math/rand"
 
-	"github.com/hunterloftis/pbr2/pkg/geom"
+	"github.com/hunterloftis/pbr/pkg/geom"
 )
 
 const sRGB = 1.8
