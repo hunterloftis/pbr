@@ -13,3 +13,7 @@ profile.*
 /vendor
 /fixtures
 /pbr
+/shapes
+/mario
+/hello
+/.vscode
