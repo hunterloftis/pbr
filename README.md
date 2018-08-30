@@ -2,10 +2,15 @@
 
 Package pbr implements Physically-Based Rendering via a unidirectional CPU-only Monte Carlo path tracer.
 
-[![GoDoc](https://godoc.org/github.com/hunterloftis/pbr/pbr?status.svg)](https://godoc.org/github.com/hunterloftis/pbr/pbr)
+[![GoDoc](https://godoc.org/github.com/hunterloftis/pbr/pbr?status.svg)](https://godoc.org/github.com/hunterloftis/pbr)
+
+pbr uses [dep](https://golang.github.io/dep/docs/introduction.html) for
+dependency management.
 
 ```bash
 $ go get github.com/hunterloftis/pbr
+$ dep ensure
+$ make
 ```
 
 ---
@@ -114,6 +119,8 @@ To render them yourself, you'll need the `fixtures` directory of 3D assets:
 ```
 $ make fixtures
 ```
+
+Note: the download is over a gigabyte!
 
 ![Lion](https://user-images.githubusercontent.com/364501/44287057-62d8a180-a239-11e8-89b3-a6d5b5d0e6d1.png)
 
