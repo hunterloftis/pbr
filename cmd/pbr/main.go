@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"runtime/pprof"
 
 	"github.com/hunterloftis/pbr/pkg/camera"
 	"github.com/hunterloftis/pbr/pkg/env"
@@ -30,7 +31,29 @@ func main() {
 	}
 }
 
+func createProfile() (*os.File, error) {
+       f, err := os.Create("profile.pprof")
+       if err != nil {
+               return nil, err
+       }
+       pprof.StartCPUProfile(f)
+       return f, nil
+}
+
+func stopProfile(f *os.File) {
+       pprof.StopCPUProfile()
+       f.Close()
+}
+
 func run(o *Options) error {
+	if o.Profile {
+		f, err := createProfile()
+		if err != nil {
+			return err
+		}
+		defer stopProfile(f)
+	}
+
 	mesh, err := obj.ReadFile(o.Scene, true)
 	if err != nil {
 		return err
