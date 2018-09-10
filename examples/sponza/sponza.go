@@ -44,5 +44,5 @@ func run() error {
 	tree := surface.NewTree(surfaces...)
 	scene := render.NewScene(camera, tree, environment)
 
-	return render.Iterative(scene, "sponza.png", 1280, 720, 8, true)
+	return render.Iterative(scene, nil, "sponza.png", 1280, 720, 8, true)
 }
