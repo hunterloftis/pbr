@@ -24,7 +24,7 @@ func main() {
 	e := env.NewGradient(rgb.Black, rgb.Energy{750, 750, 750}, 7)
 
 	scene := render.NewScene(c, s, e)
-	err := render.Iterative(scene, "hello.png", 898, 450, 8, true)
+	err := render.Iterative(scene, nil, "hello.png", 898, 450, 8, true)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\nError: %v\n", err)
 	}

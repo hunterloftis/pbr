@@ -1,7 +1,6 @@
 package main
 
 import (
-	"math"
 	"path/filepath"
 
 	arg "github.com/alexflint/go-arg"
@@ -15,8 +14,9 @@ type Options struct {
 	Scene    string  `arg:"positional,required" help:"input scene .obj"`
 	Verbose  bool    `arg:"-v" help:"verbose output with scene information"`
 	Info     bool    `help:"output scene information and exit"`
-	Frames   float64 `arg:"-f" help:"number of frames at which to exit"`
-	Time     float64 `arg:"-t" help:"time to run before exiting (seconds)"`
+	DumpPeriod int `help:"how frequently to output progress frames"`
+	Frames   int `arg:"-f" help:"number of frames at which to exit"`
+	Time     int `arg:"-t" help:"time to run before exiting (seconds)"`
 	Material string  `help:"override material (glass, gold, mirror, plastic)"`
 
 	Width  int       `arg:"-w" help:"rendering width in pixels"`
@@ -57,8 +57,9 @@ func options() *Options {
 		Rad:        100,
 		Bounce:     6,
 		Indirect:   false,
-		Frames:     math.Inf(1),
-		Time:       math.Inf(1),
+		DumpPeriod: 6,
+		Frames:     0,
+		Time:       0,
 		Lens:       50,
 		FStop:      4,
 		Focus:      1,

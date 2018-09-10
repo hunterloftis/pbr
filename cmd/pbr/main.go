@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"runtime/pprof"
+	"time"
 
 	"github.com/hunterloftis/pbr/pkg/camera"
 	"github.com/hunterloftis/pbr/pkg/env"
@@ -45,6 +46,20 @@ func stopProfile(f *os.File) {
        f.Close()
 }
 
+func startTimer(o *Options, s string) time.Time {
+	if o.Verbose {
+		fmt.Print(s)
+	}
+	return time.Now()
+}
+
+func stopTimer(o *Options, start time.Time) {
+	if o.Verbose {
+		elapsed := time.Since(start)
+		fmt.Printf("done: %s\n", elapsed.Round(time.Millisecond))
+	}
+}
+
 func run(o *Options) error {
 	if o.Profile {
 		f, err := createProfile()
@@ -54,10 +69,12 @@ func run(o *Options) error {
 		defer stopProfile(f)
 	}
 
+	start := startTimer(o, "Loading object file... ")
 	mesh, err := obj.ReadFile(o.Scene, true)
 	if err != nil {
 		return err
 	}
+	stopTimer(o, start)
 
 	if o.Scale != nil {
 		mesh.Scale(*o.Scale)
@@ -69,7 +86,9 @@ func run(o *Options) error {
 		m := materials[strings.ToLower(o.Material)]
 		mesh.SetMaterial(m)
 	}
+	start = startTimer(o, "Calculating mesh bounds... ")
 	bounds, surfaces := mesh.Bounds()
+	stopTimer(o, start)
 	camera := camera.NewSLR()
 	environment := render.Environment(env.NewGradient(rgb.Black, *o.Ambient, 3))
 
@@ -107,9 +126,12 @@ func run(o *Options) error {
 		surfaces = append(surfaces, sun)
 	}
 
+	start = startTimer(o, "Creating surface tree... ")
 	tree := surface.NewTree(surfaces...)
+	stopTimer(o, start)
 	scene := render.NewScene(camera, tree, environment)
 
 	fmt.Println("Surfaces:", len(surfaces))
-	return render.Iterative(scene, o.Out, o.Width, o.Height, o.Bounce, !o.Indirect)
+	limits := render.NewLimits(o.DumpPeriod, o.Time, o.Frames)
+	return render.Iterative(scene, limits, o.Out, o.Width, o.Height, o.Bounce, !o.Indirect)
 }
